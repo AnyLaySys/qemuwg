@@ -45,13 +45,13 @@
                         Click="QemuTools_Click"
                         CornerRadius="6"
                         ToolTipService.ToolTip="{Binding [main.qemuTools], Source={StaticResource Strings}}">
-                        <FontIcon Glyph="&#xE90F;" />
+                        <FontIcon Foreground="#2AA7A1" Glyph="&#xE90F;" />
                     </Button>
                     <Button
                         Click="GlobalDiskManager_Click"
                         CornerRadius="6"
                         ToolTipService.ToolTip="{Binding [main.diskManager], Source={StaticResource Strings}}">
-                        <FontIcon Glyph="&#xE958;" />
+                        <FontIcon Foreground="#DF9835" Glyph="&#xE958;" />
                     </Button>
                     <Button
                         x:Name="NewVmButton"
@@ -266,7 +266,7 @@
                                                 <ColumnDefinition Width="30" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <FontIcon VerticalAlignment="Center" FontSize="16" Glyph="{x:Bind Glyph}" />
+                                            <FontIcon VerticalAlignment="Center" FontSize="16" Foreground="{x:Bind IconBrush}" Glyph="{x:Bind Glyph}" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
                                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Title}" />
                                                 <TextBlock MaxLines="1" Text="{x:Bind Value}" TextTrimming="CharacterEllipsis" />

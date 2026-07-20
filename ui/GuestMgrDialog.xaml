@@ -5,7 +5,7 @@
     xmlns:models="using:QemuWG.data"
     CloseButtonText="{Binding [common.done], Source={StaticResource Strings}}">
     <ContentDialog.Resources><x:Double x:Key="ContentDialogMaxWidth">1040</x:Double></ContentDialog.Resources>
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="8">
+    <Grid Margin="0,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="8">
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <InfoBar x:Name="ConnectionInfo" IsClosable="False" IsOpen="True" Severity="Informational" Title="{Binding [guestAgent.status], Source={StaticResource Strings}}" />
         <TabView Grid.Row="1" IsAddTabButtonVisible="False">
@@ -35,4 +35,3 @@
         </TabView>
     </Grid>
 </ContentDialog>
-

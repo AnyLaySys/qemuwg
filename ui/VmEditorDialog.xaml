@@ -23,7 +23,7 @@
         </Style>
     </ContentDialog.Resources>
 
-    <ScrollViewer HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Margin="0,8" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
         <StackPanel HorizontalAlignment="Stretch" Spacing="8">
             <Border Style="{StaticResource HardwareCardStyle}">
                 <Grid ColumnSpacing="10">
@@ -258,12 +258,14 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="3" Grid.ColumnSpan="6" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
-                    <StackPanel Spacing="8">
+                <Expander Grid.Row="3" Grid.ColumnSpan="6" IsExpanded="False">
+                    <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Glyph="&#xE713;" />
+                            <FontIcon FontSize="14" Foreground="#8A7BE8" Glyph="&#xE713;" />
                             <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.advanced], Source={StaticResource Strings}}" />
                         </StackPanel>
+                    </Expander.Header>
+                    <Border Margin="0,6,0,0" Style="{StaticResource HardwareCardStyle}">
                         <Grid ColumnSpacing="8" RowSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="0.7*" />
@@ -358,8 +360,8 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                    </StackPanel>
-                </Border>
+                    </Border>
+                </Expander>
             </Grid>
 
             <InfoBar
@@ -370,4 +372,3 @@
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>
-

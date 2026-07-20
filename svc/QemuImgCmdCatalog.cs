@@ -1,3 +1,5 @@
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Media;
 using QemuWG.data;
 
 namespace QemuWG.svc;
@@ -11,13 +13,13 @@ public static class QemuImgCmdCatalog
         Cmd("info", "检查", "显示镜像信息", false,
             Path("file", "镜像文件", true, false),
             Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"),
-            Toggle("backingChain", "--backing-chain"), Text("cache", "缓存模式", "-t", "writeback"),
+            Toggle("backingChain", "--backing-chain"), Cache("cache", "缓存模式", "-t", "writeback"),
             Toggle("forceShare", "-U"), Toggle("limits", "--limits"),
             Choice("output", "输出格式", "--output", "human", "human", "json")),
 
         Cmd("check", "检查", "检查镜像完整性", true,
             Path("file", "镜像文件", true, false), Text("format", "格式", "-f"),
-            Toggle("imageOpts", "--image-opts"), Text("cache", "缓存模式", "-T", "writeback"),
+            Toggle("imageOpts", "--image-opts"), Cache("cache", "缓存模式", "-T", "writeback"),
             Choice("repair", "修复", "-r", "none", "none", "leaks", "all"), Toggle("forceShare", "-U"),
             Choice("output", "输出格式", "--output", "human", "human", "json"), Toggle("quiet", "-q")),
 
@@ -36,12 +38,12 @@ public static class QemuImgCmdCatalog
         Cmd("compare", "检查", "比较两个镜像内容", false,
             Path("file1", "镜像 1", true, false), Path("file2", "镜像 2", true, false),
             Text("format1", "镜像 1 格式", "-f"), Text("format2", "镜像 2 格式", "-F"),
-            Toggle("imageOpts", "--image-opts"), Toggle("strict", "-s"), Text("cache", "缓存模式", "-T", "writeback"),
+            Toggle("imageOpts", "--image-opts"), Toggle("strict", "-s"), Cache("cache", "缓存模式", "-T", "writeback"),
             Toggle("forceShare", "-U"), Toggle("progress", "-p"), Toggle("quiet", "-q")),
 
         Cmd("bench", "检查", "运行镜像 I/O 基准测试", true,
             Path("file", "镜像文件", true, false), Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"),
-            Text("cache", "缓存模式", "-t", "writeback"), Text("count", "请求数量", "-c"),
+            Cache("cache", "缓存模式", "-t", "writeback"), Text("count", "请求数量", "-c"),
             Text("depth", "并行深度", "-d"), Text("offset", "起始偏移", "-o"),
             Text("buffer", "缓冲区大小", "-s", "4K"), Text("step", "步长", "-S"),
             Toggle("write", "-w"), Text("pattern", "写入字节", "--pattern"),
@@ -57,11 +59,11 @@ public static class QemuImgCmdCatalog
 
         Cmd("convert", "转换", "转换一个或多个镜像", true,
             MultiPath("sources", "源镜像（以分号分隔）", true), Path("target", "目标镜像", true, true),
-            Text("sourceFormat", "源格式", "-f"), Toggle("imageOpts", "--image-opts"), Text("sourceCache", "源缓存", "-T", "writeback"),
+            Text("sourceFormat", "源格式", "-f"), Toggle("imageOpts", "--image-opts"), Cache("sourceCache", "源缓存", "-T", "writeback"),
             Text("snapshot", "源快照", "-l"), Toggle("bitmaps", "--bitmaps"), Toggle("skipBroken", "--skip-broken-bitmaps"),
             Toggle("salvage", "--salvage"), Text("targetFormat", "目标格式", "-O", "qcow2"),
             Toggle("targetImageOpts", "--target-image-opts"), Text("targetOptions", "目标格式选项", "-o", wide: true),
-            Text("targetCache", "目标缓存", "-t", "unsafe"), Path("backing", "后备文件", false, false, "-b"),
+            Cache("targetCache", "目标缓存", "-t", "unsafe"), Path("backing", "后备文件", false, false, "-b"),
             Text("backingFormat", "后备格式", "-F"), Text("sparse", "稀疏阈值", "-S"),
             Toggle("noCreate", "-n"), Toggle("targetZero", "--target-is-zero"), Toggle("compress", "-c"),
             Toggle("forceShare", "-U"), Text("rate", "速率限制", "-r"), Text("parallel", "并行数", "-m", "8"),
@@ -80,19 +82,19 @@ public static class QemuImgCmdCatalog
 
         Cmd("rebase", "修改", "修改镜像后备文件", true,
             Path("file", "镜像文件", true, false), Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"),
-            Text("cache", "缓存模式", "-t", "writeback"), Path("backing", "新后备文件（留空为无）", false, false, "-b"),
-            Text("backingFormat", "后备格式", "-B"), Text("backingCache", "后备缓存", "-T", "writeback"),
+            Cache("cache", "缓存模式", "-t", "writeback"), Path("backing", "新后备文件（留空为无）", false, false, "-b"),
+            Text("backingFormat", "后备格式", "-B"), Cache("backingCache", "后备缓存", "-T", "writeback"),
             Toggle("clearBacking", "移除后备文件"), Toggle("backingUnsafe", "-u"), Toggle("compress", "-c"), Toggle("forceShare", "-U"),
             Toggle("progress", "-p"), Toggle("quiet", "-q")),
 
         Cmd("commit", "修改", "提交到后备镜像", true,
             Path("file", "顶层镜像", true, false), Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"),
-            Text("cache", "缓存模式", "-t", "writeback"), Path("base", "目标后备镜像", false, false, "-b"),
+            Cache("cache", "缓存模式", "-t", "writeback"), Path("base", "目标后备镜像", false, false, "-b"),
             Toggle("drop", "-d"), Text("rate", "速率限制", "-r"), Toggle("progress", "-p"), Toggle("quiet", "-q")),
 
         Cmd("amend", "修改", "修改格式专用选项", true,
             Path("file", "镜像文件", true, false), Text("options", "格式选项", "-o", required: true, wide: true),
-            Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"), Text("cache", "缓存模式", "-t", "writeback"),
+            Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"), Cache("cache", "缓存模式", "-t", "writeback"),
             Toggle("force", "--force"), Toggle("progress", "-p"), Toggle("quiet", "-q")),
 
         Cmd("snapshot", "快照", "管理内部快照", true,
@@ -112,9 +114,9 @@ public static class QemuImgCmdCatalog
         params DiskFieldDef[] fields)
     {
         var allFields = fields.Concat([
-            Text("object", "对象定义（以分号分隔）", "--object", mode: DiskFieldMode.MultiOptionValue, wide: true),
-            Text("trace", "跟踪规则", "--trace", mode: DiskFieldMode.GlobalOptionValue, wide: true),
-            Text("extra", "额外参数", mode: DiskFieldMode.RawArguments, wide: true)
+            Text("object", "对象定义（以分号分隔）", "--object", mode: DiskFieldMode.MultiOptionValue, wide: true, advanced: true),
+            Text("trace", "跟踪规则", "--trace", mode: DiskFieldMode.GlobalOptionValue, wide: true, advanced: true),
+            Text("extra", "额外参数", mode: DiskFieldMode.RawArguments, wide: true, advanced: true)
         ]).Select(field => LocalizeField(name, field)).ToList();
 
         return new DiskCmdDef
@@ -124,6 +126,8 @@ public static class QemuImgCmdCatalog
             Category = category,
             DisplayCategory = Localizer.Get(CategoryKey(category), category),
             Description = Localizer.Get($"disk.description.{name}", description),
+            Glyph = CommandGlyph(name),
+            IconBrush = CommandBrush(name),
             CanWrite = canWrite,
             Fields = allFields
         };
@@ -139,11 +143,50 @@ public static class QemuImgCmdCatalog
         Choices = field.Choices,
         Required = field.Required,
         Wide = field.Wide,
+        Advanced = field.Advanced,
         PathKind = field.PathKind,
         DependsOnId = field.DependsOnId,
         DependsOnValue = field.DependsOnValue,
         InvertDependency = field.InvertDependency
     };
+
+    private static string CommandGlyph(string command) => command switch
+    {
+        "info" => "\uE946",
+        "check" => "\uE9D9",
+        "map" => "\uE81E",
+        "measure" => "\uE9F9",
+        "compare" => "\uE8AB",
+        "bench" => "\uE9D2",
+        "create" => "\uE710",
+        "convert" => "\uE8AB",
+        "dd" => "\uE8C8",
+        "resize" => "\uE8B5",
+        "rebase" => "\uE8A7",
+        "commit" => "\uE74E",
+        "amend" => "\uE70F",
+        "snapshot" => "\uE7B8",
+        "bitmap" => "\uE91B",
+        _ => "\uE958"
+    };
+
+    private static SolidColorBrush CommandBrush(string command)
+    {
+        var color = command switch
+        {
+            "info" or "map" => ColorHelper.FromArgb(255, 48, 138, 210),
+            "check" or "compare" => ColorHelper.FromArgb(255, 38, 166, 154),
+            "measure" or "bench" => ColorHelper.FromArgb(255, 125, 104, 210),
+            "create" => ColorHelper.FromArgb(255, 46, 160, 87),
+            "convert" or "dd" => ColorHelper.FromArgb(255, 225, 139, 40),
+            "resize" or "amend" => ColorHelper.FromArgb(255, 218, 90, 116),
+            "rebase" or "commit" => ColorHelper.FromArgb(255, 195, 92, 190),
+            "snapshot" => ColorHelper.FromArgb(255, 75, 113, 210),
+            "bitmap" => ColorHelper.FromArgb(255, 80, 154, 128),
+            _ => ColorHelper.FromArgb(255, 96, 110, 125)
+        };
+        return new SolidColorBrush(color);
+    }
 
     private static string CategoryKey(string category) => category switch
     {
@@ -157,7 +200,7 @@ public static class QemuImgCmdCatalog
     };
 
     private static DiskFieldDef Text(string id, string label, string argument = "", string defaultValue = "",
-        bool positional = false, bool required = false, bool wide = false, DiskFieldMode? mode = null) => new()
+        bool positional = false, bool required = false, bool wide = false, DiskFieldMode? mode = null, bool advanced = false) => new()
     {
         Id = id,
         Label = label,
@@ -165,6 +208,7 @@ public static class QemuImgCmdCatalog
         DefaultValue = defaultValue,
         Required = required,
         Wide = wide,
+        Advanced = advanced,
         Mode = mode ?? (positional ? DiskFieldMode.Positional : DiskFieldMode.OptionValue)
     };
 
@@ -237,6 +281,9 @@ public static class QemuImgCmdCatalog
         Mode = DiskFieldMode.OptionValue
     };
 
+    private static DiskFieldDef Cache(string id, string label, string argument, string defaultValue) =>
+        Choice(id, label, argument, defaultValue, "writeback", "none", "writethrough", "directsync", "unsafe");
+
     private static DiskFieldDef Action(string id, string label, string defaultValue, params string[] choices) => new()
     {
         Id = id,
@@ -246,4 +293,3 @@ public static class QemuImgCmdCatalog
         Mode = DiskFieldMode.ChoiceArguments
     };
 }
-

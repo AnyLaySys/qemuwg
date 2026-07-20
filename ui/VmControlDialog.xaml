@@ -5,7 +5,7 @@
     xmlns:models="using:QemuWG.data"
     CloseButtonText="{Binding [common.done], Source={StaticResource Strings}}">
     <ContentDialog.Resources><x:Double x:Key="ContentDialogMaxWidth">1080</x:Double></ContentDialog.Resources>
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="10">
+    <Grid Margin="0,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="10">
         <Grid.RowDefinitions><RowDefinition Height="76" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <Grid ColumnSpacing="8">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -55,4 +55,3 @@
         </TabView>
     </Grid>
 </ContentDialog>
-

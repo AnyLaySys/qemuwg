@@ -9,7 +9,7 @@
         <x:Double x:Key="ContentDialogMaxWidth">1080</x:Double>
     </ContentDialog.Resources>
 
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ColumnSpacing="12">
+    <Grid Margin="0,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.22*" />
             <ColumnDefinition Width="0.78*" />
@@ -25,7 +25,7 @@
                     <RowDefinition Height="48" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Margin="14,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="qemu-img" />
+                <TextBlock Margin="14,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding [disk.operations], Source={StaticResource Strings}}" />
                 <ListView
                     x:Name="CommandList"
                     Grid.Row="1"
@@ -45,8 +45,16 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiskCmdDef">
-                            <Grid>
-                                <TextBlock FontWeight="SemiBold" Text="{x:Bind DisplayName}" />
+                            <Grid ColumnSpacing="9">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="26" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon VerticalAlignment="Center" FontSize="15" Foreground="{x:Bind IconBrush}" Glyph="{x:Bind Glyph}" />
+                                <StackPanel Grid.Column="1" Spacing="1">
+                                    <TextBlock FontWeight="SemiBold" Text="{x:Bind DisplayName}" />
+                                    <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Description}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -60,7 +68,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="158" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="0.3*" />
             </Grid.RowDefinitions>
 
             <Grid>
@@ -81,21 +90,32 @@
                 </StackPanel>
             </Grid>
 
-            <TextBox
-                x:Name="CommandPreviewBox"
-                Grid.Row="1"
-                FontFamily="Cascadia Mono, Consolas"
-                FontSize="11"
-                IsReadOnly="True"
-                TextWrapping="NoWrap" />
+            <Grid Grid.Row="1" ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="38" Height="38" Background="{ThemeResource AccentFillColorSecondaryBrush}" CornerRadius="6">
+                    <FontIcon x:Name="CommandIcon" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="17" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                    <TextBlock x:Name="CommandTitleText" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock x:Name="CommandDescriptionText" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
 
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                <Grid x:Name="FormGrid" ColumnSpacing="10" RowSpacing="9">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                <StackPanel Spacing="10">
+                    <Grid x:Name="FormGrid" ColumnSpacing="10" RowSpacing="9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                    <Expander x:Name="AdvancedExpander" Header="{Binding [disk.advanced], Source={StaticResource Strings}}" IsExpanded="False">
+                        <StackPanel x:Name="AdvancedFieldsPanel" Padding="0,8,0,0" Spacing="9" />
+                    </Expander>
+                </StackPanel>
             </ScrollViewer>
 
             <InfoBar
@@ -105,7 +125,16 @@
                 IsOpen="False"
                 Severity="Warning" />
 
-            <Grid Grid.Row="4">
+            <Expander Grid.Row="4" Header="{Binding [disk.commandPreview], Source={StaticResource Strings}}" IsExpanded="False">
+                <TextBox
+                    x:Name="CommandPreviewBox"
+                    FontFamily="Cascadia Mono, Consolas"
+                    FontSize="11"
+                    IsReadOnly="True"
+                    TextWrapping="NoWrap" />
+            </Expander>
+
+            <Grid Grid.Row="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="28" />
                     <RowDefinition Height="*" />

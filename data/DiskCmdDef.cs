@@ -1,3 +1,5 @@
+using Microsoft.UI.Xaml.Media;
+
 namespace QemuWG.data;
 
 public enum DiskFieldMode
@@ -30,6 +32,7 @@ public sealed class DiskFieldDef
     public IReadOnlyList<string> Choices { get; init; } = [];
     public bool Required { get; init; }
     public bool Wide { get; init; }
+    public bool Advanced { get; init; }
     public DiskPathKind PathKind { get; init; }
     public string DependsOnId { get; init; } = string.Empty;
     public string DependsOnValue { get; init; } = string.Empty;
@@ -43,6 +46,8 @@ public sealed class DiskCmdDef
     public string Category { get; init; } = string.Empty;
     public string DisplayCategory { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
+    public string Glyph { get; init; } = string.Empty;
+    public Brush? IconBrush { get; init; }
     public bool CanWrite { get; init; }
     public IReadOnlyList<DiskFieldDef> Fields { get; init; } = [];
 }
@@ -59,4 +64,3 @@ public sealed class DiskImageInfo
     public long ActualSize { get; init; }
     public string BackingFile { get; init; } = string.Empty;
 }
-

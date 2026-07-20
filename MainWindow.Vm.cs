@@ -49,19 +49,20 @@ public sealed partial class MainWindow
 
         DeviceSummaries.Clear();
         DeviceSummaries.Add(new DeviceSummary("\uE950", T("device.processor", "处理器"),
-            string.Format(T("device.cpuValue", "{0} 核 · {1}"), selectedVm.CpuCount, RawOrDefault(selectedVm.CpuModel))));
-        DeviceSummaries.Add(new DeviceSummary("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb)));
-        DeviceSummaries.Add(new DeviceSummary("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2"));
-        DeviceSummaries.Add(new DeviceSummary("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}"));
-        DeviceSummaries.Add(new DeviceSummary("\uE7F4", T("device.display", "显示"), $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}"));
-        DeviceSummaries.Add(new DeviceSummary("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}"));
-        DeviceSummaries.Add(new DeviceSummary("\uE8B7", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}"));
+            string.Format(T("device.cpuValue", "{0} 核 · {1}"), selectedVm.CpuCount, RawOrDefault(selectedVm.CpuModel)), ColorHelper.FromArgb(255, 82, 132, 230)));
+        DeviceSummaries.Add(new DeviceSummary("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb), ColorHelper.FromArgb(255, 70, 173, 101)));
+        DeviceSummaries.Add(new DeviceSummary("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)));
+        DeviceSummaries.Add(new DeviceSummary("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)));
+        DeviceSummaries.Add(new DeviceSummary("\uE7F4", T("device.display", "显示"), $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
+        DeviceSummaries.Add(new DeviceSummary("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)));
+        DeviceSummaries.Add(new DeviceSummary("\uE8B7", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}", ColorHelper.FromArgb(255, 57, 153, 210)));
         DeviceSummaries.Add(new DeviceSummary("\uE8B7", T("device.installMedia", "安装介质"),
-            string.IsNullOrWhiteSpace(selectedVm.IsoPath) ? T("device.notConnected", "未连接") : Path.GetFileName(selectedVm.IsoPath)));
+            string.IsNullOrWhiteSpace(selectedVm.IsoPath) ? T("device.notConnected", "未连接") : Path.GetFileName(selectedVm.IsoPath), ColorHelper.FromArgb(255, 202, 118, 45)));
         if (selectedVm.Devices.Count > 0)
             DeviceSummaries.Add(new DeviceSummary("\uE950", T("device.additional", "附加设备"),
                 string.Format(T("device.additionalValue", "{0} 个 · {1}"), selectedVm.Devices.Count,
-                    string.Join(", ", selectedVm.Devices.Take(3).Select(device => device.Model)))));
+                    string.Join(", ", selectedVm.Devices.Take(3).Select(device => device.Model))),
+                ColorHelper.FromArgb(255, 112, 121, 214)));
     }
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
@@ -220,7 +221,5 @@ public sealed partial class MainWindow
     }
 
 }
-
-
 
 
