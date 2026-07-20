@@ -1,0 +1,129 @@
+<ContentDialog
+    x:Class="QemuWG.ui.DiskMgrDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:QemuWG.data"
+    CloseButtonText="{Binding [common.done], Source={StaticResource Strings}}">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1080</x:Double>
+    </ContentDialog.Resources>
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.22*" />
+            <ColumnDefinition Width="0.78*" />
+        </Grid.ColumnDefinitions>
+
+        <Border
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="48" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="14,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="qemu-img" />
+                <ListView
+                    x:Name="CommandList"
+                    Grid.Row="1"
+                    Margin="6,0,6,6"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    SelectionChanged="CommandList_SelectionChanged"
+                    SelectionMode="Single">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="MinHeight" Value="43" />
+                            <Setter Property="Padding" Value="8,5" />
+                            <Setter Property="Margin" Value="0,1" />
+                            <Setter Property="CornerRadius" Value="6" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DiskCmdDef">
+                            <Grid>
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind DisplayName}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="158" />
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <StackPanel Spacing="2">
+                    <TextBlock x:Name="DiskNameText" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock x:Name="DiskInfoText" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                    <Button x:Name="CancelRunButton" Click="CancelRunButton_Click" CornerRadius="6" Visibility="Collapsed">
+                        <TextBlock Text="{Binding [common.cancel], Source={StaticResource Strings}}" />
+                    </Button>
+                    <Button x:Name="ExecuteButton" Click="ExecuteButton_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <SymbolIcon Symbol="Play" />
+                            <TextBlock x:Name="ExecuteButtonText" Text="{Binding [common.execute], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <TextBox
+                x:Name="CommandPreviewBox"
+                Grid.Row="1"
+                FontFamily="Cascadia Mono, Consolas"
+                FontSize="11"
+                IsReadOnly="True"
+                TextWrapping="NoWrap" />
+
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                <Grid x:Name="FormGrid" ColumnSpacing="10" RowSpacing="9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </ScrollViewer>
+
+            <InfoBar
+                x:Name="SafetyInfo"
+                Grid.Row="3"
+                IsClosable="False"
+                IsOpen="False"
+                Severity="Warning" />
+
+            <Grid Grid.Row="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding [common.output], Source={StaticResource Strings}}" />
+                    <TextBlock x:Name="ExitCodeText" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Grid>
+                <TextBox
+                    x:Name="OutputBox"
+                    Grid.Row="1"
+                    AcceptsReturn="True"
+                    FontFamily="Cascadia Mono, Consolas"
+                    FontSize="11"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap" />
+                <ProgressBar x:Name="RunProgress" Grid.Row="1" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" />
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentDialog>
