@@ -133,6 +133,7 @@ public sealed partial class MainWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            vm.IsRunning = sessions.HasQmpSession(vm);
             if (ReferenceEquals(selectedVm, vm)) RefreshDetails();
         });
     }
@@ -205,6 +206,5 @@ public sealed partial class MainWindow : Window
         Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
     }
 }
-
 
 

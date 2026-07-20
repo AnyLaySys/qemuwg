@@ -17,19 +17,21 @@ public sealed partial class QemuSessionMgr
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
-        if (session is null || session.Process.HasExited)
+        if (session is null || !session.IsActive)
             return new QmpResult(false, T("session.notRunning", "虚拟机没有运行"), "NotRunning");
 
         try
         {
+            using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, session.Lifetime.Token);
+            var sessionToken = linkedCancellation.Token;
             using var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, session.QmpPort, cancellationToken);
+            await client.ConnectAsync(IPAddress.Loopback, session.QmpPort, sessionToken);
             await using var stream = client.GetStream();
             using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
-            await ReadJsonLineAsync(reader, cancellationToken);
+            await ReadJsonLineAsync(reader, sessionToken);
 
-            await WriteQmpAsync(stream, "{\"execute\":\"qmp_capabilities\"}\r\n", cancellationToken);
-            var caps = await ReadQmpResponseAsync(reader, cancellationToken);
+            await WriteQmpAsync(stream, "{\"execute\":\"qmp_capabilities\"}\r\n", sessionToken);
+            var caps = await ReadQmpResponseAsync(reader, sessionToken);
             if (!caps.Succeeded) return caps;
 
             var request = new JsonObject { ["execute"] = command };
@@ -41,8 +43,12 @@ public sealed partial class QemuSessionMgr
                 request["arguments"] = arguments;
             }
 
-            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", cancellationToken);
-            return await ReadQmpResponseAsync(reader, cancellationToken);
+            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", sessionToken);
+            return await ReadQmpResponseAsync(reader, sessionToken);
+        }
+        catch (OperationCanceledException) when (session.Lifetime.IsCancellationRequested)
+        {
+            return new QmpResult(false, T("qmp.connectionClosed", "QMP 连接已关闭。"), "ConnectionClosed");
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -58,13 +64,15 @@ public sealed partial class QemuSessionMgr
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
-        if (session is null || session.Process.HasExited)
+        if (session is null || !session.IsActive)
             return new GuestAgentResult(false, T("session.notRunning", "虚拟机没有运行"), "NotRunning");
 
         try
         {
+            using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, session.Lifetime.Token);
+            var sessionToken = linkedCancellation.Token;
             using var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, session.GuestAgentPort, cancellationToken);
+            await client.ConnectAsync(IPAddress.Loopback, session.GuestAgentPort, sessionToken);
             await using var stream = client.GetStream();
             using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
             var request = new JsonObject { ["execute"] = command };
@@ -76,10 +84,10 @@ public sealed partial class QemuSessionMgr
                 request["arguments"] = arguments;
             }
 
-            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", cancellationToken);
+            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", sessionToken);
             while (true)
             {
-                var line = await ReadJsonLineAsync(reader, cancellationToken);
+                var line = await ReadJsonLineAsync(reader, sessionToken);
                 using var document = JsonDocument.Parse(line.TrimStart('\u00ff'));
                 var root = document.RootElement;
                 if (root.TryGetProperty("return", out var returned))
@@ -90,6 +98,10 @@ public sealed partial class QemuSessionMgr
                     return new GuestAgentResult(false, JsonSerializer.Serialize(error, new JsonSerializerOptions { WriteIndented = true }), errorClass);
                 }
             }
+        }
+        catch (OperationCanceledException) when (session.Lifetime.IsCancellationRequested)
+        {
+            return new GuestAgentResult(false, T("guestAgent.unavailable", "Guest Agent 未连接或未安装。"), "ConnectionClosed");
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -132,7 +144,6 @@ public sealed partial class QemuSessionMgr
     }
 
 }
-
 
 
 

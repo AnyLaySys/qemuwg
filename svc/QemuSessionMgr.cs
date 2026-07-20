@@ -58,6 +58,7 @@ public sealed partial class QemuSessionMgr
             foreach (var argument in BuildArgs(install, vm, port, guestAgentPort)) startInfo.ArgumentList.Add(argument);
 
             var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
+            Session? session = null;
             var logLock = new object();
             void AppendLog(string? line)
             {
@@ -69,19 +70,25 @@ public sealed partial class QemuSessionMgr
             process.ErrorDataReceived += (_, args) => AppendLog(args.Data);
             process.Exited += (_, _) =>
             {
-                var exitLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] QEMU exited with code {process.ExitCode}.";
+                if (session is null || !session.TryClose()) return;
+                var exitLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] QEMU exited with code {TryGetExitCode(process)}.";
                 AppendLog(exitLine);
-                lock (gate) sessions.Remove(vm.Id);
-                vm.IsRunning = false;
+                session.Lifetime.Cancel();
+                lock (gate)
+                {
+                    if (sessions.TryGetValue(vm.Id, out var current) && ReferenceEquals(current, session))
+                        sessions.Remove(vm.Id);
+                }
                 StateChanged?.Invoke(this, vm);
                 process.Dispose();
             };
 
             File.AppendAllText(logPath, $"{Environment.NewLine}[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Starting {vm.Name}{Environment.NewLine}", Encoding.UTF8);
             if (!process.Start()) return OperationResult.Fail(T("session.startFailed", "QEMU 启动失败"));
+            session = new Session(process, port, guestAgentPort);
+            lock (gate) sessions[vm.Id] = session;
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            lock (gate) sessions[vm.Id] = new Session(process, port, guestAgentPort);
             vm.IsRunning = true;
             StateChanged?.Invoke(this, vm);
             return OperationResult.Ok(T("session.started", "虚拟机已启动"));
@@ -103,14 +110,14 @@ public sealed partial class QemuSessionMgr
     public bool HasQmpSession(VmCfg vm)
     {
         lock (gate)
-            return sessions.TryGetValue(vm.Id, out var session) && !session.Process.HasExited;
+            return sessions.TryGetValue(vm.Id, out var session) && session.IsActive;
     }
 
     public OperationResult ForceStop(VmCfg vm)
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
-        if (session is null || session.Process.HasExited) return OperationResult.Fail(T("session.notRunning", "虚拟机没有运行"));
+        if (session is null || !session.IsActive) return OperationResult.Fail(T("session.notRunning", "虚拟机没有运行"));
         try
         {
             session.Process.Kill(true);
@@ -228,9 +235,33 @@ public sealed partial class QemuSessionMgr
     [DllImport("kernel32.dll")]
     private static extern IntPtr LocalFree(IntPtr memory);
 
-    private sealed record Session(Process Process, int QmpPort, int GuestAgentPort);
-}
+    private static int TryGetExitCode(Process process)
+    {
+        try { return process.ExitCode; }
+        catch { return -1; }
+    }
 
+    private sealed class Session(Process process, int qmpPort, int guestAgentPort)
+    {
+        private int closed;
+
+        public Process Process { get; } = process;
+        public int QmpPort { get; } = qmpPort;
+        public int GuestAgentPort { get; } = guestAgentPort;
+        public CancellationTokenSource Lifetime { get; } = new();
+        public bool IsActive
+        {
+            get
+            {
+                if (Volatile.Read(ref closed) != 0) return false;
+                try { return !Process.HasExited; }
+                catch { return false; }
+            }
+        }
+
+        public bool TryClose() => Interlocked.Exchange(ref closed, 1) == 0;
+    }
+}
 
 
 
