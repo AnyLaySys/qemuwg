@@ -107,6 +107,25 @@ public sealed partial class QemuSessionMgr
             : OperationResult.Fail(T("session.shutdownFailed", "发送关机请求失败"), result.Output);
     }
 
+    public async Task<bool> WaitForExitAsync(VmCfg vm, TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        Session? session;
+        lock (gate) sessions.TryGetValue(vm.Id, out session);
+        if (session is null || !session.IsActive) return true;
+
+        using var timeoutCancellation = new CancellationTokenSource(timeout);
+        using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, timeoutCancellation.Token, session.Lifetime.Token);
+        try
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, linkedCancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        return !session.IsActive;
+    }
+
     public bool HasQmpSession(VmCfg vm)
     {
         lock (gate)
@@ -262,6 +281,5 @@ public sealed partial class QemuSessionMgr
         public bool TryClose() => Interlocked.Exchange(ref closed, 1) == 0;
     }
 }
-
 
 

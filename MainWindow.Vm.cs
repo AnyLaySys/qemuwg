@@ -68,16 +68,64 @@ public sealed partial class MainWindow
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
         if (selectedVm is null) return;
+        var vm = selectedVm;
+        StartButton.IsEnabled = false;
         var result = sessions.Start(qemu, selectedVm);
-        if (!result.Succeeded) await ShowOperationErrorAsync(result);
+        if (!result.Succeeded)
+        {
+            await ShowOperationErrorAsync(result);
+            RefreshDetails();
+            return;
+        }
+        await Task.Delay(700);
+        if (!sessions.HasQmpSession(vm))
+        {
+            var logPath = Path.Combine(vm.DirPath, "qemu.log");
+            var detail = File.Exists(logPath)
+                ? string.Join(Environment.NewLine, File.ReadLines(logPath).TakeLast(12))
+                : string.Empty;
+            await ShowOperationErrorAsync(OperationResult.Fail(
+                T("session.exitedEarly", "QEMU 启动后立即退出"), detail));
+        }
         RefreshDetails();
     }
 
     private async void ShutdownButton_Click(object sender, RoutedEventArgs e)
     {
         if (selectedVm is null) return;
-        var result = await sessions.ShutdownAsync(selectedVm);
-        if (!result.Succeeded) await ShowOperationErrorAsync(result);
+        var vm = selectedVm;
+        ShutdownButton.IsEnabled = false;
+        VmStatusText.Text = T("session.shuttingDown", "正在等待来宾系统关机…");
+        FooterStatusText.Text = VmStatusText.Text;
+        var result = await sessions.ShutdownAsync(vm);
+        if (!result.Succeeded)
+        {
+            await ShowOperationErrorAsync(result);
+            RefreshDetails();
+            return;
+        }
+
+        if (await sessions.WaitForExitAsync(vm, TimeSpan.FromSeconds(12)))
+        {
+            RefreshDetails();
+            return;
+        }
+
+        var confirm = new ContentDialog
+        {
+            XamlRoot = RootXamlRoot,
+            Title = T("dialog.shutdownTimeoutTitle", "虚拟机没有响应关机请求"),
+            Content = T("dialog.shutdownTimeoutMessage", "来宾系统可能尚未启动、未启用 ACPI，或正在处理关机。可以继续等待，也可以强制停止。"),
+            PrimaryButtonText = T("main.forceStop", "强制停止"),
+            CloseButtonText = T("dialog.keepWaiting", "继续等待"),
+            DefaultButton = ContentDialogButton.Close
+        };
+        if (await confirm.ShowAsync() == ContentDialogResult.Primary)
+        {
+            var stopResult = sessions.ForceStop(vm);
+            if (!stopResult.Succeeded) await ShowOperationErrorAsync(stopResult);
+        }
+        RefreshDetails();
     }
 
     private async void ForceStop_Click(object sender, RoutedEventArgs e)
@@ -174,6 +222,7 @@ public sealed partial class MainWindow
 
     private async void QmpConsole_Click(object sender, RoutedEventArgs e)
     {
+        AppLog.Write("Opening VmControlDialog");
         if (selectedVm is null) return;
         if (!sessions.HasQmpSession(selectedVm))
         {
@@ -185,8 +234,10 @@ public sealed partial class MainWindow
 
         try
         {
-            var dialog = new VmControlDialog(WindowNative.GetWindowHandle(this), sessions, selectedVm) { XamlRoot = RootXamlRoot };
+            var dialog = new VmControlDialog(WindowNative.GetWindowHandle(this), qemu, sessions, selectedVm) { XamlRoot = RootXamlRoot };
+            AppLog.Write("VmControlDialog constructed");
             await dialog.ShowAsync();
+            AppLog.Write("VmControlDialog closed");
             RefreshDetails();
         }
         catch (Exception exception)
@@ -221,5 +272,3 @@ public sealed partial class MainWindow
     }
 
 }
-
-

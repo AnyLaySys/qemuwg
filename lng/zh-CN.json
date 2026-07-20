@@ -52,6 +52,9 @@
   "dialog.noLogTitle": "暂无日志",
   "dialog.noLogMessage": "该虚拟机还没有生成 QEMU 日志。",
   "dialog.operationFailed": "操作失败",
+  "dialog.shutdownTimeoutTitle": "虚拟机没有响应关机请求",
+  "dialog.shutdownTimeoutMessage": "来宾系统可能尚未启动、未启用 ACPI，或正在处理关机。可以继续等待，也可以强制停止。",
+  "dialog.keepWaiting": "继续等待",
   "settings.title": "设置",
   "settings.library": "虚拟机库",
   "workspace.disk": "磁盘工作区",
@@ -244,6 +247,8 @@
   "session.shutdownFailed": "发送关机请求失败",
   "session.forceStopped": "虚拟机已强制停止",
   "session.stopFailed": "无法停止虚拟机",
+  "session.exitedEarly": "QEMU 启动后立即退出",
+  "session.shuttingDown": "正在等待来宾系统关机…",
   "repo.imgMissing": "未找到 qemu-img",
   "repo.diskCreateFailed": "创建虚拟磁盘失败",
   "repo.created": "虚拟机已创建",
@@ -288,6 +293,20 @@
   ,"qmp.screenshot": "截取虚拟机屏幕"
   ,"qmp.activity": "操作结果"
   ,"qmp.commandSucceeded": "{0} 已执行。"
+  ,"qmp.shutdownWaiting": "关机请求已发送，正在等待来宾系统响应…"
+  ,"qmp.shutdownComplete": "虚拟机已关机。"
+  ,"qmp.shutdownNoResponse": "来宾系统没有响应关机请求。可以继续等待，或使用强制停止。"
+  ,"qmp.confirmForceStop": "确认强制停止"
+  ,"qmp.resetRestarted": "QEMU 在重置时退出，虚拟机已自动重新启动。"
+  ,"qmp.resetRestartFailed": "QEMU 在重置时退出，自动重新启动失败："
+  ,"qmp.state.running": "运行中"
+  ,"qmp.state.paused": "已暂停"
+  ,"qmp.state.shutdown": "正在关机"
+  ,"qmp.state.prelaunch": "准备启动"
+  ,"qmp.state.suspended": "已挂起"
+  ,"qmp.state.internalError": "内部错误"
+  ,"qmp.state.ioError": "I/O 错误"
+  ,"qmp.state.guestPanicked": "来宾系统崩溃"
   ,"qmp.opticalMedia": "光盘介质"
   ,"qmp.eject": "弹出"
   ,"qmp.mount": "装载"
@@ -411,7 +430,7 @@
   ,"disk.commandPreview": "命令预览"
   ,"disk.field.imageOpts": "使用镜像选项语法"
   ,"disk.field.backingChain": "显示完整后备链"
-  ,"disk.field.forceShare": "允许共享读取"
+  ,"disk.field.forceShare": "共享打开（可能读取到不一致状态）"
   ,"disk.field.limits": "显示格式限制"
   ,"disk.field.quiet": "静默运行"
   ,"disk.field.strict": "严格比较"
@@ -419,7 +438,7 @@
   ,"disk.field.write": "执行写入测试"
   ,"disk.field.noDrain": "跳过写入排空"
   ,"disk.field.native": "使用原生异步 I/O"
-  ,"disk.field.backingUnsafe": "不验证后备文件"
+  ,"disk.field.backingUnsafe": "允许缺失或不可验证的后备文件"
   ,"disk.field.bitmaps": "复制持久位图"
   ,"disk.field.skipBroken": "跳过损坏的位图"
   ,"disk.field.salvage": "尽量恢复可读数据"
@@ -427,8 +446,8 @@
   ,"disk.field.noCreate": "使用已有目标文件"
   ,"disk.field.targetZero": "假定目标文件已清零"
   ,"disk.field.compress": "压缩输出数据"
-  ,"disk.field.copyRange": "启用快速范围复制"
-  ,"disk.field.oobWrites": "允许并行越序写入"
+  ,"disk.field.copyRange": "使用系统范围复制卸载"
+  ,"disk.field.oobWrites": "允许目标写入越序完成"
   ,"disk.field.shrink": "允许缩小磁盘容量"
   ,"disk.field.drop": "提交后保留顶层数据"
   ,"disk.field.force": "强制修改"
@@ -444,26 +463,26 @@
   ,"disk.choice.preallocation.metadata": "仅预分配元数据"
   ,"disk.choice.preallocation.falloc": "快速分配文件空间"
   ,"disk.choice.preallocation.full": "完整预分配"
-  ,"disk.choice.cache.writeback": "回写缓存（推荐）"
-  ,"disk.choice.cache.none": "绕过主机页缓存"
-  ,"disk.choice.cache.writethrough": "同步写入磁盘"
-  ,"disk.choice.cache.directsync": "直接同步读写"
-  ,"disk.choice.cache.unsafe": "极速模式（断电可能丢数据）"
-  ,"disk.choice.sourceCache.writeback": "回写缓存（推荐）"
-  ,"disk.choice.sourceCache.none": "绕过主机页缓存"
-  ,"disk.choice.sourceCache.writethrough": "同步写入磁盘"
-  ,"disk.choice.sourceCache.directsync": "直接同步读写"
-  ,"disk.choice.sourceCache.unsafe": "极速模式（断电可能丢数据）"
-  ,"disk.choice.targetCache.writeback": "回写缓存"
-  ,"disk.choice.targetCache.none": "绕过主机页缓存"
-  ,"disk.choice.targetCache.writethrough": "同步写入磁盘"
-  ,"disk.choice.targetCache.directsync": "直接同步读写"
-  ,"disk.choice.targetCache.unsafe": "极速模式（默认）"
-  ,"disk.choice.backingCache.writeback": "回写缓存（推荐）"
-  ,"disk.choice.backingCache.none": "绕过主机页缓存"
-  ,"disk.choice.backingCache.writethrough": "同步写入磁盘"
-  ,"disk.choice.backingCache.directsync": "直接同步读写"
-  ,"disk.choice.backingCache.unsafe": "极速模式（断电可能丢数据）"
+  ,"disk.choice.cache.writeback": "回写缓存（遵循刷盘请求）"
+  ,"disk.choice.cache.none": "绕过主机页缓存（遵循刷盘请求）"
+  ,"disk.choice.cache.writethrough": "写入落盘后返回"
+  ,"disk.choice.cache.directsync": "绕过页缓存并同步写入"
+  ,"disk.choice.cache.unsafe": "忽略刷盘请求（高风险）"
+  ,"disk.choice.sourceCache.writeback": "回写缓存（遵循刷盘请求）"
+  ,"disk.choice.sourceCache.none": "绕过主机页缓存（遵循刷盘请求）"
+  ,"disk.choice.sourceCache.writethrough": "写入落盘后返回"
+  ,"disk.choice.sourceCache.directsync": "绕过页缓存并同步写入"
+  ,"disk.choice.sourceCache.unsafe": "忽略刷盘请求（高风险）"
+  ,"disk.choice.targetCache.writeback": "回写缓存（遵循刷盘请求）"
+  ,"disk.choice.targetCache.none": "绕过主机页缓存（遵循刷盘请求）"
+  ,"disk.choice.targetCache.writethrough": "写入落盘后返回"
+  ,"disk.choice.targetCache.directsync": "绕过页缓存并同步写入"
+  ,"disk.choice.targetCache.unsafe": "忽略刷盘请求（高风险）"
+  ,"disk.choice.backingCache.writeback": "回写缓存（遵循刷盘请求）"
+  ,"disk.choice.backingCache.none": "绕过主机页缓存（遵循刷盘请求）"
+  ,"disk.choice.backingCache.writethrough": "写入落盘后返回"
+  ,"disk.choice.backingCache.directsync": "绕过页缓存并同步写入"
+  ,"disk.choice.backingCache.unsafe": "忽略刷盘请求（高风险）"
   ,"disk.choice.snapshot.action.l": "列出快照"
   ,"disk.choice.snapshot.action.c": "创建快照"
   ,"disk.choice.snapshot.action.a": "恢复快照"
