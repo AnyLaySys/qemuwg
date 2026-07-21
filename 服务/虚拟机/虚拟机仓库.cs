@@ -36,6 +36,7 @@ public sealed class 虚拟机仓库
                     if (vm is null) continue;
                     vm.CfgPath = path;
                     vm.DirPath = Path.GetDirectoryName(path) ?? string.Empty;
+                    迁移输入设备(vm);
                     result.Add(vm);
                 }
                 catch (JsonException)
@@ -142,6 +143,29 @@ public sealed class 虚拟机仓库
         var sanitized = new string(name.Trim().Select(character => invalid.Contains(character) || char.IsControl(character) ? '_' : character).ToArray())
             .TrimEnd('.', ' ');
         return string.IsNullOrWhiteSpace(sanitized) ? T("repo.defaultName", "新建虚拟机") : sanitized;
+    }
+
+    private static void 迁移输入设备(虚拟机配置 vm)
+    {
+        var migrateKeyboard = string.IsNullOrWhiteSpace(vm.KeyboardDevice)
+                              || string.Equals(vm.KeyboardDevice, "auto", StringComparison.OrdinalIgnoreCase);
+        var migrateMouse = string.IsNullOrWhiteSpace(vm.MouseDevice)
+                           || string.Equals(vm.MouseDevice, "auto", StringComparison.OrdinalIgnoreCase);
+        foreach (var device in vm.Devices.ToList())
+        {
+            if (migrateKeyboard && QEMU服务.是键盘设备(device.Model))
+            {
+                vm.KeyboardDevice = device.Model;
+                vm.Devices.Remove(device);
+                migrateKeyboard = false;
+            }
+            else if (migrateMouse && QEMU服务.是指针设备(device.Model))
+            {
+                vm.MouseDevice = device.Model;
+                vm.Devices.Remove(device);
+                migrateMouse = false;
+            }
+        }
     }
 
     private static void 尝试删除空目录(string path)

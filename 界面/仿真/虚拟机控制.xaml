@@ -6,7 +6,7 @@
     CornerRadius="9"
     CloseButtonText="{Binding [common.done], Source={StaticResource Strings}}">
     <ContentDialog.Resources><x:Double x:Key="ContentDialogMaxWidth">1080</x:Double></ContentDialog.Resources>
-    <Grid Margin="0,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="10">
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowSpacing="10">
         <Grid.RowDefinitions><RowDefinition Height="76" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <Grid ColumnSpacing="8">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -19,7 +19,7 @@
 
         <TabView x:Name="ControlTabs" Grid.Row="1" IsAddTabButtonVisible="False">
             <TabViewItem Header="{Binding [qmp.controls], Source={StaticResource Strings}}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto"><Grid Padding="6" ColumnSpacing="10" RowSpacing="10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"><Grid Padding="9" ColumnSpacing="10" RowSpacing="10">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="1.35*" /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
 
@@ -48,7 +48,7 @@
             </TabViewItem>
 
             <TabViewItem Header="{Binding [qmp.advanced], Source={StaticResource Strings}}">
-                <Grid Padding="6" ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="250" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Grid Padding="9" ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="250" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6"><Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><AutoSuggestBox x:Name="SearchBox" Margin="8" PlaceholderText="{Binding [qmp.search], Source={StaticResource Strings}}" TextChanged="SearchBox_TextChanged" /><TextBlock x:Name="CommandCountText" Grid.Row="1" Margin="12,0,12,5" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /><ListView x:Name="CommandList" Grid.Row="2" Margin="6,0,6,6" Background="Transparent" BorderThickness="0" SelectionChanged="CommandList_SelectionChanged"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QMP命令"><TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="12" Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" /></DataTemplate></ListView.ItemTemplate></ListView></Grid></Border>
                     <Grid Grid.Column="1" RowSpacing="8"><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="110" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><StackPanel><TextBlock FontSize="11" Text="{Binding [qmp.command], Source={StaticResource Strings}}" /><TextBox x:Name="CommandBox" FontFamily="Cascadia Mono, Consolas" TextChanged="CommandBox_TextChanged" /></StackPanel><Button Grid.Column="1" VerticalAlignment="Bottom" Click="ExecuteButton_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}"><StackPanel Orientation="Horizontal" Spacing="7"><SymbolIcon Symbol="Play" /><TextBlock Text="{Binding [common.execute], Source={StaticResource Strings}}" /></StackPanel></Button></Grid><StackPanel Grid.Row="1"><TextBlock FontSize="11" Text="{Binding [qmp.schema], Source={StaticResource Strings}}" /><TextBlock x:Name="SchemaHintText" FontFamily="Cascadia Mono, Consolas" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel><StackPanel Grid.Row="2"><TextBlock FontSize="11" Text="{Binding [qmp.arguments], Source={StaticResource Strings}}" /><TextBox x:Name="ArgumentsBox" Height="88" AcceptsReturn="True" FontFamily="Cascadia Mono, Consolas" Text="{}" TextWrapping="Wrap" /></StackPanel><Grid Grid.Row="3"><TextBlock FontWeight="SemiBold" Text="{Binding [qmp.result], Source={StaticResource Strings}}" /><ProgressRing x:Name="BusyRing" HorizontalAlignment="Right" Width="18" Height="18" IsActive="False" /></Grid><TextBox x:Name="OutputBox" Grid.Row="4" AcceptsReturn="True" FontFamily="Cascadia Mono, Consolas" FontSize="11" IsReadOnly="True" TextWrapping="Wrap" /></Grid>
                 </Grid>

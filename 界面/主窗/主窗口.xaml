@@ -20,19 +20,30 @@
 
         <Grid x:Name="TitleBarDragRegion" Grid.ColumnSpan="2" Background="Transparent">
             <StackPanel
-                Margin="18,0,150,0"
+                Margin="9,0,150,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 IsHitTestVisible="False"
                 Orientation="Horizontal"
-                Spacing="9">
-                <TextBlock FontWeight="SemiBold" Foreground="{ThemeResource SidebarTextBrush}" Text="QemuWG" />
+                Spacing="6">
                 <TextBlock
-                    x:Name="QemuVersionText"
-                    MaxWidth="240"
-                    FontSize="10"
-                    Foreground="{ThemeResource SidebarSecondaryTextBrush}"
-                    TextTrimming="CharacterEllipsis" />
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource SidebarTextBrush}"
+                    Text="QemuWG" />
+                <Border
+                    MaxWidth="180"
+                    Padding="6,2"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource VersionBadgeBackgroundBrush}"
+                    CornerRadius="3">
+                    <TextBlock
+                        x:Name="QemuVersionText"
+                        FontSize="12"
+                        Foreground="{ThemeResource VersionBadgeForegroundBrush}"
+                        TextTrimming="CharacterEllipsis" />
+                </Border>
             </StackPanel>
         </Grid>
 
@@ -43,7 +54,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Margin="12,12,12,8" ColumnSpacing="8">
+            <Grid Margin="9" ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -83,7 +94,7 @@
             <ListView
                 x:Name="VmList"
                 Grid.Row="1"
-                Margin="8,0"
+                Margin="9,0"
                 Background="Transparent"
                 BorderThickness="0"
                 IsItemClickEnabled="True"
@@ -136,7 +147,7 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <StackPanel Grid.Row="2" Margin="8,8,8,10" Spacing="4">
+            <StackPanel Grid.Row="2" Margin="9" Spacing="4">
                 <Button
                     x:Name="SettingsButton"
                     HorizontalContentAlignment="Left"

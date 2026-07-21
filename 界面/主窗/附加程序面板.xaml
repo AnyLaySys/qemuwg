@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:数据="using:QemuWG.数据">
 
-    <TabView x:Name="ToolsTabs" Margin="14" IsAddTabButtonVisible="False" SelectedIndex="0">
+    <TabView x:Name="ToolsTabs" Margin="9" IsAddTabButtonVisible="False" SelectedIndex="0">
         <TabViewItem Header="{Binding [tools.qemuIo], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="6" ColumnSpacing="10" RowSpacing="8">
+            <Grid Padding="9" ColumnSpacing="10" RowSpacing="8">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="0.3*" /><ColumnDefinition Width="0.7*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <Grid Grid.ColumnSpan="2" ColumnSpacing="8">

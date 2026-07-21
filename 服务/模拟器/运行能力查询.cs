@@ -24,6 +24,7 @@ public sealed partial class QEMU服务
         await Task.WhenAll(machineTask, cpuTask, accelTask, displayTask, networkBackendTask, audioBackendTask, deviceTask, helpTask);
 
         var devices = deviceTask.Result.输出;
+        var inputDevices = 解析设备(devices, "input");
         return new QEMU能力
         {
             Machines = 解析首列块(machineTask.Result.输出, "Supported machines"),
@@ -35,7 +36,9 @@ public sealed partial class QEMU服务
             NetworkDevices = 解析设备(devices, "network"),
             AudioBackends = 解析首列块(audioBackendTask.Result.输出, "Available audio drivers"),
             AudioDevices = 解析设备(devices, "sound"),
-            InputDevices = 解析设备(devices, "input"),
+            InputDevices = inputDevices,
+            KeyboardDevices = inputDevices.Where(是键盘设备).ToList(),
+            PointerDevices = inputDevices.Where(是指针设备).ToList(),
             AllDevices = 解析全部设备(devices),
             CmdOptions = 解析命令选项(helpTask.Result.输出)
         };
@@ -110,6 +113,19 @@ public sealed partial class QEMU服务
         }
         return devices;
     }
+
+    internal static bool 是键盘设备(string model) =>
+        string.Equals(model, "usb-kbd", StringComparison.OrdinalIgnoreCase)
+        || model.StartsWith("virtio-keyboard-", StringComparison.OrdinalIgnoreCase);
+
+    internal static bool 是指针设备(string model) =>
+        string.Equals(model, "usb-mouse", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(model, "usb-tablet", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(model, "usb-wacom-tablet", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(model, "vmmouse", StringComparison.OrdinalIgnoreCase)
+        || model.StartsWith("virtio-mouse-", StringComparison.OrdinalIgnoreCase)
+        || model.StartsWith("virtio-tablet-", StringComparison.OrdinalIgnoreCase)
+        || model.StartsWith("virtio-multitouch-", StringComparison.OrdinalIgnoreCase);
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex 空白正则();

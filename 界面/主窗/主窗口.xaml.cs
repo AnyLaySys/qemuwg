@@ -85,7 +85,7 @@ public sealed partial class 主窗 : Window
         await Task.WhenAll(qemuTask, machinesTask);
         应用日志.写("InitializeAsync data loaded");
         qemu = qemuTask.Result;
-        QemuVersionText.Text = qemu.Version;
+        QemuVersionText.Text = 简化QEMU版本(qemu.Version);
         应用日志.写("InitializeAsync version assigned");
         NewVmButton.IsEnabled = qemu.IsAvailable;
 
@@ -184,6 +184,8 @@ public sealed partial class 主窗 : Window
         target.VideoDevice = source.VideoDevice;
         target.AudioBackend = source.AudioBackend;
         target.AudioDevice = source.AudioDevice;
+        target.KeyboardDevice = source.KeyboardDevice;
+        target.MouseDevice = source.MouseDevice;
         target.NetworkMode = source.NetworkMode;
         target.NetworkModel = source.NetworkModel;
         target.BootOrder = source.BootOrder;
@@ -205,6 +207,16 @@ public sealed partial class 主窗 : Window
         : $"{megabytes} MB";
 
     private static string RawOrDefault(string value, string fallback = "default") => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static string 简化QEMU版本(string version)
+    {
+        if (string.IsNullOrWhiteSpace(version)) return "QEMU";
+        var detailsStart = version.IndexOf(" (", StringComparison.Ordinal);
+        var conciseVersion = detailsStart > 0 ? version[..detailsStart] : version;
+        return conciseVersion.StartsWith("QEMU ", StringComparison.OrdinalIgnoreCase)
+            ? conciseVersion[5..]
+            : conciseVersion;
+    }
 
     private static void OpenPath(string path)
     {

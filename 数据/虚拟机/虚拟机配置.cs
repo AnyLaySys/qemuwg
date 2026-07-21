@@ -24,6 +24,8 @@ public sealed class 虚拟机配置 : INotifyPropertyChanged
     public string VideoDevice { get; set; } = "auto";
     public string AudioBackend { get; set; } = "none";
     public string AudioDevice { get; set; } = "auto";
+    public string KeyboardDevice { get; set; } = "auto";
+    public string MouseDevice { get; set; } = "auto";
     public string NetworkMode { get; set; } = "user";
     public string NetworkModel { get; set; } = "auto";
     public string BootOrder { get; set; } = "dc";
@@ -71,6 +73,8 @@ public sealed class 虚拟机配置 : INotifyPropertyChanged
         VideoDevice = VideoDevice,
         AudioBackend = AudioBackend,
         AudioDevice = AudioDevice,
+        KeyboardDevice = KeyboardDevice,
+        MouseDevice = MouseDevice,
         NetworkMode = NetworkMode,
         NetworkModel = NetworkModel,
         BootOrder = BootOrder,

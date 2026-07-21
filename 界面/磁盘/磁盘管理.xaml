@@ -10,7 +10,7 @@
         <x:Double x:Key="ContentDialogMaxWidth">1080</x:Double>
     </ContentDialog.Resources>
 
-    <Grid Margin="0,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ColumnSpacing="12">
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.22*" />
             <ColumnDefinition Width="0.78*" />

@@ -23,6 +23,8 @@
                     <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="Transparent" />
                     <SolidColorBrush x:Key="SidebarTextBrush" Color="#1A1A1A" />
                     <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#646464" />
+                    <SolidColorBrush x:Key="VersionBadgeBackgroundBrush" Color="#DCEBFF" />
+                    <SolidColorBrush x:Key="VersionBadgeForegroundBrush" Color="#145DA0" />
                     <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#DCE8F8" />
                     <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#245A9C" />
                     <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#F6F6F6" />
@@ -46,6 +48,8 @@
                     <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="Transparent" />
                     <SolidColorBrush x:Key="SidebarTextBrush" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#AAB0B8" />
+                    <SolidColorBrush x:Key="VersionBadgeBackgroundBrush" Color="#294A70" />
+                    <SolidColorBrush x:Key="VersionBadgeForegroundBrush" Color="#D8E9FF" />
                     <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#253046" />
                     <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#8AB4F8" />
                     <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#101215" />
@@ -58,7 +62,7 @@
             </ResourceDictionary.MergedDictionaries>
             <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
             <CornerRadius x:Key="OverlayCornerRadius">9</CornerRadius>
-            <Thickness x:Key="ContentDialogPadding">18</Thickness>
+            <Thickness x:Key="ContentDialogPadding">9</Thickness>
             <服务:语言服务 x:Key="Strings" />
             <Style x:Key="圆角列表项基础样式" TargetType="ListViewItem">
                 <Setter Property="Background" Value="{ThemeResource ListViewItemBackground}" />

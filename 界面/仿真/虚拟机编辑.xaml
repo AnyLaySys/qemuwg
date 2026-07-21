@@ -267,44 +267,32 @@
                             <FontIcon FontSize="14" Foreground="#E58B45" Glyph="&#xE765;" />
                             <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.inputDevices], Source={StaticResource Strings}}" />
                         </StackPanel>
-                        <Grid ColumnSpacing="6">
+                        <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <ComboBox
-                                x:Name="InputDeviceModelCombo"
-                                HorizontalAlignment="Stretch"
-                                MaxDropDownHeight="240"
-                                PlaceholderText="{Binding [vmEditor.inputDeviceModel], Source={StaticResource Strings}}" />
-                            <Button Grid.Column="1" Click="AddInputDevice_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.addInputDevice], Source={StaticResource Strings}}">
-                                <SymbolIcon Symbol="Add" />
-                            </Button>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.keyboard], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="KeyboardDeviceCombo"
+                                    HorizontalAlignment="Stretch"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
+                                    MaxDropDownHeight="240"
+                                    SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.mouse], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="MouseDeviceCombo"
+                                    HorizontalAlignment="Stretch"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
+                                    MaxDropDownHeight="240"
+                                    SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
                         </Grid>
-                        <ListView
-                            x:Name="InputDeviceList"
-                            MaxHeight="92"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            ItemsSource="{x:Bind ConfiguredInputDevices}"
-                            SelectionMode="None">
-                            <ListView.ItemContainerTransitions>
-                                <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
-                            </ListView.ItemContainerTransitions>
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="数据:QEMU设备">
-                                    <Grid>
-                                        <TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" />
-                                        <Button HorizontalAlignment="Right" Click="RemoveInputDevice_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.removeInputDevice], Source={StaticResource Strings}}">
-                                            <SymbolIcon Symbol="Delete" />
-                                        </Button>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
                     </StackPanel>
                 </Border>
 

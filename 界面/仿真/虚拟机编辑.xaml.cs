@@ -23,10 +23,8 @@ public sealed partial class 虚拟机编辑 : ContentDialog
 
     public ObservableCollection<QEMU选项> ConfiguredQemuOpts { get; } = [];
     public ObservableCollection<QEMU设备> ConfiguredDevices { get; } = [];
-    public ObservableCollection<QEMU设备> ConfiguredInputDevices { get; } = [];
     public ObservableCollection<QEMU选项> SelectedDeviceProperties { get; } = [];
     private IReadOnlyList<QEMU设备属性> availableDeviceProperties = [];
-    private IReadOnlySet<string> availableInputDeviceModels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     public 虚拟机编辑(
         nint ownerHandle,
@@ -102,6 +100,8 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         vm.VideoDevice = ReadCapabilityValue(VideoCombo, source?.VideoDevice, "auto");
         vm.AudioBackend = ReadCapabilityValue(AudioCombo, source?.AudioBackend, "none");
         vm.AudioDevice = ReadCapabilityValue(AudioDeviceCombo, source?.AudioDevice, "auto");
+        vm.KeyboardDevice = ReadCapabilityValue(KeyboardDeviceCombo, source?.KeyboardDevice, "auto");
+        vm.MouseDevice = ReadCapabilityValue(MouseDeviceCombo, source?.MouseDevice, source is null ? "usb-tablet" : "auto");
         vm.NetworkMode = ReadCapabilityValue(NetworkModeCombo, source?.NetworkMode, "user");
         vm.NetworkModel = ReadCapabilityValue(NetworkModelCombo, source?.NetworkModel, "auto");
         vm.BootOrder = NormalizeDefault(BootOrderCombo.SelectedItem?.ToString(), "dc");
@@ -185,6 +185,12 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         var networkDevice = preferred?.NetworkModel ?? CurrentComboValue(NetworkModelCombo);
         var audioBackend = preferred?.AudioBackend ?? CurrentComboValue(AudioCombo);
         var audioDevice = preferred?.AudioDevice ?? CurrentComboValue(AudioDeviceCombo);
+        var keyboardDevice = preferred?.KeyboardDevice ?? CurrentComboValue(KeyboardDeviceCombo);
+        var mouseDevice = preferred?.MouseDevice ?? CurrentComboValue(MouseDeviceCombo);
+        if (source is null && (string.IsNullOrWhiteSpace(mouseDevice) || string.Equals(mouseDevice, "auto", StringComparison.OrdinalIgnoreCase)))
+            mouseDevice = caps.PointerDevices.FirstOrDefault(device => string.Equals(device, "usb-tablet", StringComparison.OrdinalIgnoreCase))
+                          ?? caps.PointerDevices.FirstOrDefault(device => device.Contains("tablet", StringComparison.OrdinalIgnoreCase))
+                          ?? "auto";
 
         updatingCapabilityControls = true;
         try
@@ -198,11 +204,11 @@ public sealed partial class 虚拟机编辑 : ContentDialog
             SetComboItems(NetworkModelCombo, caps.NetworkDevices, networkDevice);
             SetComboItems(AudioCombo, caps.AudioBackends, audioBackend);
             SetComboItems(AudioDeviceCombo, caps.AudioDevices, audioDevice);
-            InputDeviceModelCombo.ItemsSource = caps.InputDevices;
-            availableInputDeviceModels = new HashSet<string>(caps.InputDevices, StringComparer.OrdinalIgnoreCase);
-            RefreshConfiguredInputDevices();
+            SetComboItems(KeyboardDeviceCombo, 添加自动选项(caps.KeyboardDevices), keyboardDevice);
+            SetComboItems(MouseDeviceCombo, 添加自动选项(caps.PointerDevices), mouseDevice);
             QemuOptCombo.ItemsSource = caps.CmdOptions;
-            DeviceModelCombo.ItemsSource = caps.AllDevices;
+            var inputModels = new HashSet<string>(caps.InputDevices, StringComparer.OrdinalIgnoreCase);
+            DeviceModelCombo.ItemsSource = caps.AllDevices.Where(device => !inputModels.Contains(device)).ToList();
         }
         finally
         {
@@ -258,6 +264,8 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         comboBox.SelectedItem = items.FirstOrDefault(item => string.Equals(item, selected, StringComparison.OrdinalIgnoreCase));
         if (comboBox.SelectedItem is null) comboBox.Text = selected ?? string.Empty;
     }
+
+    private static IReadOnlyList<string> 添加自动选项(IReadOnlyList<string> items) => ["auto", "none", .. items];
 
     private void CapabilityCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {

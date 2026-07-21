@@ -82,6 +82,14 @@ public sealed partial class QEMU会话
         else if (!string.IsNullOrWhiteSpace(vm.AudioBackend)) arguments.AddRange(["-audiodev", $"driver={vm.AudioBackend},id=audio0"]);
         if (!string.IsNullOrWhiteSpace(vm.AudioDevice) && vm.AudioDevice != "auto")
             arguments.AddRange(["-device", vm.AudioDevice]);
+        if (!string.IsNullOrWhiteSpace(vm.KeyboardDevice)
+            && !string.Equals(vm.KeyboardDevice, "auto", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(vm.KeyboardDevice, "none", StringComparison.OrdinalIgnoreCase))
+            arguments.AddRange(["-device", vm.KeyboardDevice.Trim()]);
+        if (!string.IsNullOrWhiteSpace(vm.MouseDevice)
+            && !string.Equals(vm.MouseDevice, "auto", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(vm.MouseDevice, "none", StringComparison.OrdinalIgnoreCase))
+            arguments.AddRange(["-device", vm.MouseDevice.Trim()]);
 
         foreach (var device in vm.Devices.Where(device => !string.IsNullOrWhiteSpace(device.Model)))
         {

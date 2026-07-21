@@ -10,8 +10,6 @@ public sealed partial class 虚拟机编辑
 
     private void EditorScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        EditorContentFrame.Padding = new Thickness(9);
-
         var viewportWidth = EditorScrollViewer.ViewportWidth > 0
             ? EditorScrollViewer.ViewportWidth
             : e.NewSize.Width;
