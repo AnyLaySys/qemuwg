@@ -24,14 +24,21 @@ public sealed partial class 主窗
 
     private void RefreshDetails()
     {
+        var toolsWasVisible = ToolsHost.Visibility == Visibility.Visible;
         ToolsHost.Visibility = Visibility.Collapsed;
         if (selectedVm is null)
         {
+            var animateEmpty = toolsWasVisible || EmptyView.Visibility != Visibility.Visible;
             DetailsView.Visibility = Visibility.Collapsed;
             EmptyView.Visibility = Visibility.Visible;
+            lastAnimatedVmId = null;
+            if (animateEmpty) _ = 页面过渡动画.渐进显示(EmptyView, 9);
             return;
         }
 
+        var animateDetails = toolsWasVisible
+                             || DetailsView.Visibility != Visibility.Visible
+                             || !string.Equals(lastAnimatedVmId, selectedVm.Id, StringComparison.Ordinal);
         EmptyView.Visibility = Visibility.Collapsed;
         DetailsView.Visibility = Visibility.Visible;
         VmNameText.Text = selectedVm.Name;
@@ -69,6 +76,8 @@ public sealed partial class 主窗
                 string.Format(T("device.additionalValue", "{0} 个 · {1}"), selectedVm.Devices.Count,
                     string.Join(", ", selectedVm.Devices.Take(3).Select(device => device.Model))),
                 ColorHelper.FromArgb(255, 112, 121, 214)));
+        lastAnimatedVmId = selectedVm.Id;
+        if (animateDetails) _ = 页面过渡动画.渐进显示(DetailsView, 12);
     }
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)

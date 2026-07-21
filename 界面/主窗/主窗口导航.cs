@@ -40,6 +40,9 @@ public sealed partial class 主窗
         toolsView ??= new QEMU附加功能(WindowNative.GetWindowHandle(this), qemu, toolSessions);
         ToolsHost.Content = toolsView;
         ToolsHost.Visibility = Visibility.Visible;
+        lastAnimatedVmId = null;
+        按钮交互动画.启用(toolsView);
+        _ = 页面过渡动画.渐进显示(ToolsHost, 12);
     }
 
     private async Task ShowDiskManagerAsync(虚拟机配置 machine)

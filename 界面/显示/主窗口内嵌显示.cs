@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using QemuWG.数据;
 using QemuWG.服务;
+using QemuWG.界面;
 using QemuWG.界面.显示;
 
 namespace QemuWG;
@@ -248,6 +249,11 @@ public sealed partial class 主窗
         try
         {
             dialog.XamlRoot ??= RootXamlRoot;
+            对话框布局.应用按钮圆角(dialog);
+            dialog.Opened += (_, _) =>
+            {
+                if (dialog.Content is DependencyObject content) 按钮交互动画.启用(content);
+            };
             return await dialog.ShowAsync();
         }
         finally

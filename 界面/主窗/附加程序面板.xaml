@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:数据="using:QemuWG.数据">
 
-    <TabView Margin="14" IsAddTabButtonVisible="False" SelectedIndex="0">
+    <TabView x:Name="ToolsTabs" Margin="14" IsAddTabButtonVisible="False" SelectedIndex="0">
         <TabViewItem Header="{Binding [tools.qemuIo], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="8" ColumnSpacing="10" RowSpacing="8">
+            <Grid Padding="6" ColumnSpacing="10" RowSpacing="8">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="0.3*" /><ColumnDefinition Width="0.7*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <Grid Grid.ColumnSpan="2" ColumnSpacing="8">
@@ -16,7 +16,7 @@
                     <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="6"><Button x:Name="RunIoButton" Click="RunIoButton_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}"><StackPanel Orientation="Horizontal" Spacing="7"><SymbolIcon Symbol="Play" /><TextBlock x:Name="RunIoButtonText" Text="{Binding [tools.run], Source={StaticResource Strings}}" /></StackPanel></Button><Button x:Name="CancelIoButton" Click="CancelIoButton_Click" CornerRadius="3" Visibility="Collapsed"><SymbolIcon Symbol="Cancel" /></Button></StackPanel>
                 </Grid>
                 <Border Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6">
-                    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><AutoSuggestBox x:Name="IoSearchBox" Margin="8" PlaceholderText="{Binding [tools.command], Source={StaticResource Strings}}" TextChanged="IoSearchBox_TextChanged" /><ListView x:Name="IoCommandList" Grid.Row="1" Margin="6,0,6,6" Background="Transparent" BorderThickness="0" SelectionChanged="IoCommandList_SelectionChanged"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMUIO命令"><StackPanel Padding="5,3"><TextBlock FontFamily="Cascadia Mono, Consolas" Text="{x:Bind Name}" /><TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Syntax}" TextTrimming="CharacterEllipsis" /></StackPanel></DataTemplate></ListView.ItemTemplate></ListView></Grid>
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><AutoSuggestBox x:Name="IoSearchBox" Margin="8" PlaceholderText="{Binding [tools.command], Source={StaticResource Strings}}" TextChanged="IoSearchBox_TextChanged" /><ListView x:Name="IoCommandList" Grid.Row="1" Margin="6,0,6,6" Background="Transparent" BorderThickness="0" SelectionChanged="IoCommandList_SelectionChanged"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMUIO命令"><StackPanel Padding="3"><TextBlock FontFamily="Cascadia Mono, Consolas" Text="{x:Bind Name}" /><TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Syntax}" TextTrimming="CharacterEllipsis" /></StackPanel></DataTemplate></ListView.ItemTemplate></ListView></Grid>
                 </Border>
                 <Grid Grid.Row="1" Grid.Column="1" RowSpacing="8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
@@ -29,7 +29,7 @@
         </TabViewItem>
 
         <TabViewItem Header="{Binding [tools.edid], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="12" ColumnSpacing="10" RowSpacing="10">
+            <Grid Padding="9" ColumnSpacing="10" RowSpacing="10">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <TextBox x:Name="EdidVendorBox" Header="{Binding [tools.vendor], Source={StaticResource Strings}}" MaxLength="3" /><TextBox x:Name="EdidNameBox" Grid.Column="1" Header="{Binding [tools.monitorName], Source={StaticResource Strings}}" /><TextBox x:Name="EdidSerialBox" Grid.Column="2" Header="{Binding [tools.serial], Source={StaticResource Strings}}" />
@@ -41,7 +41,7 @@
         </TabViewItem>
 
         <TabViewItem Header="{Binding [tools.nbdServer], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="12" ColumnSpacing="10" RowSpacing="8">
+            <Grid Padding="9" ColumnSpacing="10" RowSpacing="8">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <Grid Grid.ColumnSpan="3" ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox x:Name="NbdImageBox" Header="{Binding [tools.image], Source={StaticResource Strings}}" /><Button Grid.Column="1" VerticalAlignment="Bottom" Click="BrowseNbdImage_Click" CornerRadius="3"><SymbolIcon Symbol="Folder" /></Button></Grid>
@@ -54,11 +54,11 @@
         </TabViewItem>
 
         <TabViewItem Header="{Binding [tools.storageDaemon], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="12" ColumnSpacing="10" RowSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><TextBox x:Name="StorageBlockdevBox" Header="--blockdev" PlaceholderText="driver=file,node-name=file0,filename=disk.qcow2" /><TextBox x:Name="StorageNbdServerBox" Grid.Column="1" Header="--nbd-server" Text="addr.type=inet,addr.host=127.0.0.1,addr.port=10809" /><TextBox x:Name="StorageExportBox" Grid.Row="1" Header="--export" PlaceholderText="type=nbd,id=export0,node-name=disk0,writable=off" /><TextBox x:Name="StorageMonitorBox" Grid.Row="1" Grid.Column="1" Header="--monitor" /><TextBox x:Name="StorageChardevBox" Grid.Row="2" Header="--chardev" /><TextBox x:Name="StorageObjectsBox" Grid.Row="2" Grid.Column="1" Header="--object" PlaceholderText="{Binding [tools.semicolonSeparated], Source={StaticResource Strings}}" /><TextBox x:Name="StoragePidFileBox" Grid.Row="3" Header="--pidfile" /><StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="6"><Button Click="StartStorageDaemon_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}"><TextBlock Text="{Binding [tools.start], Source={StaticResource Strings}}" /></Button><Button Click="StopStorageDaemon_Click" CornerRadius="6"><TextBlock Text="{Binding [tools.stop], Source={StaticResource Strings}}" /></Button></StackPanel><TextBox x:Name="StorageOutputBox" Grid.Row="4" Grid.ColumnSpan="2" AcceptsReturn="True" FontFamily="Cascadia Mono, Consolas" FontSize="11" IsReadOnly="True" TextWrapping="Wrap" /></Grid>
+            <Grid Padding="9" ColumnSpacing="10" RowSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions><TextBox x:Name="StorageBlockdevBox" Header="--blockdev" PlaceholderText="driver=file,node-name=file0,filename=disk.qcow2" /><TextBox x:Name="StorageNbdServerBox" Grid.Column="1" Header="--nbd-server" Text="addr.type=inet,addr.host=127.0.0.1,addr.port=10809" /><TextBox x:Name="StorageExportBox" Grid.Row="1" Header="--export" PlaceholderText="type=nbd,id=export0,node-name=disk0,writable=off" /><TextBox x:Name="StorageMonitorBox" Grid.Row="1" Grid.Column="1" Header="--monitor" /><TextBox x:Name="StorageChardevBox" Grid.Row="2" Header="--chardev" /><TextBox x:Name="StorageObjectsBox" Grid.Row="2" Grid.Column="1" Header="--object" PlaceholderText="{Binding [tools.semicolonSeparated], Source={StaticResource Strings}}" /><TextBox x:Name="StoragePidFileBox" Grid.Row="3" Header="--pidfile" /><StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="6"><Button Click="StartStorageDaemon_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}"><TextBlock Text="{Binding [tools.start], Source={StaticResource Strings}}" /></Button><Button Click="StopStorageDaemon_Click" CornerRadius="6"><TextBlock Text="{Binding [tools.stop], Source={StaticResource Strings}}" /></Button></StackPanel><TextBox x:Name="StorageOutputBox" Grid.Row="4" Grid.ColumnSpan="2" AcceptsReturn="True" FontFamily="Cascadia Mono, Consolas" FontSize="11" IsReadOnly="True" TextWrapping="Wrap" /></Grid>
         </TabViewItem>
 
         <TabViewItem Header="{Binding [tools.services], Source={StaticResource Strings}}" IsClosable="False">
-            <Grid Padding="12" RowSpacing="10">
+            <Grid Padding="9" RowSpacing="10">
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="140" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <ComboBox x:Name="ServiceToolCombo" Header="{Binding [tools.tool], Source={StaticResource Strings}}" HorizontalAlignment="Stretch" SelectionChanged="ServiceToolCombo_SelectionChanged"><x:String>qemu-nbd.exe</x:String><x:String>qemu-storage-daemon.exe</x:String></ComboBox>
                 <TextBox x:Name="ServiceArgumentsBox" Grid.Row="1" AcceptsReturn="True" Header="{Binding [tools.arguments], Source={StaticResource Strings}}" FontFamily="Cascadia Mono, Consolas" TextWrapping="Wrap" />

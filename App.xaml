@@ -7,6 +7,7 @@
         <ResourceDictionary>
             <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
             <CornerRadius x:Key="OverlayCornerRadius">9</CornerRadius>
+            <Thickness x:Key="ContentDialogPadding">18</Thickness>
             <服务:语言服务 x:Key="Strings" />
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">

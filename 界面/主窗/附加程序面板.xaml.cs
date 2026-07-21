@@ -18,6 +18,8 @@ public sealed partial class QEMU附加功能 : UserControl
     public QEMU附加功能(nint ownerHandle, QEMU安装 install, QEMU工具会话 sessions)
     {
         InitializeComponent();
+        页面过渡动画.启用标签页动画(ToolsTabs);
+        Loaded += (_, _) => 按钮交互动画.启用(this);
         this.ownerHandle = ownerHandle;
         this.install = install;
         this.sessions = sessions;

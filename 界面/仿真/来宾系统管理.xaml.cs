@@ -33,6 +33,7 @@ public sealed partial class 来宾系统管理 : ContentDialog
     {
         InitializeComponent();
         对话框布局.启用自适应尺寸(this);
+        页面过渡动画.启用标签页动画(GuestTabs);
         this.ownerHandle = ownerHandle;
         this.sessions = sessions;
         this.machine = machine;

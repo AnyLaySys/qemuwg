@@ -22,12 +22,14 @@ public sealed partial class 主窗 : Window
     private readonly QEMU工具会话 toolSessions = new();
     private QEMU安装 qemu = new();
     private 虚拟机配置? selectedVm;
+    private string? lastAnimatedVmId;
     private QEMU附加功能? toolsView;
 
     public 主窗()
     {
         应用日志.写("主窗 constructor begin");
         InitializeComponent();
+        RootGrid.Loaded += (_, _) => 按钮交互动画.启用(RootGrid);
         应用日志.写("主窗 XAML initialized");
         Title = "QemuWG";
         sessions = new QEMU会话(qemuSvc);
@@ -70,6 +72,7 @@ public sealed partial class 主窗 : Window
             应用日志.写("主窗 initialization failed: " + exception);
             LoadingView.Visibility = Visibility.Collapsed;
             EmptyView.Visibility = Visibility.Visible;
+            _ = 页面过渡动画.渐进显示(EmptyView, 9);
             await ShowMessageAsync(T("dialog.operationFailed", "操作失败"), exception.Message);
         }
     }
@@ -92,6 +95,7 @@ public sealed partial class 主窗 : Window
         if (Machines.Count == 0)
         {
             EmptyView.Visibility = Visibility.Visible;
+            _ = 页面过渡动画.渐进显示(EmptyView, 9);
             return;
         }
 

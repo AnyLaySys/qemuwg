@@ -6,21 +6,23 @@ namespace QemuWG.界面;
 public sealed partial class 虚拟机编辑
 {
     private int currentCardLayout;
+    private bool? currentIdentityCompact;
 
-    private void HardwareCardsGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void EditorScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        var availableWidth = XamlRoot?.Size.Width ?? e.NewSize.Width;
-        var availableHeight = XamlRoot?.Size.Height ?? EditorContentFrame.ActualHeight;
-        var horizontalPadding = Math.Clamp(availableWidth * 0.012, 8, 20);
-        var verticalPadding = Math.Clamp(availableHeight * 0.014, 10, 20);
-        EditorContentFrame.Padding = new Thickness(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
+        EditorContentFrame.Padding = new Thickness(9);
 
-        var layout = e.NewSize.Width switch
+        var viewportWidth = EditorScrollViewer.ViewportWidth > 0
+            ? EditorScrollViewer.ViewportWidth
+            : e.NewSize.Width;
+
+        var layout = viewportWidth switch
         {
             >= 1100 => 3,
             >= 700 => 2,
             _ => 1
         };
+        ConfigureIdentity(layout == 1);
         if (layout == currentCardLayout) return;
         currentCardLayout = layout;
 
@@ -74,6 +76,39 @@ public sealed partial class 虚拟机编辑
         HardwareCardsGrid.RowDefinitions.Clear();
         for (var index = 0; index < rowCount; index++)
             HardwareCardsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+    }
+
+    private void ConfigureIdentity(bool compact)
+    {
+        if (currentIdentityCompact == compact) return;
+        currentIdentityCompact = compact;
+        IdentityGrid.ColumnDefinitions.Clear();
+        IdentityGrid.RowDefinitions.Clear();
+
+        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
+        if (compact)
+        {
+            IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Grid.SetRow(IdentityIcon, 0);
+            Grid.SetRowSpan(IdentityIcon, 2);
+            Grid.SetColumn(NameField, 1);
+            Grid.SetRow(NameField, 0);
+            Grid.SetColumn(LocationField, 1);
+            Grid.SetRow(LocationField, 1);
+            return;
+        }
+
+        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.85, GridUnitType.Star) });
+        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) });
+        IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetRow(IdentityIcon, 0);
+        Grid.SetRowSpan(IdentityIcon, 1);
+        Grid.SetColumn(NameField, 1);
+        Grid.SetRow(NameField, 0);
+        Grid.SetColumn(LocationField, 2);
+        Grid.SetRow(LocationField, 0);
     }
 
     private static void PlaceCard(FrameworkElement card, int row, int column, int columnSpan)

@@ -76,7 +76,11 @@ public sealed partial class 虚拟机编辑 : ContentDialog
             DiskBox.IsEnabled = false;
         }
 
-        Loaded += async (_, _) => await LoadCapsAsync(vm);
+        Loaded += async (_, _) =>
+        {
+            await LoadCapsAsync(vm);
+            EditorScrollViewer.ChangeView(null, 0, null, true);
+        };
     }
 
     public string ParentDir => source is null ? LocationBox.Text.Trim() : Path.GetDirectoryName(source.DirPath) ?? LocationBox.Text.Trim();

@@ -20,26 +20,41 @@
             <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Padding" Value="9" />
         </Style>
     </ContentDialog.Resources>
 
     <Border x:Name="EditorContentFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <ScrollViewer HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Disabled" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer
+            x:Name="EditorScrollViewer"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalAlignment="Stretch"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Enabled"
+            SizeChanged="EditorScrollViewer_SizeChanged"
+            ZoomMode="Disabled">
             <StackPanel HorizontalAlignment="Stretch" Spacing="8">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="9" IsStaggeringEnabled="True" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
             <Border Style="{StaticResource HardwareCardStyle}">
-                <Grid ColumnSpacing="10">
+                <Grid x:Name="IdentityGrid" ColumnSpacing="10" RowSpacing="9">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="26" />
                         <ColumnDefinition Width="0.85*" />
                         <ColumnDefinition Width="1.4*" />
                     </Grid.ColumnDefinitions>
-                    <FontIcon VerticalAlignment="Center" Foreground="#59A8FF" Glyph="&#xE77B;" />
-                    <StackPanel Grid.Column="1">
+                    <FontIcon x:Name="IdentityIcon" VerticalAlignment="Center" Foreground="#59A8FF" Glyph="&#xE77B;" />
+                    <StackPanel x:Name="NameField" Grid.Column="1">
                         <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.name], Source={StaticResource Strings}}" />
                         <TextBox x:Name="NameBox" PlaceholderText="{Binding [vmEditor.nameExample], Source={StaticResource Strings}}" />
                     </StackPanel>
-                    <Grid Grid.Column="2" ColumnSpacing="6">
+                    <Grid x:Name="LocationField" Grid.Column="2" ColumnSpacing="6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -61,7 +76,12 @@
                 </Grid>
             </Border>
 
-            <Grid x:Name="HardwareCardsGrid" ColumnSpacing="8" RowSpacing="8" SizeChanged="HardwareCardsGrid_SizeChanged">
+            <Grid x:Name="HardwareCardsGrid" ColumnSpacing="8" RowSpacing="8">
+                <Grid.ChildrenTransitions>
+                    <TransitionCollection>
+                        <RepositionThemeTransition IsStaggeringEnabled="False" />
+                    </TransitionCollection>
+                </Grid.ChildrenTransitions>
 
                 <Border x:Name="PlatformCard" Grid.ColumnSpan="6" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
@@ -268,8 +288,11 @@
                             BorderThickness="0"
                             ItemsSource="{x:Bind ConfiguredInputDevices}"
                             SelectionMode="None">
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
+                            </ListView.ItemContainerTransitions>
                             <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="6,2" /><Setter Property="CornerRadius" Value="3" /></Style>
+                                <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="数据:QEMU设备">
@@ -285,7 +308,7 @@
                     </StackPanel>
                 </Border>
 
-                <Expander x:Name="AdvancedCard" Grid.Row="3" Grid.ColumnSpan="12" IsExpanded="False">
+                <Expander x:Name="AdvancedCard" Grid.Row="3" Grid.ColumnSpan="12" IsExpanded="True">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#8A7BE8" Glyph="&#xE713;" />
@@ -355,8 +378,11 @@
                                     BorderThickness="0"
                                     ItemsSource="{x:Bind ConfiguredQemuOpts}"
                                     SelectionMode="None">
+                                    <ListView.ItemContainerTransitions>
+                                        <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
+                                    </ListView.ItemContainerTransitions>
                                     <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="6,2" /><Setter Property="CornerRadius" Value="3" /></Style>
+                                        <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
                                     </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="数据:QEMU选项">

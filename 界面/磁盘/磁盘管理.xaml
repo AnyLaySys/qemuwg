@@ -39,7 +39,7 @@
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="MinHeight" Value="43" />
-                            <Setter Property="Padding" Value="8,5" />
+                            <Setter Property="Padding" Value="6,3" />
                             <Setter Property="Margin" Value="0,1" />
                             <Setter Property="CornerRadius" Value="3" />
                         </Style>
@@ -108,13 +108,23 @@
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="10">
                     <Grid x:Name="FormGrid" ColumnSpacing="10" RowSpacing="9">
+                        <Grid.ChildrenTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="6" IsStaggeringEnabled="True" />
+                                <RepositionThemeTransition IsStaggeringEnabled="False" />
+                            </TransitionCollection>
+                        </Grid.ChildrenTransitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                     <Expander x:Name="AdvancedExpander" Header="{Binding [disk.advanced], Source={StaticResource Strings}}" IsExpanded="False">
-                        <StackPanel x:Name="AdvancedFieldsPanel" Padding="0,8,0,0" Spacing="9" />
+                        <StackPanel x:Name="AdvancedFieldsPanel" Padding="0,6,0,0" Spacing="9">
+                            <StackPanel.ChildrenTransitions>
+                                <TransitionCollection><EntranceThemeTransition FromVerticalOffset="6" IsStaggeringEnabled="True" /></TransitionCollection>
+                            </StackPanel.ChildrenTransitions>
+                        </StackPanel>
                     </Expander>
                 </StackPanel>
             </ScrollViewer>

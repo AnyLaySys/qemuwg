@@ -70,6 +70,8 @@ public sealed partial class 磁盘管理
 
         UpdateDependencies();
         UpdatePreview();
+        按钮交互动画.启用(FormGrid);
+        _ = 页面过渡动画.渐进显示(FormGrid, 6);
         ExecuteButton.IsEnabled = !(machine.IsRunning && command.CanWrite);
         if (!ExecuteButton.IsEnabled)
         {

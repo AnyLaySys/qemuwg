@@ -24,6 +24,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
     {
         InitializeComponent();
         对话框布局.启用自适应尺寸(this);
+        页面过渡动画.启用标签页动画(ControlTabs);
         this.install = install;
         this.sessions = sessions;
         this.machine = machine;
