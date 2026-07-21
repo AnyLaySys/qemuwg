@@ -27,6 +27,7 @@
   "main.deleteVm": "Delete virtual machine",
   "main.configuration": "Configuration",
   "main.display": "Display",
+  "main.detachDisplay": "Detach to QEMU native window",
   "main.displayRunning": "Virtual machine display connected",
   "main.displayOff": "Virtual machine is powered off",
   "device.processor": "Processor",
@@ -494,6 +495,9 @@
   ,"disk.choice.bitmap.action.merge": "Merge bitmap"
   ,"main.displayConnecting": "Connecting to the virtual machine display…"
   ,"main.displayUnavailable": "Unable to connect to the virtual machine display"
+  ,"display.nativeWindowUnavailable": "The current configuration has no native QEMU graphics window."
+  ,"display.nativeWindowNotReady": "The native QEMU graphics window is not ready yet."
+  ,"display.detached": "The native QEMU graphics window is now visible."
   ,"session.displayPortUnavailable": "No local display port is available."
   ,"qmp.timeout": "The QMP operation timed out. Check that the virtual machine is still responding."
   ,"guestAgent.timeout": "The Guest Agent operation timed out."

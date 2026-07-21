@@ -14,7 +14,7 @@ namespace QemuWG;
 
 public sealed partial class 主窗 : Window
 {
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly QEMU服务 qemuSvc = new();
     private readonly 虚拟机仓库 vmRepo = new();
@@ -26,12 +26,12 @@ public sealed partial class 主窗 : Window
 
     public 主窗()
     {
-        应用日志.Write("主窗 constructor begin");
+        应用日志.写("主窗 constructor begin");
         InitializeComponent();
-        应用日志.Write("主窗 XAML initialized");
+        应用日志.写("主窗 XAML initialized");
         Title = "QemuWG";
         sessions = new QEMU会话(qemuSvc);
-        sessions.StateChanged += Sessions_StateChanged;
+        sessions.状态变化 += Sessions_StateChanged;
 
         displayClient.FrameReady += DisplayClient_FrameReady;
         displayClient.ConnectionClosed += DisplayClient_ConnectionClosed;
@@ -44,10 +44,10 @@ public sealed partial class 主窗 : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarDragRegion);
         appWindow.TitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
-        应用日志.Write("AppWindow configured");
+        应用日志.写("AppWindow configured");
 
         Activated += 主窗_Activated;
-        应用日志.Write("主窗 constructor end");
+        应用日志.写("主窗 constructor end");
     }
 
     public ObservableCollection<虚拟机配置> Machines { get; } = [];
@@ -69,7 +69,7 @@ public sealed partial class 主窗 : Window
         }
         catch (Exception exception)
         {
-            应用日志.Write("主窗 initialization failed: " + exception);
+            应用日志.写("主窗 initialization failed: " + exception);
             LoadingView.Visibility = Visibility.Collapsed;
             EmptyView.Visibility = Visibility.Visible;
             await ShowMessageAsync(T("dialog.operationFailed", "操作失败"), exception.Message);
@@ -78,18 +78,18 @@ public sealed partial class 主窗 : Window
 
     private async Task InitializeAsync()
     {
-        应用日志.Write("InitializeAsync begin");
-        var qemuTask = qemuSvc.DetectAsync();
-        var machinesTask = vmRepo.LoadAllAsync();
+        应用日志.写("InitializeAsync begin");
+        var qemuTask = qemuSvc.检测();
+        var machinesTask = vmRepo.加载全部();
         await Task.WhenAll(qemuTask, machinesTask);
-        应用日志.Write("InitializeAsync data loaded");
+        应用日志.写("InitializeAsync data loaded");
         qemu = qemuTask.Result;
         QemuVersionText.Text = qemu.Version;
-        应用日志.Write("InitializeAsync version assigned");
+        应用日志.写("InitializeAsync version assigned");
         NewVmButton.IsEnabled = qemu.IsAvailable;
 
         foreach (var vm in machinesTask.Result) Machines.Add(vm);
-        应用日志.Write($"InitializeAsync machines assigned: {Machines.Count}");
+        应用日志.写($"InitializeAsync machines assigned: {Machines.Count}");
         LoadingView.Visibility = Visibility.Collapsed;
         if (Machines.Count == 0)
         {
@@ -108,7 +108,7 @@ public sealed partial class 主窗 : Window
             return;
         }
 
-        var dialog = new 虚拟机编辑(WindowNative.GetWindowHandle(this), qemu, qemuSvc, vmRepo.RootPath)
+        var dialog = new 虚拟机编辑(WindowNative.GetWindowHandle(this), qemu, qemuSvc, vmRepo.根目录)
         {
             XamlRoot = RootXamlRoot
         };
@@ -117,7 +117,7 @@ public sealed partial class 主窗 : Window
         NewVmButton.IsEnabled = false;
         try
         {
-            var (result, vm) = await vmRepo.CreateAsync(qemu, dialog.BuildMachine(), dialog.ParentDir);
+            var (result, vm) = await vmRepo.创建(qemu, dialog.BuildMachine(), dialog.ParentDir);
             if (!result.Succeeded || vm is null)
             {
                 await ShowOperationErrorAsync(result);
@@ -137,7 +137,7 @@ public sealed partial class 主窗 : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            vm.IsRunning = sessions.HasQmpSession(vm);
+            vm.IsRunning = sessions.存在QMP会话(vm);
             if (ReferenceEquals(selectedVm, vm)) RefreshDetails();
         });
     }

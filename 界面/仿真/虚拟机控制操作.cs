@@ -16,9 +16,9 @@ public sealed partial class 虚拟机控制
         var result = await ExecuteControlAsync("system_reset");
         if (!result.Succeeded) return;
         await Task.Delay(900);
-        if (sessions.HasQmpSession(machine)) return;
+        if (sessions.存在QMP会话(machine)) return;
 
-        var restart = sessions.Start(install, machine);
+        var restart = sessions.启动(install, machine);
         ControlOutputBox.Text = restart.Succeeded
             ? T("qmp.resetRestarted", "QEMU 在重置时退出，虚拟机已自动重新启动。")
             : T("qmp.resetRestartFailed", "QEMU 在重置时退出，自动重新启动失败：") + Environment.NewLine + restart.Message + Environment.NewLine + restart.Detail;
@@ -30,10 +30,10 @@ public sealed partial class 虚拟机控制
         var result = await ExecuteControlAsync("system_powerdown");
         if (!result.Succeeded) return;
         ControlOutputBox.Text = T("qmp.shutdownWaiting", "关机请求已发送，正在等待来宾系统响应…");
-        if (await sessions.WaitForExitAsync(machine, TimeSpan.FromSeconds(12)))
+        if (await sessions.等待退出(machine, TimeSpan.FromSeconds(12)))
             ControlOutputBox.Text = T("qmp.shutdownComplete", "虚拟机已关机。");
         else
-            ControlOutputBox.Text = T("qmp.shutdownNoResponse", "来宾系统没有响应关机请求。可以继续等待，或使用强制停止。 ");
+            ControlOutputBox.Text = T("qmp.shutdownNoResponse", "来宾系统没有响应关机请求。可以继续等待，或使用强制停止。");
     }
 
     private async void ForceStopControl_Click(object sender, RoutedEventArgs e)
@@ -45,11 +45,11 @@ public sealed partial class 虚拟机控制
             ControlOutputBox.Text = T("dialog.forceStopMessage", "未保存的数据可能丢失。");
             return;
         }
-        var result = sessions.ForceStop(machine);
+        var result = sessions.强制停止(machine);
         ControlOutputBox.Text = result.Succeeded ? result.Message : result.Message + Environment.NewLine + result.Detail;
         if (result.Succeeded)
         {
-            await sessions.WaitForExitAsync(machine, TimeSpan.FromSeconds(3));
+            await sessions.等待退出(machine, TimeSpan.FromSeconds(3));
             Hide();
         }
     }
@@ -103,7 +103,7 @@ public sealed partial class 虚拟机控制
         ControlBusyRing.Visibility = Visibility.Visible;
         try
         {
-            var result = await sessions.ExecuteQmpAsync(machine, command, arguments);
+            var result = await sessions.执行QMP(machine, command, arguments);
             ControlOutputBox.Text = result.Succeeded
                 ? string.Format(T("qmp.commandSucceeded", "{0} 已执行。"), ControlName(command)) + (result.Output is "{}" or "null" ? string.Empty : Environment.NewLine + result.Output)
                 : result.Output;
@@ -125,7 +125,7 @@ public sealed partial class 虚拟机控制
         "system_powerdown" => T("qmp.powerdown", "正常关机"),
         "inject-nmi" => T("qmp.injectNmi", "注入 NMI"),
         "send-key" => T("qmp.keyboard", "键盘输入"),
-        "screendump" => T("qmp.screenshot", "截取虚拟机画面"),
+        "screendump" => T("qmp.screenshot", "截取虚拟机屏幕"),
         _ => command
     };
 

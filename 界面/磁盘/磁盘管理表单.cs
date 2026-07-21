@@ -211,7 +211,7 @@ public sealed partial class 磁盘管理
         if (selectedCmd is null) return;
         try
         {
-            CommandPreviewBox.Text = qemuImgSvc.BuildArgs(selectedCmd, ReadValues()).Preview;
+            CommandPreviewBox.Text = qemuImgSvc.构建参数(selectedCmd, ReadValues()).Preview;
         }
         catch (InvalidOperationException)
         {

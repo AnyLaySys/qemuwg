@@ -3,11 +3,11 @@ using System.Text;
 
 namespace QemuWG.服务;
 
-public sealed record 进程结果(int ExitCode, string Output);
+public sealed record 进程结果(int 退出码, string 输出);
 
 public static class 进程
 {
-    public static async Task<进程结果> RunAsync(
+    public static async Task<进程结果> 运行(
         string executable,
         IEnumerable<string> arguments,
         CancellationToken cancellationToken = default)
@@ -25,7 +25,7 @@ public static class 进程
         foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
 
         using var process = new Process { StartInfo = startInfo };
-        if (!process.Start()) return new 进程结果(-1, 语言服务.Current.Get("process.startFailed", "无法启动进程"));
+        if (!process.Start()) return new 进程结果(-1, 语言服务.当前.获取("process.startFailed", "无法启动进程"));
 
         var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);

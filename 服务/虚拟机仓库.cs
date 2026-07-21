@@ -6,7 +6,7 @@ namespace QemuWG.服务;
 
 public sealed class 虚拟机仓库
 {
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -16,25 +16,24 @@ public sealed class 虚拟机仓库
 
     public 虚拟机仓库()
     {
-        RootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "qemuwg", "vm");
-        Directory.CreateDirectory(RootPath);
+        根目录 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "qemuwg", "vm");
+        Directory.CreateDirectory(根目录);
     }
 
-    public string RootPath { get; }
+    public string 根目录 { get; }
 
-    public async Task<IReadOnlyList<虚拟机配置>> LoadAllAsync()
+    public async Task<IReadOnlyList<虚拟机配置>> 加载全部()
     {
         return await Task.Run(async () =>
         {
             var result = new List<虚拟机配置>();
-            foreach (var path in Directory.EnumerateFiles(RootPath, "*.qemu", System.IO.SearchOption.AllDirectories))
+            foreach (var path in Directory.EnumerateFiles(根目录, "*.qemu", System.IO.SearchOption.AllDirectories))
             {
                 try
                 {
                     await using var stream = File.OpenRead(path);
                     var vm = await JsonSerializer.DeserializeAsync<虚拟机配置>(stream, JsonOptions);
                     if (vm is null) continue;
-                    vm.DisplayBackend = "vnc";
                     vm.CfgPath = path;
                     vm.DirPath = Path.GetDirectoryName(path) ?? string.Empty;
                     result.Add(vm);
@@ -47,7 +46,7 @@ public sealed class 虚拟机仓库
         });
     }
 
-    public async Task<(操作结果 Result, 虚拟机配置? Machine)> CreateAsync(
+    public async Task<(操作结果 结果, 虚拟机配置? 虚拟机)> 创建(
         QEMU安装 qemu,
         虚拟机配置 request,
         string parentDirectory)
@@ -55,8 +54,8 @@ public sealed class 虚拟机仓库
         if (!qemu.IsAvailable || !File.Exists(qemu.ImgToolPath))
             return (操作结果.Fail(T("repo.imgMissing", "未找到 qemu-img")), null);
 
-        var safeName = SanitizeName(request.Name);
-        var directory = GetUniqueDirectory(parentDirectory, safeName);
+        var safeName = 清理名称(request.Name);
+        var directory = 获取唯一目录(parentDirectory, safeName);
         Directory.CreateDirectory(directory);
 
         var vm = request.Copy();
@@ -66,32 +65,32 @@ public sealed class 虚拟机仓库
         vm.CfgPath = Path.Combine(directory, safeName + ".qemu");
         vm.DiskPath = Path.Combine(directory, "system.qcow2");
 
-        var disk = await 进程.RunAsync(qemu.ImgToolPath,
+        var disk = await 进程.运行(qemu.ImgToolPath,
             ["create", "-f", "qcow2", vm.DiskPath, $"{vm.DiskGb}G"]);
-        if (disk.ExitCode != 0)
+        if (disk.退出码 != 0)
         {
-            TryDeleteEmptyDirectory(directory);
-            return (操作结果.Fail(T("repo.diskCreateFailed", "创建虚拟磁盘失败"), disk.Output), null);
+            尝试删除空目录(directory);
+            return (操作结果.Fail(T("repo.diskCreateFailed", "创建虚拟磁盘失败"), disk.输出), null);
         }
 
-        var saved = await SaveAsync(vm);
+        var saved = await 保存(vm);
         if (!saved.Succeeded)
         {
-            TryDeleteDirectory(directory);
+            尝试删除目录(directory);
             return (saved, null);
         }
         return (操作结果.Ok(T("repo.created", "虚拟机已创建")), vm);
     }
 
-    public async Task<操作结果> UpdateAsync(虚拟机配置 vm)
+    public async Task<操作结果> 更新(虚拟机配置 vm)
     {
-        if (!IsManagedConfig(vm.CfgPath)) return 操作结果.Fail(T("repo.unmanagedConfig", "配置文件不在 QemuWG 虚拟机库中"));
-        return await SaveAsync(vm);
+        if (!是受管配置(vm.CfgPath)) return 操作结果.Fail(T("repo.unmanagedConfig", "配置文件不在 QemuWG 虚拟机库中"));
+        return await 保存(vm);
     }
 
-    public Task<操作结果> DeleteAsync(虚拟机配置 vm) => Task.Run(() =>
+    public Task<操作结果> 删除(虚拟机配置 vm) => Task.Run(() =>
     {
-        if (!IsManagedConfig(vm.CfgPath) || !Directory.Exists(vm.DirPath))
+        if (!是受管配置(vm.CfgPath) || !Directory.Exists(vm.DirPath))
             return 操作结果.Fail(T("repo.invalidDirectory", "虚拟机目录无效"));
         try
         {
@@ -104,7 +103,7 @@ public sealed class 虚拟机仓库
         }
     });
 
-    private static async Task<操作结果> SaveAsync(虚拟机配置 vm)
+    private static async Task<操作结果> 保存(虚拟机配置 vm)
     {
         try
         {
@@ -121,15 +120,15 @@ public sealed class 虚拟机仓库
         }
     }
 
-    private bool IsManagedConfig(string configPath)
+    private bool 是受管配置(string configPath)
     {
         if (!string.Equals(Path.GetExtension(configPath), ".qemu", StringComparison.OrdinalIgnoreCase)) return false;
-        var root = Path.GetFullPath(RootPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var root = Path.GetFullPath(根目录).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         var config = Path.GetFullPath(configPath);
         return config.StartsWith(root, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string GetUniqueDirectory(string parent, string name)
+    private static string 获取唯一目录(string parent, string name)
     {
         Directory.CreateDirectory(parent);
         var candidate = Path.Combine(parent, name);
@@ -137,7 +136,7 @@ public sealed class 虚拟机仓库
         return candidate;
     }
 
-    private static string SanitizeName(string name)
+    private static string 清理名称(string name)
     {
         var invalid = Path.GetInvalidFileNameChars();
         var sanitized = new string(name.Trim().Select(character => invalid.Contains(character) || char.IsControl(character) ? '_' : character).ToArray())
@@ -145,14 +144,13 @@ public sealed class 虚拟机仓库
         return string.IsNullOrWhiteSpace(sanitized) ? T("repo.defaultName", "新建虚拟机") : sanitized;
     }
 
-    private static void TryDeleteEmptyDirectory(string path)
+    private static void 尝试删除空目录(string path)
     {
         try { Directory.Delete(path, false); } catch { }
     }
 
-    private static void TryDeleteDirectory(string path)
+    private static void 尝试删除目录(string path)
     {
         try { Directory.Delete(path, true); } catch { }
     }
 }
-

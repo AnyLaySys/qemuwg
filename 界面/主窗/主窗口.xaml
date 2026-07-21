@@ -292,7 +292,17 @@
                             </Grid.RowDefinitions>
                             <Grid Padding="14,0">
                                 <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding [main.display], Source={StaticResource Strings}}" />
-                                <TextBlock x:Name="DisplayBackendText" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="DisplayBackendText" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <Button
+                                        x:Name="DetachDisplayButton"
+                                        Click="DetachDisplayButton_Click"
+                                        CornerRadius="6"
+                                        Padding="8,4"
+                                        ToolTipService.ToolTip="{Binding [main.detachDisplay], Source={StaticResource Strings}}">
+                                        <FontIcon FontSize="13" Glyph="&#xE8A7;" />
+                                    </Button>
+                                </StackPanel>
                             </Grid>
                             <Grid x:Name="DisplaySurface" Grid.Row="1">
                                 <Image

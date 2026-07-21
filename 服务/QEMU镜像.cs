@@ -5,7 +5,7 @@ namespace QemuWG.服务;
 
 public sealed class QEMU镜像
 {
-    public 磁盘命令参数 BuildArgs(
+    public 磁盘命令参数 构建参数(
         磁盘命令 command,
         IReadOnlyDictionary<string, string> values)
     {
@@ -14,16 +14,16 @@ public sealed class QEMU镜像
         var positional = new List<string>();
         var consumed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        HandleCompoundActions(command, values, options, consumed);
+        处理复合操作(command, values, options, consumed);
 
         foreach (var field in command.Fields)
         {
-            if (consumed.Contains(field.Id) || !DependencyMatches(field, values)) continue;
+            if (consumed.Contains(field.Id) || !依赖匹配(field, values)) continue;
             values.TryGetValue(field.Id, out var rawValue);
             var value = rawValue?.Trim() ?? string.Empty;
             if (field.Required && string.IsNullOrWhiteSpace(value))
                 throw new InvalidOperationException(string.Format(
-                    语言服务.Current.Get("disk.required", "“{0}”不能为空。"), field.Label));
+                    语言服务.当前.获取("disk.required", "“{0}”不能为空。"), field.Label));
 
             switch (field.Mode)
             {
@@ -31,7 +31,7 @@ public sealed class QEMU镜像
                     if (value.Length > 0) positional.Add(value);
                     break;
                 case 磁盘字段模式.MultiPositional:
-                    positional.AddRange(SplitList(value));
+                    positional.AddRange(分割列表(value));
                     break;
                 case 磁盘字段模式.OptionValue:
                     if (value.Length == 0 || value == "none" && field.Id == "repair") break;
@@ -39,7 +39,7 @@ public sealed class QEMU镜像
                     options.Add(value);
                     break;
                 case 磁盘字段模式.MultiOptionValue:
-                    foreach (var item in SplitList(value))
+                    foreach (var item in 分割列表(value))
                     {
                         options.Add(field.Argument);
                         options.Add(item);
@@ -58,7 +58,7 @@ public sealed class QEMU镜像
                     if (value.Length > 0) options.Add(field.Argument + value);
                     break;
                 case 磁盘字段模式.ChoiceArguments:
-                    if (value.Length > 0) options.AddRange(命令行.Split(value));
+                    if (value.Length > 0) options.AddRange(命令行.分割(value));
                     break;
                 case 磁盘字段模式.GlobalOptionValue:
                     if (value.Length > 0)
@@ -68,35 +68,35 @@ public sealed class QEMU镜像
                     }
                     break;
                 case 磁盘字段模式.RawArguments:
-                    options.AddRange(命令行.Split(value));
+                    options.AddRange(命令行.分割(value));
                     break;
             }
         }
 
         options.AddRange(positional);
-        var all = global.Concat([command.Name]).Concat(options).Select(命令行.Quote);
+        var all = global.Concat([command.Name]).Concat(options).Select(命令行.引用);
         return new 磁盘命令参数(global, options, "qemu-img " + string.Join(' ', all));
     }
 
-    public Task<进程结果> ExecuteAsync(
+    public Task<进程结果> 执行(
         QEMU安装 install,
         磁盘命令 command,
         IReadOnlyDictionary<string, string> values,
         CancellationToken cancellationToken = default)
     {
-        var built = BuildArgs(command, values);
+        var built = 构建参数(command, values);
         var arguments = built.GlobalArgs.Concat([command.Name]).Concat(built.CmdArgs);
-        return 进程.RunAsync(install.ImgToolPath, arguments, cancellationToken);
+        return 进程.运行(install.ImgToolPath, arguments, cancellationToken);
     }
 
-    public async Task<磁盘镜像信息?> GetInfoAsync(QEMU安装 install, string path)
+    public async Task<磁盘镜像信息?> 获取信息(QEMU安装 install, string path)
     {
         if (!File.Exists(path)) return null;
-        var result = await 进程.RunAsync(install.ImgToolPath, ["info", "--output", "json", path]);
-        if (result.ExitCode != 0) return null;
+        var result = await 进程.运行(install.ImgToolPath, ["info", "--output", "json", path]);
+        if (result.退出码 != 0) return null;
         try
         {
-            using var document = JsonDocument.Parse(result.Output);
+            using var document = JsonDocument.Parse(result.输出);
             var root = document.RootElement;
             return new 磁盘镜像信息
             {
@@ -112,7 +112,7 @@ public sealed class QEMU镜像
         }
     }
 
-    private static void HandleCompoundActions(
+    private static void 处理复合操作(
         磁盘命令 command,
         IReadOnlyDictionary<string, string> values,
         ICollection<string> options,
@@ -140,7 +140,7 @@ public sealed class QEMU镜像
         }
     }
 
-    private static bool DependencyMatches(磁盘字段 field, IReadOnlyDictionary<string, string> values)
+    private static bool 依赖匹配(磁盘字段 field, IReadOnlyDictionary<string, string> values)
     {
         if (string.IsNullOrEmpty(field.DependsOnId)) return true;
         values.TryGetValue(field.DependsOnId, out var current);
@@ -148,7 +148,7 @@ public sealed class QEMU镜像
         return field.InvertDependency ? !equal : equal;
     }
 
-    private static IEnumerable<string> SplitList(string value) => value
+    private static IEnumerable<string> 分割列表(string value) => value
         .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     private static string GetString(JsonElement element, string name, string fallback) =>

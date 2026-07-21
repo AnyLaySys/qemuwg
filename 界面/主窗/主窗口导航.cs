@@ -19,12 +19,12 @@ public sealed partial class 主窗
     {
         try
         {
-            应用日志.Write("Opening embedded QEMU工具界面");
+            应用日志.写("Opening embedded QEMU工具界面");
             ShowToolsView();
         }
         catch (Exception exception)
         {
-            应用日志.Write("QemuToolsDialog failed: " + exception);
+            应用日志.写("QemuToolsDialog failed: " + exception);
             await ShowMessageAsync(
                 T("dialog.operationFailed", "操作失败"),
                 string.Format(T("tools.openFailed", "无法打开 QEMU 工具箱：{0}"), exception.Message));
@@ -46,18 +46,18 @@ public sealed partial class 主窗
     {
         try
         {
-            应用日志.Write("Opening 磁盘管理");
+            应用日志.写("Opening 磁盘管理");
             var dialog = new 磁盘管理(WindowNative.GetWindowHandle(this), qemu, machine)
             {
                 XamlRoot = RootXamlRoot
             };
             await ShowDialogAsync(dialog);
-            应用日志.Write("磁盘管理 closed");
+            应用日志.写("磁盘管理 closed");
             RefreshDetails();
         }
         catch (Exception exception)
         {
-            应用日志.Write("磁盘管理 failed: " + exception);
+            应用日志.写("磁盘管理 failed: " + exception);
             await ShowMessageAsync(
                 T("dialog.operationFailed", "操作失败"),
                 string.Format(T("disk.openFailed", "无法打开磁盘管理：{0}"), exception.Message));
@@ -68,7 +68,7 @@ public sealed partial class 主窗
     {
         var panel = new StackPanel { Spacing = 12, MinWidth = 460 };
         panel.Children.Add(CreateSettingsRow("QEMU", qemu.Version, qemu.RootDir));
-        panel.Children.Add(CreateSettingsRow(T("settings.library", "虚拟机库"), "Documents\\qemuwg\\vm", vmRepo.RootPath));
+        panel.Children.Add(CreateSettingsRow(T("settings.library", "虚拟机库"), "Documents\\qemuwg\\vm", vmRepo.根目录));
         var dialog = new ContentDialog
         {
             XamlRoot = RootXamlRoot,

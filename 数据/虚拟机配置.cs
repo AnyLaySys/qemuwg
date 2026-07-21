@@ -20,7 +20,7 @@ public sealed class 虚拟机配置 : INotifyPropertyChanged
     public string MachineType { get; set; } = string.Empty;
     public string Accelerator { get; set; } = "tcg";
     public string CpuModel { get; set; } = "default";
-    public string DisplayBackend { get; set; } = "vnc";
+    public string DisplayBackend { get; set; } = "gtk";
     public string VideoDevice { get; set; } = "auto";
     public string AudioBackend { get; set; } = "none";
     public string AudioDevice { get; set; } = "auto";
@@ -51,8 +51,8 @@ public sealed class 虚拟机配置 : INotifyPropertyChanged
 
     [JsonIgnore]
     public string StatusText => IsRunning
-        ? 语言服务.Current.Get("status.running", "运行中")
-        : 语言服务.Current.Get("status.off", "已关机");
+        ? 语言服务.当前.获取("status.running", "运行中")
+        : 语言服务.当前.获取("status.off", "已关机");
 
     public 虚拟机配置 Copy() => new()
     {

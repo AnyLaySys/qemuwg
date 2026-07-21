@@ -6,9 +6,9 @@ namespace QemuWG.服务;
 
 public static class QEMU镜像命令
 {
-    private static readonly 语言服务 Localizer = 语言服务.Current;
+    private static readonly 语言服务 本地化 = 语言服务.当前;
 
-    public static IReadOnlyList<磁盘命令> All { get; } =
+    public static IReadOnlyList<磁盘命令> 全部 { get; } =
     [
         Cmd("info", "检查", "显示镜像信息", false,
             Path("file", "镜像文件", true, false),
@@ -122,12 +122,12 @@ public static class QEMU镜像命令
         return new 磁盘命令
         {
             Name = name,
-            DisplayName = Localizer.Get($"disk.command.{name}", name),
+            DisplayName = 本地化.获取($"disk.command.{name}", name),
             Category = category,
-            DisplayCategory = Localizer.Get(CategoryKey(category), category),
-            Description = Localizer.Get($"disk.description.{name}", description),
-            Glyph = CommandGlyph(name),
-            IconBrush = CommandBrush(name),
+            DisplayCategory = 本地化.获取(分类键(category), category),
+            Description = 本地化.获取($"disk.description.{name}", description),
+            Glyph = 命令图标(name),
+            IconBrush = 命令画刷(name),
             CanWrite = canWrite,
             Fields = allFields
         };
@@ -136,7 +136,7 @@ public static class QEMU镜像命令
     private static 磁盘字段 LocalizeField(string command, 磁盘字段 field) => new()
     {
         Id = field.Id,
-        Label = Localizer.Get($"disk.field.{command}.{field.Id}", Localizer.Get($"disk.field.{field.Id}", field.Label)),
+        Label = 本地化.获取($"disk.field.{command}.{field.Id}", 本地化.获取($"disk.field.{field.Id}", field.Label)),
         Mode = field.Mode,
         Argument = field.Argument,
         DefaultValue = field.DefaultValue,
@@ -150,7 +150,7 @@ public static class QEMU镜像命令
         InvertDependency = field.InvertDependency
     };
 
-    private static string CommandGlyph(string command) => command switch
+    private static string 命令图标(string command) => command switch
     {
         "info" => "\uE946",
         "check" => "\uE9D9",
@@ -170,7 +170,7 @@ public static class QEMU镜像命令
         _ => "\uE958"
     };
 
-    private static SolidColorBrush CommandBrush(string command)
+    private static SolidColorBrush 命令画刷(string command)
     {
         var color = command switch
         {
@@ -188,7 +188,7 @@ public static class QEMU镜像命令
         return new SolidColorBrush(color);
     }
 
-    private static string CategoryKey(string category) => category switch
+    private static string 分类键(string category) => category switch
     {
         "检查" => "disk.category.inspect",
         "创建" => "disk.category.create",
@@ -289,7 +289,7 @@ public static class QEMU镜像命令
         Id = id,
         Label = label,
         DefaultValue = defaultValue,
-        Choices = choices,
+        Choices = [defaultValue, .. choices],
         Mode = 磁盘字段模式.ChoiceArguments
     };
 }

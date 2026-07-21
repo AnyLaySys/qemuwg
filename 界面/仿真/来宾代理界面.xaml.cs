@@ -21,7 +21,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
         "guest-file-write", "guest-file-flush", "guest-file-close", "guest-ssh-add-authorized-keys",
         "guest-ssh-remove-authorized-keys"
     };
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly nint ownerHandle;
     private readonly QEMU会话 sessions;
@@ -46,7 +46,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
     {
         CommandList.ItemsSource = VisibleCommands;
         ConnectionInfo.Message = T("guestAgent.connecting", "正在连接虚拟机内的 Guest Agent…");
-        var result = await sessions.ExecuteGuestAgentAsync(machine, "guest-info");
+        var result = await sessions.执行来宾代理(machine, "guest-info");
         if (!result.Succeeded)
         {
             ConnectionInfo.Severity = InfoBarSeverity.Warning;
@@ -96,7 +96,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
     }
 
     private Task<来宾代理结果> QueryIfSupportedAsync(string command) => Supports(command)
-        ? sessions.ExecuteGuestAgentAsync(machine, command)
+        ? sessions.执行来宾代理(machine, command)
         : Task.FromResult(new 来宾代理结果(false, string.Empty, "Unsupported"));
 
     private static string FormatOsInfo(string json)
@@ -155,7 +155,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
     private async Task RunMaintenanceAsync(string command)
     {
         if (!Supports(command)) { FsStateText.Text = T("guestAgent.commandUnsupported", "当前 Guest Agent 不支持此操作。"); return; }
-        var result = await sessions.ExecuteGuestAgentAsync(machine, command);
+        var result = await sessions.执行来宾代理(machine, command);
         FsStateText.Text = result.Output;
         await RefreshOverviewAsync();
     }
@@ -170,10 +170,10 @@ public sealed partial class 来宾代理界面 : ContentDialog
             var arguments = new JsonObject
             {
                 ["path"] = path,
-                ["arg"] = new JsonArray(命令行.Split(ProcessArgumentsBox.Text).Select(value => (JsonNode)value).ToArray()),
+                ["arg"] = new JsonArray(命令行.分割(ProcessArgumentsBox.Text).Select(value => (JsonNode)value).ToArray()),
                 ["capture-output"] = CaptureOutputToggle.IsOn
             };
-            var started = await sessions.ExecuteGuestAgentAsync(machine, "guest-exec", arguments.ToJsonString());
+            var started = await sessions.执行来宾代理(machine, "guest-exec", arguments.ToJsonString());
             if (!started.Succeeded) { ProcessOutputBox.Text = started.Output; return; }
             using var startDocument = JsonDocument.Parse(started.Output);
             var pid = startDocument.RootElement.GetProperty("pid").GetInt64();
@@ -181,7 +181,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
             for (var attempt = 0; attempt < 600; attempt++)
             {
                 await Task.Delay(250);
-                var status = await sessions.ExecuteGuestAgentAsync(machine, "guest-exec-status", $"{{\"pid\":{pid}}}");
+                var status = await sessions.执行来宾代理(machine, "guest-exec-status", $"{{\"pid\":{pid}}}");
                 if (!status.Succeeded) { ProcessOutputBox.Text = status.Output; return; }
                 using var statusDocument = JsonDocument.Parse(status.Output);
                 if (!statusDocument.RootElement.TryGetProperty("exited", out var exited) || !exited.GetBoolean()) continue;
@@ -232,7 +232,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
                 var count = await input.ReadAsync(buffer);
                 if (count == 0) break;
                 var payload = Convert.ToBase64String(buffer, 0, count);
-                var result = await sessions.ExecuteGuestAgentAsync(machine, "guest-file-write", new JsonObject { ["handle"] = handle.Value, ["buf-b64"] = payload, ["count"] = count }.ToJsonString());
+                var result = await sessions.执行来宾代理(machine, "guest-file-write", new JsonObject { ["handle"] = handle.Value, ["buf-b64"] = payload, ["count"] = count }.ToJsonString());
                 if (!result.Succeeded) throw new IOException(result.Output);
                 sent += count;
                 FileOutputBox.Text = string.Format(T("guestAgent.uploadProgress", "已上传 {0} / {1}"), FormatBytes(sent), FormatBytes(input.Length));
@@ -255,7 +255,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
             long received = 0;
             while (true)
             {
-                var result = await sessions.ExecuteGuestAgentAsync(machine, "guest-file-read", $"{{\"handle\":{handle.Value},\"count\":{FileChunkSize}}}");
+                var result = await sessions.执行来宾代理(machine, "guest-file-read", $"{{\"handle\":{handle.Value},\"count\":{FileChunkSize}}}");
                 if (!result.Succeeded) throw new IOException(result.Output);
                 using var document = JsonDocument.Parse(result.Output);
                 var root = document.RootElement;
@@ -271,13 +271,13 @@ public sealed partial class 来宾代理界面 : ContentDialog
 
     private async Task<long> OpenGuestFileAsync(string path, string mode)
     {
-        var result = await sessions.ExecuteGuestAgentAsync(machine, "guest-file-open", new JsonObject { ["path"] = path, ["mode"] = mode }.ToJsonString());
+        var result = await sessions.执行来宾代理(machine, "guest-file-open", new JsonObject { ["path"] = path, ["mode"] = mode }.ToJsonString());
         if (!result.Succeeded) throw new IOException(result.Output);
         using var document = JsonDocument.Parse(result.Output);
         return document.RootElement.GetInt64();
     }
 
-    private Task CloseGuestFileAsync(long handle) => sessions.ExecuteGuestAgentAsync(machine, "guest-file-close", $"{{\"handle\":{handle}}}");
+    private Task CloseGuestFileAsync(long handle) => sessions.执行来宾代理(machine, "guest-file-close", $"{{\"handle\":{handle}}}");
     private void SetFileRunning(bool running) { UploadButton.IsEnabled = DownloadButton.IsEnabled = !running; FileProgress.IsActive = running; FileProgress.Visibility = running ? Visibility.Visible : Visibility.Collapsed; }
 
     private static string FormatBytes(long bytes)
@@ -301,7 +301,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
         if (ConfirmedCommands.Contains(command) && !confirmationPending) { confirmationPending = true; ExecuteButtonText.Text = T("common.confirmExecute", "确认执行"); OutputBox.Text = T("guestAgent.dangerousConfirm", "该命令可能改变来宾系统状态。请检查参数后再次执行。"); return; }
         ResetConfirmation();
         SetAdvancedRunning(true);
-        try { OutputBox.Text = (await sessions.ExecuteGuestAgentAsync(machine, command, arguments is "" or "{}" ? string.Empty : arguments)).Output; }
+        try { OutputBox.Text = (await sessions.执行来宾代理(machine, command, arguments is "" or "{}" ? string.Empty : arguments)).Output; }
         catch (Exception exception) { OutputBox.Text = exception.ToString(); }
         finally { SetAdvancedRunning(false); }
     }

@@ -9,7 +9,7 @@ namespace QemuWG.界面;
 
 public sealed partial class 磁盘管理 : ContentDialog
 {
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly nint ownerHandle;
     private readonly QEMU安装 install;
@@ -30,7 +30,7 @@ public sealed partial class 磁盘管理 : ContentDialog
         this.machine = machine;
         Title = T("disk.title", "磁盘管理");
         DiskNameText.Text = string.IsNullOrWhiteSpace(machine.DiskPath) ? T("disk.manager", "磁盘管理") : Path.GetFileName(machine.DiskPath);
-        CommandList.ItemsSource = QEMU镜像命令.All;
+        CommandList.ItemsSource = QEMU镜像命令.全部;
         Loaded += async (_, _) =>
         {
             CommandList.SelectedIndex = 0;
@@ -58,7 +58,7 @@ public sealed partial class 磁盘管理 : ContentDialog
         IReadOnlyDictionary<string, string> values = ReadValues();
         try
         {
-            CommandPreviewBox.Text = qemuImgSvc.BuildArgs(selectedCmd, values).Preview;
+            CommandPreviewBox.Text = qemuImgSvc.构建参数(selectedCmd, values).Preview;
         }
         catch (InvalidOperationException exception)
         {
@@ -88,9 +88,9 @@ public sealed partial class 磁盘管理 : ContentDialog
         runCancellation = new CancellationTokenSource();
         try
         {
-            var result = await qemuImgSvc.ExecuteAsync(install, command, values, runCancellation.Token);
-            ExitCodeText.Text = string.Format(T("disk.exitCode", "退出码 {0}"), result.ExitCode);
-            OutputBox.Text = string.IsNullOrWhiteSpace(result.Output) ? T("disk.noOutput", "（无输出）") : result.Output;
+            var result = await qemuImgSvc.执行(install, command, values, runCancellation.Token);
+            ExitCodeText.Text = string.Format(T("disk.exitCode", "退出码 {0}"), result.退出码);
+            OutputBox.Text = string.IsNullOrWhiteSpace(result.输出) ? T("disk.noOutput", "（无输出）") : result.输出;
             await RefreshDiskInfoAsync();
         }
         catch (OperationCanceledException)
@@ -124,7 +124,7 @@ public sealed partial class 磁盘管理 : ContentDialog
 
     private async Task RefreshDiskInfoAsync()
     {
-        var info = await qemuImgSvc.GetInfoAsync(install, machine.DiskPath);
+        var info = await qemuImgSvc.获取信息(install, machine.DiskPath);
         if (info is null)
         {
             DiskInfoText.Text = string.IsNullOrWhiteSpace(machine.DiskPath)

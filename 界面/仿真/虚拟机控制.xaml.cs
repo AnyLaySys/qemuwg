@@ -18,7 +18,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
     private readonly nint ownerHandle;
     private readonly List<QMP命令> allCommands = [];
     private bool forceStopPending;
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     public 虚拟机控制(nint ownerHandle, QEMU安装 install, QEMU会话 sessions, 虚拟机配置 machine)
     {
@@ -28,7 +28,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
         this.sessions = sessions;
         this.machine = machine;
         this.ownerHandle = ownerHandle;
-        Title = T("qmp.title", "QMP 控制台");
+        Title = T("qmp.title", "虚拟机控制中心");
         Loaded += async (_, _) => await InitializeSafelyAsync();
     }
 
@@ -42,7 +42,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
         }
         catch (Exception exception)
         {
-            应用日志.Write("虚拟机控制 initialization failed: " + exception);
+            应用日志.写("虚拟机控制 initialization failed: " + exception);
             OutputBox.Text = string.Format(T("qmp.openFailed", "无法打开 QMP 控制台：{0}"), exception.Message);
         }
     }
@@ -61,8 +61,8 @@ public sealed partial class 虚拟机控制 : ContentDialog
         OutputBox.Text = T("qmp.loading", "正在读取 QMP Schema…");
         await RefreshSummaryAsync();
 
-        var commandsResult = await sessions.ExecuteQmpAsync(machine, "query-commands");
-        var schemaResult = await sessions.ExecuteQmpAsync(machine, "query-qmp-schema");
+        var commandsResult = await sessions.执行QMP(machine, "query-commands");
+        var schemaResult = await sessions.执行QMP(machine, "query-qmp-schema");
         if (!commandsResult.Succeeded)
         {
             OutputBox.Text = commandsResult.Output;
@@ -86,10 +86,10 @@ public sealed partial class 虚拟机控制 : ContentDialog
     {
         var unknown = T("qmp.unknown", "未知");
         StatusValue.Text = CpuValue.Text = MemoryValue.Text = BlockValue.Text = unknown;
-        var statusTask = sessions.ExecuteQmpAsync(machine, "query-status");
-        var cpuTask = sessions.ExecuteQmpAsync(machine, "query-cpus-fast");
-        var memoryTask = sessions.ExecuteQmpAsync(machine, "query-memory-size-summary");
-        var blockTask = sessions.ExecuteQmpAsync(machine, "query-block");
+        var statusTask = sessions.执行QMP(machine, "query-status");
+        var cpuTask = sessions.执行QMP(machine, "query-cpus-fast");
+        var memoryTask = sessions.执行QMP(machine, "query-memory-size-summary");
+        var blockTask = sessions.执行QMP(machine, "query-block");
         await Task.WhenAll(statusTask, cpuTask, memoryTask, blockTask);
 
         if (statusTask.Result.Succeeded)
@@ -196,7 +196,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
         try
         {
             var arguments = ArgumentsBox.Text.Trim();
-            var result = await sessions.ExecuteQmpAsync(machine, command, arguments is "" or "{}" ? string.Empty : arguments);
+            var result = await sessions.执行QMP(machine, command, arguments is "" or "{}" ? string.Empty : arguments);
             OutputBox.Text = result.Output;
             await RefreshSummaryAsync();
         }

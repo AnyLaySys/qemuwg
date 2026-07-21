@@ -15,7 +15,7 @@ public sealed partial class QEMU工具界面 : UserControl
         "aio_write", "break", "discard", "flush", "open", "reopen", "remove_break", "resume",
         "truncate", "write", "writev", "zone_append", "zone_close", "zone_finish", "zone_open", "zone_reset"
     };
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly nint ownerHandle;
     private readonly QEMU安装 install;
@@ -34,10 +34,10 @@ public sealed partial class QEMU工具界面 : UserControl
         this.ownerHandle = ownerHandle;
         this.install = install;
         this.sessions = sessions;
-        sessions.OutputReceived += Sessions_OutputReceived;
+        sessions.收到输出 += Sessions_OutputReceived;
         Unloaded += (_, _) =>
         {
-            sessions.OutputReceived -= Sessions_OutputReceived;
+            sessions.收到输出 -= Sessions_OutputReceived;
             ioCancellation?.Cancel();
             toolCancellation?.Cancel();
         };
@@ -49,7 +49,7 @@ public sealed partial class QEMU工具界面 : UserControl
         if (initialized) return;
         initialized = true;
         try { await InitializeAsync(); }
-        catch (Exception exception) { 应用日志.Write("QEMU工具界面 initialization failed: " + exception); }
+        catch (Exception exception) { 应用日志.写("QEMU工具界面 initialization failed: " + exception); }
     }
 
     public ObservableCollection<QEMUIO命令> VisibleCommands { get; } = [];
@@ -59,7 +59,7 @@ public sealed partial class QEMU工具界面 : UserControl
         IoCommandList.ItemsSource = VisibleCommands;
         try
         {
-            var discovered = await Task.Run(() => tools.GetQemuIoCommandsAsync(install));
+            var discovered = await Task.Run(() => tools.获取QEMU输入输出命令(install));
             allCommands.AddRange(discovered);
             ApplyFilter(string.Empty);
         }
@@ -111,7 +111,7 @@ public sealed partial class QEMU工具界面 : UserControl
         ResetConfirmation();
         SetIoRunning(true);
         ioCancellation = new CancellationTokenSource();
-        try { IoOutputBox.Text = FormatResult(await tools.RunQemuIoAsync(install, image, command, BuildIoOptions(), ioCancellation.Token)); }
+        try { IoOutputBox.Text = FormatResult(await tools.运行QEMU输入输出(install, image, command, BuildIoOptions(), ioCancellation.Token)); }
         catch (OperationCanceledException) { IoOutputBox.Text = T("tools.cancelled", "操作已取消。"); }
         catch (Exception exception) { IoOutputBox.Text = exception.ToString(); }
         finally
@@ -160,8 +160,8 @@ public sealed partial class QEMU工具界面 : UserControl
         EdidProgress.Visibility = Visibility.Visible;
         try
         {
-            var result = await tools.GenerateEdidAsync(install, BuildEdidArguments());
-            EdidResultBox.Text = result.ExitCode == 0 ? T("tools.generated", "EDID 已生成。") + Environment.NewLine + EdidOutputBox.Text : FormatResult(result);
+            var result = await tools.生成EDID(install, BuildEdidArguments());
+            EdidResultBox.Text = result.退出码 == 0 ? T("tools.generated", "EDID 已生成。") + Environment.NewLine + EdidOutputBox.Text : FormatResult(result);
         }
         catch (Exception exception) { EdidResultBox.Text = exception.ToString(); }
         finally { EdidProgress.IsActive = false; EdidProgress.Visibility = Visibility.Collapsed; }
@@ -206,14 +206,14 @@ public sealed partial class QEMU工具界面 : UserControl
         if (NbdPersistentToggle.IsOn) arguments.Add("--persistent");
         if (NbdAllocationDepthToggle.IsOn) arguments.Add("--allocation-depth");
         if (NbdVerboseToggle.IsOn) arguments.Add("--verbose");
-        arguments.AddRange(命令行.Split(NbdExtraBox.Text));
+        arguments.AddRange(命令行.分割(NbdExtraBox.Text));
         arguments.Add(NbdImageBox.Text.Trim());
-        AppendNbdResult(sessions.Start(install, "qemu-nbd.exe", JoinArguments(arguments)));
+        AppendNbdResult(sessions.启动(install, "qemu-nbd.exe", JoinArguments(arguments)));
     }
 
     private void StopNbd_Click(object sender, RoutedEventArgs e)
     {
-        if (sessions.IsRunning("qemu-nbd.exe")) AppendNbdResult(sessions.Stop("qemu-nbd.exe"));
+        if (sessions.正在运行("qemu-nbd.exe")) AppendNbdResult(sessions.停止("qemu-nbd.exe"));
         else NbdOutputBox.Text = T("tools.notRunning", "工具没有运行");
     }
 
@@ -232,12 +232,12 @@ public sealed partial class QEMU工具界面 : UserControl
             StorageOutputBox.Text = T("tools.storageRequired", "存储守护进程至少需要一个块设备和一个导出定义。");
             return;
         }
-        AppendStorageResult(sessions.Start(install, "qemu-storage-daemon.exe", JoinArguments(arguments)));
+        AppendStorageResult(sessions.启动(install, "qemu-storage-daemon.exe", JoinArguments(arguments)));
     }
 
     private void StopStorageDaemon_Click(object sender, RoutedEventArgs e)
     {
-        if (sessions.IsRunning("qemu-storage-daemon.exe")) AppendStorageResult(sessions.Stop("qemu-storage-daemon.exe"));
+        if (sessions.正在运行("qemu-storage-daemon.exe")) AppendStorageResult(sessions.停止("qemu-storage-daemon.exe"));
         else StorageOutputBox.Text = T("tools.notRunning", "工具没有运行");
     }
 
@@ -254,7 +254,7 @@ public sealed partial class QEMU工具界面 : UserControl
         foreach (var value in values.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) AddOption(arguments, option, value);
     }
 
-    private static string JoinArguments(IEnumerable<string> arguments) => string.Join(' ', arguments.Select(命令行.Quote));
+    private static string JoinArguments(IEnumerable<string> arguments) => string.Join(' ', arguments.Select(命令行.引用));
     private void AppendNbdResult(操作结果 result) => NbdOutputBox.Text += (NbdOutputBox.Text.Length == 0 ? string.Empty : Environment.NewLine) + ResultText(result);
     private void AppendStorageResult(操作结果 result) => StorageOutputBox.Text += (StorageOutputBox.Text.Length == 0 ? string.Empty : Environment.NewLine) + ResultText(result);
     private static string ResultText(操作结果 result) => result.Succeeded ? result.Message : string.Join(Environment.NewLine, new[] { result.Message, result.Detail }.Where(value => !string.IsNullOrWhiteSpace(value)));
@@ -263,17 +263,17 @@ public sealed partial class QEMU工具界面 : UserControl
     {
         RunToolOnceButton.IsEnabled = false;
         toolCancellation = new CancellationTokenSource();
-        try { ServiceOutputBox.Text = FormatResult(await tools.RunToolAsync(install, SelectedTool, ServiceArgumentsBox.Text, toolCancellation.Token)); }
+        try { ServiceOutputBox.Text = FormatResult(await tools.运行工具(install, SelectedTool, ServiceArgumentsBox.Text, toolCancellation.Token)); }
         catch (OperationCanceledException) { ServiceOutputBox.Text = T("tools.cancelled", "操作已取消。"); }
         catch (Exception exception) { ServiceOutputBox.Text = exception.ToString(); }
         finally { toolCancellation.Dispose(); toolCancellation = null; RunToolOnceButton.IsEnabled = true; }
     }
 
-    private void StartTool_Click(object sender, RoutedEventArgs e) => AppendResult(sessions.Start(install, SelectedTool, ServiceArgumentsBox.Text));
+    private void StartTool_Click(object sender, RoutedEventArgs e) => AppendResult(sessions.启动(install, SelectedTool, ServiceArgumentsBox.Text));
     private void StopTool_Click(object sender, RoutedEventArgs e)
     {
         toolCancellation?.Cancel();
-        if (sessions.IsRunning(SelectedTool)) AppendResult(sessions.Stop(SelectedTool));
+        if (sessions.正在运行(SelectedTool)) AppendResult(sessions.停止(SelectedTool));
     }
     private void ClearToolOutput_Click(object sender, RoutedEventArgs e) => ServiceOutputBox.Text = string.Empty;
     private string SelectedTool => ServiceToolCombo.SelectedItem?.ToString() ?? "qemu-nbd.exe";
@@ -288,6 +288,5 @@ public sealed partial class QEMU工具界面 : UserControl
     });
     private void AppendResult(操作结果 result) => AppendOutput(result.Succeeded ? result.Message : string.Join(Environment.NewLine, new[] { result.Message, result.Detail }.Where(value => !string.IsNullOrWhiteSpace(value))));
     private void AppendOutput(string text) => ServiceOutputBox.Text += (ServiceOutputBox.Text.Length == 0 ? string.Empty : Environment.NewLine) + text;
-    private static string FormatResult(进程结果 result) => string.Format(T("tools.exitCode", "退出码 {0}"), result.ExitCode) + Environment.NewLine + (string.IsNullOrWhiteSpace(result.Output) ? T("tools.noOutput", "（无输出）") : result.Output);
+    private static string FormatResult(进程结果 result) => string.Format(T("tools.exitCode", "退出码 {0}"), result.退出码) + Environment.NewLine + (string.IsNullOrWhiteSpace(result.输出) ? T("tools.noOutput", "（无输出）") : result.输出);
 }
-

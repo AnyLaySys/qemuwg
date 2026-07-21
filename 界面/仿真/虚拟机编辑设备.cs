@@ -40,7 +40,7 @@ public sealed partial class 虚拟机编辑
         DevicePropertyHintText.Text = T("vmEditor.devicePropertiesLoading", "正在读取设备属性…");
         try
         {
-            availableDeviceProperties = await qemuSvc.GetDevicePropertiesAsync(arch, device.Model);
+            availableDeviceProperties = await qemuSvc.获取设备属性(arch, device.Model);
             DevicePropertyCombo.ItemsSource = availableDeviceProperties;
             DevicePropertyHintText.Text = string.Format(T("vmEditor.devicePropertyCount", "{0} 个可配置属性"), availableDeviceProperties.Count);
         }

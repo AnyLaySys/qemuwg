@@ -27,6 +27,7 @@
   "main.deleteVm": "删除虚拟机",
   "main.configuration": "配置",
   "main.display": "显示器",
+  "main.detachDisplay": "分离到 QEMU 原生窗口",
   "main.displayRunning": "虚拟机显示器已连接",
   "main.displayOff": "虚拟机已关机",
   "device.processor": "处理器",
@@ -494,6 +495,9 @@
   ,"disk.choice.bitmap.action.merge": "合并位图"
   ,"main.displayConnecting": "正在连接虚拟机显示器…"
   ,"main.displayUnavailable": "无法连接虚拟机显示器"
+  ,"display.nativeWindowUnavailable": "当前配置没有 QEMU 原生图形窗口。"
+  ,"display.nativeWindowNotReady": "QEMU 原生图形窗口尚未就绪。"
+  ,"display.detached": "已显示 QEMU 原生图形窗口"
   ,"session.displayPortUnavailable": "没有可用的本机显示端口。"
   ,"qmp.timeout": "QMP 操作超时，请确认虚拟机仍在响应。"
   ,"guestAgent.timeout": "Guest Agent 操作超时。"

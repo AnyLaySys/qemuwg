@@ -23,7 +23,7 @@ public sealed partial class 主窗
     private async Task RefreshDisplayAsync(虚拟机配置? vm)
     {
         var version = Interlocked.Increment(ref displayVersion);
-        if (vm is null || !vm.IsRunning || !sessions.TryGetDisplayPort(vm, out var port))
+        if (vm is null || !vm.IsRunning || !sessions.尝试获取显示端口(vm, out var port))
         {
             StopDisplay();
             DisplayImage.Visibility = Visibility.Collapsed;
@@ -58,7 +58,7 @@ public sealed partial class 主窗
         }
         catch (Exception exception)
         {
-            应用日志.Write("Display connection failed: " + exception);
+            应用日志.写("Display connection failed: " + exception);
             if (version == Volatile.Read(ref displayVersion))
                 DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
         }
@@ -127,7 +127,7 @@ public sealed partial class 主窗
             DisplayImage.Visibility = Visibility.Collapsed;
             DisplayFallback.Visibility = Visibility.Visible;
             DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
-            应用日志.Write("Display connection closed: " + message);
+            应用日志.写("Display connection closed: " + message);
         });
     }
 

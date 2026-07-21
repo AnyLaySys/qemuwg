@@ -36,7 +36,9 @@ public sealed partial class 主窗
         DetailsView.Visibility = Visibility.Visible;
         VmNameText.Text = selectedVm.Name;
         VmStatusText.Text = selectedVm.StatusText;
-        DisplayBackendText.Text = "VNC";
+        DisplayBackendText.Text = string.Equals(selectedVm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
+            ? "D-Bus · D3D11"
+            : $"D-Bus · D3D11 + {selectedVm.DisplayBackend.ToUpperInvariant()}";
         DisplayStateText.Text = selectedVm.IsRunning
             ? T("main.displayRunning", "虚拟机显示器已连接")
             : T("main.displayOff", "虚拟机已关机");
@@ -54,7 +56,8 @@ public sealed partial class 主窗
         DeviceSummaries.Add(new 设备摘要("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb), ColorHelper.FromArgb(255, 70, 173, 101)));
         DeviceSummaries.Add(new 设备摘要("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)));
         DeviceSummaries.Add(new 设备摘要("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)));
-        DeviceSummaries.Add(new 设备摘要("\uE7F4", T("device.display", "显示"), $"vnc · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
+        DeviceSummaries.Add(new 设备摘要("\uE7F4", T("device.display", "显示"),
+            $"dbus + {selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
         DeviceSummaries.Add(new 设备摘要("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)));
         DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}", ColorHelper.FromArgb(255, 57, 153, 210)));
         DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.installMedia", "安装介质"),
@@ -71,7 +74,7 @@ public sealed partial class 主窗
         if (selectedVm is null) return;
         var vm = selectedVm;
         StartButton.IsEnabled = false;
-        var result = sessions.Start(qemu, selectedVm);
+        var result = sessions.启动(qemu, selectedVm);
         if (!result.Succeeded)
         {
             await ShowOperationErrorAsync(result);
@@ -79,7 +82,7 @@ public sealed partial class 主窗
             return;
         }
         await Task.Delay(700);
-        if (!sessions.HasQmpSession(vm))
+        if (!sessions.存在QMP会话(vm))
         {
             var logPath = Path.Combine(vm.DirPath, "qemu.log");
             var detail = File.Exists(logPath)
@@ -98,7 +101,7 @@ public sealed partial class 主窗
         ShutdownButton.IsEnabled = false;
         VmStatusText.Text = T("session.shuttingDown", "正在等待来宾系统关机…");
         FooterStatusText.Text = VmStatusText.Text;
-        var result = await sessions.ShutdownAsync(vm);
+        var result = await sessions.关机(vm);
         if (!result.Succeeded)
         {
             await ShowOperationErrorAsync(result);
@@ -106,7 +109,7 @@ public sealed partial class 主窗
             return;
         }
 
-        if (await sessions.WaitForExitAsync(vm, TimeSpan.FromSeconds(12)))
+        if (await sessions.等待退出(vm, TimeSpan.FromSeconds(12)))
         {
             RefreshDetails();
             return;
@@ -123,7 +126,7 @@ public sealed partial class 主窗
         };
         if (await ShowDialogAsync(confirm) == ContentDialogResult.Primary)
         {
-            var stopResult = sessions.ForceStop(vm);
+            var stopResult = sessions.强制停止(vm);
             if (!stopResult.Succeeded) await ShowOperationErrorAsync(stopResult);
         }
         RefreshDetails();
@@ -142,14 +145,14 @@ public sealed partial class 主窗
             DefaultButton = ContentDialogButton.Close
         };
         if (await ShowDialogAsync(confirm) != ContentDialogResult.Primary) return;
-        var result = sessions.ForceStop(selectedVm);
+        var result = sessions.强制停止(selectedVm);
         if (!result.Succeeded) await ShowOperationErrorAsync(result);
     }
 
     private async void EditButton_Click(object sender, RoutedEventArgs e)
     {
         if (selectedVm is null || selectedVm.IsRunning) return;
-        var dialog = new 虚拟机编辑(WindowNative.GetWindowHandle(this), qemu, qemuSvc, vmRepo.RootPath, selectedVm)
+        var dialog = new 虚拟机编辑(WindowNative.GetWindowHandle(this), qemu, qemuSvc, vmRepo.根目录, selectedVm)
         {
             XamlRoot = RootXamlRoot
         };
@@ -157,7 +160,7 @@ public sealed partial class 主窗
 
         var edited = dialog.BuildMachine();
         CopyEditableValues(edited, selectedVm);
-        var result = await vmRepo.UpdateAsync(selectedVm);
+        var result = await vmRepo.更新(selectedVm);
         if (!result.Succeeded) await ShowOperationErrorAsync(result);
         VmList.ItemsSource = null;
         VmList.ItemsSource = Machines;
@@ -186,7 +189,7 @@ public sealed partial class 主窗
         };
         if (await ShowDialogAsync(confirm) != ContentDialogResult.Primary) return;
 
-        var result = await vmRepo.DeleteAsync(vm);
+        var result = await vmRepo.删除(vm);
         if (!result.Succeeded)
         {
             await ShowOperationErrorAsync(result);
@@ -223,12 +226,12 @@ public sealed partial class 主窗
 
     private async void QmpConsole_Click(object sender, RoutedEventArgs e)
     {
-        应用日志.Write("Opening 虚拟机控制");
+        应用日志.写("Opening 虚拟机控制");
         if (selectedVm is null) return;
-        if (!sessions.HasQmpSession(selectedVm))
+        if (!sessions.存在QMP会话(selectedVm))
         {
             await ShowMessageAsync(
-                T("qmp.title", "QMP 控制台"),
+                T("qmp.title", "虚拟机控制中心"),
                 T("qmp.requiresRunning", "QMP 控制台仅在虚拟机运行时可用。"));
             return;
         }
@@ -236,14 +239,14 @@ public sealed partial class 主窗
         try
         {
             var dialog = new 虚拟机控制(WindowNative.GetWindowHandle(this), qemu, sessions, selectedVm) { XamlRoot = RootXamlRoot };
-            应用日志.Write("虚拟机控制 constructed");
+            应用日志.写("虚拟机控制 constructed");
             await ShowDialogAsync(dialog);
-            应用日志.Write("虚拟机控制 closed");
+            应用日志.写("虚拟机控制 closed");
             RefreshDetails();
         }
         catch (Exception exception)
         {
-            应用日志.Write("虚拟机控制 failed: " + exception);
+            应用日志.写("虚拟机控制 failed: " + exception);
             await ShowMessageAsync(
                 T("dialog.operationFailed", "操作失败"),
                 string.Format(T("qmp.openFailed", "无法打开 QMP 控制台：{0}"), exception.Message));
@@ -253,9 +256,9 @@ public sealed partial class 主窗
     private async void GuestAgent_Click(object sender, RoutedEventArgs e)
     {
         if (selectedVm is null) return;
-        if (!sessions.HasQmpSession(selectedVm))
+        if (!sessions.存在QMP会话(selectedVm))
         {
-            await ShowMessageAsync(T("guestAgent.title", "Guest Agent"), T("guestAgent.requiresRunning", "Guest Agent 仅在虚拟机运行时可用。"));
+            await ShowMessageAsync(T("guestAgent.title", "来宾系统管理"), T("guestAgent.requiresRunning", "Guest Agent 仅在虚拟机运行时可用。"));
             return;
         }
         try
@@ -265,11 +268,18 @@ public sealed partial class 主窗
         }
         catch (Exception exception)
         {
-            应用日志.Write("来宾代理界面 failed: " + exception);
+            应用日志.写("来宾代理界面 failed: " + exception);
             await ShowMessageAsync(
                 T("dialog.operationFailed", "操作失败"),
                 string.Format(T("guestAgent.openFailed", "无法打开 Guest Agent：{0}"), exception.Message));
         }
+    }
+
+    private async void DetachDisplayButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (selectedVm is null || !selectedVm.IsRunning) return;
+        var result = sessions.分离显示(selectedVm);
+        if (!result.Succeeded) await ShowOperationErrorAsync(result);
     }
 
 }

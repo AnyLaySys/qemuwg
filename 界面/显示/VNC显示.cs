@@ -59,7 +59,7 @@ internal sealed class VNC显示 : IDisposable
             }
         }
 
-        应用日志.Write($"VNC display connection failed on port {port}: {lastError?.Message}");
+        应用日志.写($"VNC display connection failed on port {port}: {lastError?.Message}");
         Disconnect();
         return false;
     }
@@ -157,7 +157,7 @@ internal sealed class VNC显示 : IDisposable
         }
         catch (Exception exception)
         {
-            应用日志.Write("VNC display connection closed: " + exception);
+            应用日志.写("VNC display connection closed: " + exception);
             ConnectionClosed?.Invoke(this, exception.Message);
         }
     }

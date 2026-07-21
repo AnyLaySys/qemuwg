@@ -4,7 +4,7 @@ namespace QemuWG.服务;
 
 public static class 命令行
 {
-    public static IReadOnlyList<string> Split(string commandLine)
+    public static IReadOnlyList<string> 分割(string commandLine)
     {
         if (string.IsNullOrWhiteSpace(commandLine)) return [];
         var pointer = CommandLineToArgvW(commandLine, out var count);
@@ -25,7 +25,7 @@ public static class 命令行
         }
     }
 
-    public static string Quote(string value)
+    public static string 引用(string value)
     {
         if (value.Length > 0 && value.All(character => !char.IsWhiteSpace(character) && character != '"')) return value;
         return "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";

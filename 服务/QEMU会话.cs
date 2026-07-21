@@ -16,7 +16,7 @@ public sealed partial class QEMU会话
         "aarch64", "alpha", "arm", "hppa", "i386", "loongarch64", "m68k", "mips", "mips64",
         "mips64el", "mipsel", "or1k", "ppc", "ppc64", "riscv32", "riscv64", "s390x", "sh4", "x86_64"
     };
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly Dictionary<string, Session> sessions = [];
     private readonly object gate = new();
@@ -27,9 +27,9 @@ public sealed partial class QEMU会话
         this.qemuSvc = qemuSvc;
     }
 
-    public event EventHandler<虚拟机配置>? StateChanged;
+    public event EventHandler<虚拟机配置>? 状态变化;
 
-    public 操作结果 Start(QEMU安装 install, 虚拟机配置 vm)
+    public 操作结果 启动(QEMU安装 install, 虚拟机配置 vm)
     {
         lock (gate)
         {
@@ -43,11 +43,11 @@ public sealed partial class QEMU会话
 
         try
         {
-            var displayPort = FindFreeVncPort();
+            var displayPort = 查找空闲VNC端口();
             int port;
-            do port = FindFreePort(); while (port == displayPort);
+            do port = 查找空闲端口(); while (port == displayPort);
             int guestAgentPort;
-            do guestAgentPort = FindFreePort(); while (guestAgentPort == port || guestAgentPort == displayPort);
+            do guestAgentPort = 查找空闲端口(); while (guestAgentPort == port || guestAgentPort == displayPort);
             var logPath = Path.Combine(vm.DirPath, "qemu.log");
             var startInfo = new ProcessStartInfo(arch.ExecutablePath)
             {
@@ -72,8 +72,8 @@ public sealed partial class QEMU会话
             process.ErrorDataReceived += (_, args) => AppendLog(args.Data);
             process.Exited += (_, _) =>
             {
-                if (session is null || !session.TryClose()) return;
-                var exitLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] QEMU exited with code {TryGetExitCode(process)}.";
+                if (session is null || !session.尝试关闭()) return;
+                var exitLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] QEMU exited with code {尝试获取退出码(process)}.";
                 AppendLog(exitLine);
                 session.Lifetime.Cancel();
                 lock (gate)
@@ -81,18 +81,19 @@ public sealed partial class QEMU会话
                     if (sessions.TryGetValue(vm.Id, out var current) && ReferenceEquals(current, session))
                         sessions.Remove(vm.Id);
                 }
-                StateChanged?.Invoke(this, vm);
+                状态变化?.Invoke(this, vm);
                 process.Dispose();
             };
 
             File.AppendAllText(logPath, $"{Environment.NewLine}[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Starting {vm.Name}{Environment.NewLine}", Encoding.UTF8);
             if (!process.Start()) return 操作结果.Fail(T("session.startFailed", "QEMU 启动失败"));
-            session = new Session(process, port, guestAgentPort, displayPort);
+            session = new Session(process, port, guestAgentPort, displayPort, vm.DisplayBackend);
             lock (gate) sessions[vm.Id] = session;
+            _ = 准备原生显示窗口(session);
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             vm.IsRunning = true;
-            StateChanged?.Invoke(this, vm);
+            状态变化?.Invoke(this, vm);
             return 操作结果.Ok(T("session.started", "虚拟机已启动"));
         }
         catch (Exception exception)
@@ -101,15 +102,15 @@ public sealed partial class QEMU会话
         }
     }
 
-    public async Task<操作结果> ShutdownAsync(虚拟机配置 vm)
+    public async Task<操作结果> 关机(虚拟机配置 vm)
     {
-        var result = await ExecuteQmpAsync(vm, "system_powerdown");
+        var result = await 执行QMP(vm, "system_powerdown");
         return result.Succeeded
             ? 操作结果.Ok(T("session.shutdownRequested", "已发送关机请求"))
             : 操作结果.Fail(T("session.shutdownFailed", "发送关机请求失败"), result.Output);
     }
 
-    public async Task<bool> WaitForExitAsync(虚拟机配置 vm, TimeSpan timeout, CancellationToken cancellationToken = default)
+    public async Task<bool> 等待退出(虚拟机配置 vm, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
@@ -128,13 +129,13 @@ public sealed partial class QEMU会话
         return !session.IsActive;
     }
 
-    public bool HasQmpSession(虚拟机配置 vm)
+    public bool 存在QMP会话(虚拟机配置 vm)
     {
         lock (gate)
             return sessions.TryGetValue(vm.Id, out var session) && session.IsActive;
     }
 
-    public bool TryGetDisplayPort(虚拟机配置 vm, out int displayPort)
+    public bool 尝试获取显示端口(虚拟机配置 vm, out int displayPort)
     {
         lock (gate)
         {
@@ -148,7 +149,7 @@ public sealed partial class QEMU会话
         return false;
     }
 
-    public 操作结果 ForceStop(虚拟机配置 vm)
+    public 操作结果 强制停止(虚拟机配置 vm)
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
@@ -178,8 +179,8 @@ public sealed partial class QEMU会话
 
         if (vm.Firmware == "uefi")
         {
-            var code = qemuSvc.FindFirmware(install, vm.Arch, false);
-            var variablesTemplate = qemuSvc.FindFirmware(install, vm.Arch, true);
+            var code = qemuSvc.查找固件(install, vm.Arch, false);
+            var variablesTemplate = qemuSvc.查找固件(install, vm.Arch, true);
             if (code is not null)
             {
                 arguments.AddRange(["-drive", $"if=pflash,format=raw,readonly=on,file={code}"]);
@@ -197,11 +198,29 @@ public sealed partial class QEMU会话
         if (!string.IsNullOrWhiteSpace(vm.BootOrder)) arguments.AddRange(["-boot", $"order={vm.BootOrder}"]);
         if (!string.IsNullOrWhiteSpace(vm.RtcBase)) arguments.AddRange(["-rtc", $"base={vm.RtcBase}"]);
 
-        arguments.AddRange([
-            "-display", "none",
-            "-vnc", $"127.0.0.1:{displayPort - 5900},share=force-shared"
-        ]);
-        if (!string.IsNullOrWhiteSpace(vm.VideoDevice) && vm.VideoDevice != "auto") arguments.AddRange(["-device", vm.VideoDevice]);
+        arguments.AddRange(["-display", "dbus,p2p=on,gl=on"]);
+        if (!string.IsNullOrWhiteSpace(vm.DisplayBackend)
+            && !string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(vm.DisplayBackend, "none", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.Equals(vm.DisplayBackend, "vnc", StringComparison.OrdinalIgnoreCase))
+                arguments.AddRange(["-vnc", $"127.0.0.1:{displayPort - 5900},share=force-shared"]);
+            else
+            {
+                var nativeDisplay = vm.DisplayBackend;
+                if (nativeDisplay.StartsWith("gtk", StringComparison.OrdinalIgnoreCase)
+                    && !nativeDisplay.Contains("window-close=", StringComparison.OrdinalIgnoreCase))
+                    nativeDisplay += ",window-close=off";
+                arguments.AddRange(["-display", nativeDisplay]);
+            }
+        }
+
+        var videoDevice = vm.VideoDevice;
+        if (string.Equals(videoDevice, "auto", StringComparison.OrdinalIgnoreCase)
+            && (string.Equals(vm.Arch, "x86_64", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(vm.Arch, "i386", StringComparison.OrdinalIgnoreCase)))
+            videoDevice = "virtio-vga-gl";
+        if (!string.IsNullOrWhiteSpace(videoDevice) && videoDevice != "auto") arguments.AddRange(["-device", videoDevice]);
         if (vm.NetworkMode != "none")
         {
             if (vm.NetworkModel == "auto") arguments.AddRange(["-nic", "user"]);
@@ -238,11 +257,11 @@ public sealed partial class QEMU会话
             arguments.Add("-" + name);
             if (!string.IsNullOrWhiteSpace(option.Value)) arguments.Add(option.Value.Trim());
         }
-        arguments.AddRange(ParseCmdLine(vm.ExtraArgs));
+        arguments.AddRange(解析命令行(vm.ExtraArgs));
         return arguments;
     }
 
-    private static int FindFreePort()
+    private static int 查找空闲端口()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
@@ -251,7 +270,7 @@ public sealed partial class QEMU会话
         return port;
     }
 
-    private static int FindFreeVncPort()
+    private static int 查找空闲VNC端口()
     {
         for (var port = 5900; port <= 5999; port++)
         {
@@ -269,7 +288,7 @@ public sealed partial class QEMU会话
         throw new IOException(T("session.displayPortUnavailable", "没有可用的本机显示端口。"));
     }
 
-    private static IReadOnlyList<string> ParseCmdLine(string commandLine)
+    private static IReadOnlyList<string> 解析命令行(string commandLine)
     {
         if (string.IsNullOrWhiteSpace(commandLine)) return [];
         var pointer = CommandLineToArgvW(commandLine, out var count);
@@ -296,13 +315,13 @@ public sealed partial class QEMU会话
     [DllImport("kernel32.dll")]
     private static extern IntPtr LocalFree(IntPtr memory);
 
-    private static int TryGetExitCode(Process process)
+    private static int 尝试获取退出码(Process process)
     {
         try { return process.ExitCode; }
         catch { return -1; }
     }
 
-    private sealed class Session(Process process, int qmpPort, int guestAgentPort, int displayPort)
+    private sealed class Session(Process process, int qmpPort, int guestAgentPort, int displayPort, string nativeDisplayBackend)
     {
         private int closed;
 
@@ -310,6 +329,8 @@ public sealed partial class QEMU会话
         public int QmpPort { get; } = qmpPort;
         public int GuestAgentPort { get; } = guestAgentPort;
         public int DisplayPort { get; } = displayPort;
+        public string NativeDisplayBackend { get; } = nativeDisplayBackend;
+        public nint NativeWindowHandle { get; set; }
         public CancellationTokenSource Lifetime { get; } = new();
         public bool IsActive
         {
@@ -321,6 +342,6 @@ public sealed partial class QEMU会话
             }
         }
 
-        public bool TryClose() => Interlocked.Exchange(ref closed, 1) == 0;
+        public bool 尝试关闭() => Interlocked.Exchange(ref closed, 1) == 0;
     }
 }

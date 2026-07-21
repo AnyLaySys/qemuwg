@@ -11,7 +11,7 @@ public sealed partial class QEMU会话
 {
     private static readonly TimeSpan ProtocolTimeout = TimeSpan.FromSeconds(5);
 
-    public async Task<QMP结果> ExecuteQmpAsync(
+    public async Task<QMP结果> 执行QMP(
         虚拟机配置 vm,
         string command,
         string argumentsJson = "",
@@ -32,10 +32,10 @@ public sealed partial class QEMU会话
             await client.ConnectAsync(IPAddress.Loopback, session.QmpPort, sessionToken);
             await using var stream = client.GetStream();
             using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
-            await ReadJsonLineAsync(reader, sessionToken);
+            await 读取JSON行(reader, sessionToken);
 
-            await WriteQmpAsync(stream, "{\"execute\":\"qmp_capabilities\"}\r\n", sessionToken);
-            var caps = await ReadQmpResponseAsync(reader, sessionToken);
+            await 写入QMP(stream, "{\"execute\":\"qmp_capabilities\"}\r\n", sessionToken);
+            var caps = await 读取QMP响应(reader, sessionToken);
             if (!caps.Succeeded) return caps;
 
             var request = new JsonObject { ["execute"] = command };
@@ -47,8 +47,8 @@ public sealed partial class QEMU会话
                 request["arguments"] = arguments;
             }
 
-            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", sessionToken);
-            return await ReadQmpResponseAsync(reader, sessionToken);
+            await 写入QMP(stream, request.ToJsonString() + "\r\n", sessionToken);
+            return await 读取QMP响应(reader, sessionToken);
         }
         catch (OperationCanceledException) when (session.Lifetime.IsCancellationRequested)
         {
@@ -64,7 +64,7 @@ public sealed partial class QEMU会话
         }
     }
 
-    public async Task<来宾代理结果> ExecuteGuestAgentAsync(
+    public async Task<来宾代理结果> 执行来宾代理(
         虚拟机配置 vm,
         string command,
         string argumentsJson = "",
@@ -94,10 +94,10 @@ public sealed partial class QEMU会话
                 request["arguments"] = arguments;
             }
 
-            await WriteQmpAsync(stream, request.ToJsonString() + "\r\n", sessionToken);
+            await 写入QMP(stream, request.ToJsonString() + "\r\n", sessionToken);
             while (true)
             {
-                var line = await ReadJsonLineAsync(reader, sessionToken);
+                var line = await 读取JSON行(reader, sessionToken);
                 using var document = JsonDocument.Parse(line.TrimStart('\u00ff'));
                 var root = document.RootElement;
                 if (root.TryGetProperty("return", out var returned))
@@ -123,18 +123,18 @@ public sealed partial class QEMU会话
         }
     }
 
-    private static async Task WriteQmpAsync(Stream stream, string command, CancellationToken cancellationToken = default)
+    private static async Task 写入QMP(Stream stream, string command, CancellationToken cancellationToken = default)
     {
         var bytes = Encoding.UTF8.GetBytes(command);
         await stream.WriteAsync(bytes, cancellationToken);
         await stream.FlushAsync(cancellationToken);
     }
 
-    private static async Task<QMP结果> ReadQmpResponseAsync(StreamReader reader, CancellationToken cancellationToken)
+    private static async Task<QMP结果> 读取QMP响应(StreamReader reader, CancellationToken cancellationToken)
     {
         while (true)
         {
-            var line = await ReadJsonLineAsync(reader, cancellationToken);
+            var line = await 读取JSON行(reader, cancellationToken);
             using var document = JsonDocument.Parse(line);
             var root = document.RootElement;
             if (root.TryGetProperty("return", out var returned))
@@ -147,12 +147,12 @@ public sealed partial class QEMU会话
         }
     }
 
-    private static async Task<string> ReadJsonLineAsync(StreamReader reader, CancellationToken cancellationToken)
+    private static async Task<string> 读取JSON行(StreamReader reader, CancellationToken cancellationToken)
     {
         while (true)
         {
             var line = await reader.ReadLineAsync(cancellationToken);
-            if (line is null) throw new EndOfStreamException(语言服务.Current.Get("qmp.connectionClosed", "QMP 连接已关闭。"));
+            if (line is null) throw new EndOfStreamException(语言服务.当前.获取("qmp.connectionClosed", "QMP 连接已关闭。"));
             if (!string.IsNullOrWhiteSpace(line)) return line;
         }
     }

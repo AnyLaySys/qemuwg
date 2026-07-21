@@ -10,7 +10,7 @@ namespace QemuWG.界面;
 
 public sealed partial class 虚拟机编辑 : ContentDialog
 {
-    private static string T(string key, string fallback) => 语言服务.Current.Get(key, fallback);
+    private static string T(string key, string fallback) => 语言服务.当前.获取(key, fallback);
 
     private readonly nint ownerHandle;
     private readonly QEMU安装 install;
@@ -91,7 +91,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         vm.MemoryMb = (int)MemoryBox.Value;
         vm.CpuCount = (int)CpuCountBox.Value;
         vm.DiskGb = (int)DiskBox.Value;
-        vm.DisplayBackend = NormalizeDefault(DisplayCombo.SelectedItem?.ToString(), "vnc");
+        vm.DisplayBackend = NormalizeDefault(DisplayCombo.SelectedItem?.ToString(), "gtk");
         vm.VideoDevice = NormalizeDefault(VideoCombo.Text, "auto");
         vm.AudioBackend = NormalizeDefault(AudioCombo.SelectedItem?.ToString(), "none");
         vm.AudioDevice = NormalizeDefault(AudioDeviceCombo.Text, "auto");
@@ -146,13 +146,17 @@ public sealed partial class 虚拟机编辑 : ContentDialog
 
         try
         {
-            var caps = await qemuSvc.GetCapabilitiesAsync(arch);
+            var caps = await qemuSvc.获取能力(arch);
             if (version != capsVersion) return;
 
             SetComboItems(MachineCombo, ["default", .. caps.Machines], preferred?.MachineType ?? "default");
             SetComboItems(CpuModelCombo, ["default", .. caps.CpuModels], preferred?.CpuModel ?? "default");
             SetComboItems(AcceleratorCombo, EnsureValues(caps.Accelerators, "tcg", "whpx"), preferred?.Accelerator ?? "tcg");
-            SetComboItems(DisplayCombo, ["vnc"], "vnc");
+            var displayBackends = new[] { "gtk" }
+                .Concat(caps.DisplayBackends)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            SetComboItems(DisplayCombo, displayBackends, preferred?.DisplayBackend ?? "gtk");
             SetComboItems(VideoCombo, ["auto", .. caps.VideoDevices], preferred?.VideoDevice ?? "auto");
             SetComboItems(NetworkModelCombo, ["auto", .. caps.NetworkDevices], preferred?.NetworkModel ?? "auto");
             SetComboItems(AudioDeviceCombo, ["auto", .. caps.AudioDevices], preferred?.AudioDevice ?? "auto");
@@ -172,7 +176,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
             SetComboItems(MachineCombo, ["default"], preferred?.MachineType ?? "default");
             SetComboItems(CpuModelCombo, ["default"], preferred?.CpuModel ?? "default");
             SetComboItems(AcceleratorCombo, ["tcg", "whpx"], preferred?.Accelerator ?? "tcg");
-            SetComboItems(DisplayCombo, ["vnc"], "vnc");
+            SetComboItems(DisplayCombo, ["gtk", "sdl", "dbus"], preferred?.DisplayBackend ?? "gtk");
             SetComboItems(VideoCombo, ["auto"], preferred?.VideoDevice ?? "auto");
             SetComboItems(NetworkModelCombo, ["auto"], preferred?.NetworkModel ?? "auto");
             SetComboItems(AudioDeviceCombo, ["auto"], preferred?.AudioDevice ?? "auto");
@@ -216,7 +220,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
     private string? ValidateInput()
     {
         if (string.IsNullOrWhiteSpace(NameBox.Text)) return T("vmEditor.validation.name", "请输入虚拟机名称。");
-        if (ArchCombo.SelectedItem is null) return T("vmEditor.validation.arch", "请选择系统架构。");
+        if (ArchCombo.SelectedItem is null) return T("vmEditor.validation.architecture", "请选择系统架构。");
         if (string.IsNullOrWhiteSpace(LocationBox.Text)) return T("vmEditor.validation.location", "请选择保存位置。");
         if (!double.IsFinite(MemoryBox.Value) || MemoryBox.Value < 256) return T("vmEditor.validation.memory", "内存至少为 256 MB。");
         if (!double.IsFinite(CpuCountBox.Value) || CpuCountBox.Value < 1) return T("vmEditor.validation.cpu", "处理器数量至少为 1。");
