@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using QemuWG.数据;
 using QemuWG.服务;
 using Windows.Storage.Pickers;
@@ -16,7 +17,9 @@ public sealed partial class 虚拟机编辑 : ContentDialog
     private readonly QEMU安装 install;
     private readonly QEMU服务 qemuSvc;
     private readonly 虚拟机配置? source;
+    private readonly HashSet<ComboBox> modifiedCapabilityFields = [];
     private int capsVersion;
+    private bool updatingCapabilityControls;
 
     public ObservableCollection<QEMU选项> ConfiguredQemuOpts { get; } = [];
     public ObservableCollection<QEMU设备> ConfiguredDevices { get; } = [];
@@ -59,11 +62,9 @@ public sealed partial class 虚拟机编辑 : ContentDialog
                 Properties = new Dictionary<string, string>(device.Properties, StringComparer.OrdinalIgnoreCase)
             });
 
-        ArchCombo.SelectedItem = install.Archs.FirstOrDefault(item => item.Id == vm.Arch)
-                                                 ?? install.Archs.FirstOrDefault();
+        ArchCombo.SelectedItem = install.Archs.FirstOrDefault(item => string.Equals(item.Id, vm.Arch, StringComparison.OrdinalIgnoreCase));
+        if (ArchCombo.SelectedItem is null) ArchCombo.Text = vm.Arch;
         SelectTaggedItem(FirmwareCombo, vm.Firmware);
-        SelectTaggedItem(NetworkModeCombo, vm.NetworkMode);
-        SelectStringItem(AudioCombo, vm.AudioBackend);
         SelectStringItem(BootOrderCombo, vm.BootOrder);
         SelectStringItem(RtcCombo, vm.RtcBase);
 
@@ -83,20 +84,20 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         var vm = source?.Copy() ?? new 虚拟机配置();
         vm.Name = NameBox.Text.Trim();
         vm.IsoPath = IsoBox.Text.Trim();
-        vm.Arch = (ArchCombo.SelectedItem as QEMU架构)?.Id ?? "x86_64";
+        vm.Arch = ReadArchitecture();
         vm.Firmware = SelectedTag(FirmwareCombo, "uefi");
-        vm.MachineType = NormalizeDefault(MachineCombo.Text);
-        vm.Accelerator = NormalizeDefault(AcceleratorCombo.SelectedItem?.ToString() ?? AcceleratorCombo.Text, "tcg");
-        vm.CpuModel = NormalizeDefault(CpuModelCombo.Text, "default");
+        vm.MachineType = ReadCapabilityValue(MachineCombo, source?.MachineType, string.Empty);
+        vm.Accelerator = ReadCapabilityValue(AcceleratorCombo, source?.Accelerator, "tcg");
+        vm.CpuModel = ReadCapabilityValue(CpuModelCombo, source?.CpuModel, "default");
         vm.MemoryMb = (int)MemoryBox.Value;
         vm.CpuCount = (int)CpuCountBox.Value;
         vm.DiskGb = (int)DiskBox.Value;
-        vm.DisplayBackend = NormalizeDefault(DisplayCombo.SelectedItem?.ToString(), "gtk");
-        vm.VideoDevice = NormalizeDefault(VideoCombo.Text, "auto");
-        vm.AudioBackend = NormalizeDefault(AudioCombo.SelectedItem?.ToString(), "none");
-        vm.AudioDevice = NormalizeDefault(AudioDeviceCombo.Text, "auto");
-        vm.NetworkMode = SelectedTag(NetworkModeCombo, "user");
-        vm.NetworkModel = NormalizeDefault(NetworkModelCombo.Text, "auto");
+        vm.DisplayBackend = ReadCapabilityValue(DisplayCombo, source?.DisplayBackend, "dbus");
+        vm.VideoDevice = ReadCapabilityValue(VideoCombo, source?.VideoDevice, "auto");
+        vm.AudioBackend = ReadCapabilityValue(AudioCombo, source?.AudioBackend, "none");
+        vm.AudioDevice = ReadCapabilityValue(AudioDeviceCombo, source?.AudioDevice, "auto");
+        vm.NetworkMode = ReadCapabilityValue(NetworkModeCombo, source?.NetworkMode, "user");
+        vm.NetworkModel = ReadCapabilityValue(NetworkModelCombo, source?.NetworkModel, "auto");
         vm.BootOrder = NormalizeDefault(BootOrderCombo.SelectedItem?.ToString(), "dc");
         vm.RtcBase = NormalizeDefault(RtcCombo.SelectedItem?.ToString(), "localtime");
         vm.ExtraArgs = ExtraArgumentsBox.Text.Trim();
@@ -135,6 +136,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
     private async void ArchitectureCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (!IsLoaded) return;
+        if (!updatingCapabilityControls) modifiedCapabilityFields.Add(ArchCombo);
         await LoadCapsAsync();
     }
 
@@ -149,19 +151,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
             var caps = await qemuSvc.获取能力(arch);
             if (version != capsVersion) return;
 
-            SetComboItems(MachineCombo, ["default", .. caps.Machines], preferred?.MachineType ?? "default");
-            SetComboItems(CpuModelCombo, ["default", .. caps.CpuModels], preferred?.CpuModel ?? "default");
-            SetComboItems(AcceleratorCombo, EnsureValues(caps.Accelerators, "tcg", "whpx"), preferred?.Accelerator ?? "tcg");
-            var displayBackends = new[] { "gtk" }
-                .Concat(caps.DisplayBackends)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            SetComboItems(DisplayCombo, displayBackends, preferred?.DisplayBackend ?? "gtk");
-            SetComboItems(VideoCombo, ["auto", .. caps.VideoDevices], preferred?.VideoDevice ?? "auto");
-            SetComboItems(NetworkModelCombo, ["auto", .. caps.NetworkDevices], preferred?.NetworkModel ?? "auto");
-            SetComboItems(AudioDeviceCombo, ["auto", .. caps.AudioDevices], preferred?.AudioDevice ?? "auto");
-            QemuOptCombo.ItemsSource = caps.CmdOptions;
-            DeviceModelCombo.ItemsSource = caps.AllDevices;
+            ApplyCapabilityLists(caps, preferred);
             CapsInfoText.Text = string.Format(
                 T("vmEditor.capabilitySummary", "{0} · {1} 种机器 · {2} 种 CPU · {3} 种声卡 · {4} 种设备"),
                 arch.DisplayName,
@@ -173,23 +163,48 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         catch (Exception exception)
         {
             if (version != capsVersion) return;
-            SetComboItems(MachineCombo, ["default"], preferred?.MachineType ?? "default");
-            SetComboItems(CpuModelCombo, ["default"], preferred?.CpuModel ?? "default");
-            SetComboItems(AcceleratorCombo, ["tcg", "whpx"], preferred?.Accelerator ?? "tcg");
-            SetComboItems(DisplayCombo, ["gtk", "sdl", "dbus"], preferred?.DisplayBackend ?? "gtk");
-            SetComboItems(VideoCombo, ["auto"], preferred?.VideoDevice ?? "auto");
-            SetComboItems(NetworkModelCombo, ["auto"], preferred?.NetworkModel ?? "auto");
-            SetComboItems(AudioDeviceCombo, ["auto"], preferred?.AudioDevice ?? "auto");
-            QemuOptCombo.ItemsSource = Array.Empty<QEMU命令选项>();
-            DeviceModelCombo.ItemsSource = Array.Empty<string>();
+            ApplyCapabilityLists(new QEMU能力(), preferred);
             CapsInfoText.Text = string.Format(T("vmEditor.capabilityFailed", "能力读取失败：{0}"), exception.Message);
+        }
+    }
+
+    private void ApplyCapabilityLists(QEMU能力 caps, 虚拟机配置? preferred)
+    {
+        var machine = preferred?.MachineType ?? CurrentComboValue(MachineCombo);
+        var cpu = preferred?.CpuModel ?? CurrentComboValue(CpuModelCombo);
+        var accelerator = preferred?.Accelerator ?? CurrentComboValue(AcceleratorCombo);
+        var display = preferred?.DisplayBackend ?? CurrentComboValue(DisplayCombo);
+        var video = preferred?.VideoDevice ?? CurrentComboValue(VideoCombo);
+        var networkBackend = preferred?.NetworkMode ?? CurrentComboValue(NetworkModeCombo);
+        var networkDevice = preferred?.NetworkModel ?? CurrentComboValue(NetworkModelCombo);
+        var audioBackend = preferred?.AudioBackend ?? CurrentComboValue(AudioCombo);
+        var audioDevice = preferred?.AudioDevice ?? CurrentComboValue(AudioDeviceCombo);
+
+        updatingCapabilityControls = true;
+        try
+        {
+            SetComboItems(MachineCombo, caps.Machines, machine);
+            SetComboItems(CpuModelCombo, caps.CpuModels, cpu);
+            SetComboItems(AcceleratorCombo, caps.Accelerators, accelerator);
+            SetComboItems(DisplayCombo, caps.DisplayBackends, display);
+            SetComboItems(VideoCombo, caps.VideoDevices, video);
+            SetComboItems(NetworkModeCombo, caps.NetworkBackends, networkBackend);
+            SetComboItems(NetworkModelCombo, caps.NetworkDevices, networkDevice);
+            SetComboItems(AudioCombo, caps.AudioBackends, audioBackend);
+            SetComboItems(AudioDeviceCombo, caps.AudioDevices, audioDevice);
+            QemuOptCombo.ItemsSource = caps.CmdOptions;
+            DeviceModelCombo.ItemsSource = caps.AllDevices;
+        }
+        finally
+        {
+            updatingCapabilityControls = false;
         }
     }
 
     private void QemuOptionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (QemuOptCombo.SelectedItem is not QEMU命令选项 option) return;
-        QemuOptHintText.Text = string.IsNullOrWhiteSpace(option.Syntax) ? $"-{option.Name}" : $"-{option.Name} {option.Syntax}";
+        QemuOptHintText.Text = string.IsNullOrWhiteSpace(option.Syntax) ? option.Name : $"{option.Name} {option.Syntax}";
     }
 
     private void AddQemuOption_Click(object sender, RoutedEventArgs e)
@@ -197,7 +212,6 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         var name = QemuOptCombo.SelectedItem is QEMU命令选项 definition
             ? definition.Name
             : QemuOptCombo.Text.Trim();
-        name = name.TrimStart('-');
         if (name.Length == 0) return;
         ConfiguredQemuOpts.Add(new QEMU选项 { Name = name, Value = QemuOptValueBox.Text.Trim() });
         QemuOptValueBox.Text = string.Empty;
@@ -220,7 +234,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
     private string? ValidateInput()
     {
         if (string.IsNullOrWhiteSpace(NameBox.Text)) return T("vmEditor.validation.name", "请输入虚拟机名称。");
-        if (ArchCombo.SelectedItem is null) return T("vmEditor.validation.architecture", "请选择系统架构。");
+        if (ArchCombo.SelectedItem is null && string.IsNullOrWhiteSpace(ArchCombo.Text)) return T("vmEditor.validation.architecture", "请选择系统架构。");
         if (string.IsNullOrWhiteSpace(LocationBox.Text)) return T("vmEditor.validation.location", "请选择保存位置。");
         if (!double.IsFinite(MemoryBox.Value) || MemoryBox.Value < 256) return T("vmEditor.validation.memory", "内存至少为 256 MB。");
         if (!double.IsFinite(CpuCountBox.Value) || CpuCountBox.Value < 1) return T("vmEditor.validation.cpu", "处理器数量至少为 1。");
@@ -231,15 +245,40 @@ public sealed partial class 虚拟机编辑 : ContentDialog
 
     private static void SetComboItems(ComboBox comboBox, IReadOnlyList<string> items, string? selected)
     {
-        comboBox.ItemsSource = items.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        var value = string.IsNullOrWhiteSpace(selected) ? items.FirstOrDefault() : selected;
-        comboBox.SelectedItem = comboBox.Items.Cast<string>().FirstOrDefault(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase));
-        if (comboBox.SelectedItem is null && comboBox.IsEditable) comboBox.Text = value ?? string.Empty;
-        else if (comboBox.SelectedItem is null) comboBox.SelectedIndex = 0;
+        comboBox.ItemsSource = items;
+        comboBox.SelectedItem = items.FirstOrDefault(item => string.Equals(item, selected, StringComparison.OrdinalIgnoreCase));
+        if (comboBox.SelectedItem is null) comboBox.Text = selected ?? string.Empty;
     }
 
-    private static IReadOnlyList<string> EnsureValues(IReadOnlyList<string> values, params string[] required) =>
-        required.Concat(values).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    private void CapabilityCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!updatingCapabilityControls && IsLoaded && sender is ComboBox comboBox)
+            modifiedCapabilityFields.Add(comboBox);
+    }
+
+    private void CapabilityCombo_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (!updatingCapabilityControls && IsLoaded && sender is ComboBox comboBox)
+            modifiedCapabilityFields.Add(comboBox);
+    }
+
+    private string ReadArchitecture()
+    {
+        if (source is not null && !modifiedCapabilityFields.Contains(ArchCombo)) return source.Arch;
+        var value = (ArchCombo.SelectedItem as QEMU架构)?.Id ?? ArchCombo.Text;
+        return string.IsNullOrWhiteSpace(value) ? "x86_64" : value.Trim();
+    }
+
+    private string ReadCapabilityValue(ComboBox comboBox, string? originalValue, string fallback)
+    {
+        if (source is not null && !modifiedCapabilityFields.Contains(comboBox)) return originalValue ?? string.Empty;
+        var value = CurrentComboValue(comboBox);
+        if (modifiedCapabilityFields.Contains(comboBox)) return value.Trim();
+        return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+    }
+
+    private static string CurrentComboValue(ComboBox comboBox) =>
+        comboBox.SelectedItem?.ToString() ?? comboBox.Text ?? string.Empty;
 
     private static void SelectTaggedItem(ComboBox comboBox, string value)
     {

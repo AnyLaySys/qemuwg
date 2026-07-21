@@ -22,7 +22,7 @@ public sealed partial class 主窗 : Window
     private readonly QEMU工具会话 toolSessions = new();
     private QEMU安装 qemu = new();
     private 虚拟机配置? selectedVm;
-    private QEMU工具界面? toolsView;
+    private QEMU附加功能? toolsView;
 
     public 主窗()
     {
@@ -33,10 +33,8 @@ public sealed partial class 主窗 : Window
         sessions = new QEMU会话(qemuSvc);
         sessions.状态变化 += Sessions_StateChanged;
 
-        displayClient.FrameReady += DisplayClient_FrameReady;
-        displayClient.ConnectionClosed += DisplayClient_ConnectionClosed;
         var windowHandle = WindowNative.GetWindowHandle(this);
-        Closed += (_, _) => displayClient.Dispose();
+        Closed += (_, _) => StopDisplay();
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(windowHandle);
         var appWindow = AppWindow.GetFromWindowId(windowId);
         appWindow.Resize(new Windows.Graphics.SizeInt32(1180, 760));

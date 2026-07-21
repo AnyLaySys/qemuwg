@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
@@ -12,6 +13,7 @@ using Vortice.DXGI;
 using Vortice.Mathematics;
 using static Vortice.Direct3D11.D3D11;
 using static Vortice.DXGI.DXGI;
+using WinUISwapChainPanelNative = Vortice.WinUI.ISwapChainPanelNative;
 
 namespace QemuWG.界面.显示;
 
@@ -50,6 +52,7 @@ public sealed class D3D11内嵌显示 : IDisposable
     private uint 显示宽度;
     private uint 显示高度;
     private Format 显示格式;
+    private int 已附加交换链;
 
     private ID3D11Texture2D? QEMU共享纹理;
     private IDXGIKeyedMutex? QEMU共享互斥锁;
@@ -63,7 +66,7 @@ public sealed class D3D11内嵌显示 : IDisposable
     private uint 共享映射跨距;
     private uint 共享映射宽度;
     private uint 共享映射高度;
-    private bool 已释放;
+    private int 已释放;
 
     public D3D11内嵌显示(SwapChainPanel 显示面板)
     {
@@ -71,13 +74,8 @@ public sealed class D3D11内嵌显示 : IDisposable
         界面队列 = 显示面板.DispatcherQueue;
     }
 
-    public bool 已准备
-    {
-        get
-        {
-            lock (同步锁) return !已释放 && 交换链 is not null;
-        }
-    }
+    public bool 已准备 =>
+        Volatile.Read(ref 已释放) == 0 && Volatile.Read(ref 已附加交换链) != 0;
 
     public void 接收共享纹理(D3D11纹理扫描 扫描)
     {
@@ -238,7 +236,7 @@ public sealed class D3D11内嵌显示 : IDisposable
     {
         lock (同步锁)
         {
-            if (已释放) return;
+            if (Volatile.Read(ref 已释放) != 0) return;
             释放共享纹理();
             释放共享映射();
         }
@@ -246,28 +244,47 @@ public sealed class D3D11内嵌显示 : IDisposable
 
     public void Dispose()
     {
-        lock (同步锁)
+        if (Interlocked.Exchange(ref 已释放, 1) != 0) return;
+
+        // 首帧回调可能正持有同步锁并等待界面线程附加交换链。
+        // 此时界面线程绝不能再阻塞等待同一把锁，否则会形成互等死锁。
+        if (界面队列.HasThreadAccess && !Monitor.TryEnter(同步锁))
         {
-            if (已释放) return;
-            已释放 = true;
-            释放共享纹理();
-            释放共享映射();
-            在界面线程执行(() =>
-            {
-                using var 面板接口 = new ISwapChainPanelNative(WinRT.MarshalInspectable<SwapChainPanel>.FromManaged(显示面板));
-                面板接口.SetSwapChain(null).CheckError();
-            });
-            释放交换链();
-            设备上下文?.Dispose();
-            设备上下文 = null;
-            设备一?.Dispose();
-            设备一 = null;
-            设备?.Dispose();
-            设备 = null;
-            工厂?.Dispose();
-            工厂 = null;
+            _ = Task.Run(释放全部资源);
+            GC.SuppressFinalize(this);
+            return;
+        }
+
+        if (界面队列.HasThreadAccess)
+        {
+            try { 释放全部资源Core(); }
+            finally { Monitor.Exit(同步锁); }
+        }
+        else
+        {
+            释放全部资源();
         }
         GC.SuppressFinalize(this);
+    }
+
+    private void 释放全部资源()
+    {
+        lock (同步锁) 释放全部资源Core();
+    }
+
+    private void 释放全部资源Core()
+    {
+        释放共享纹理();
+        释放共享映射();
+        释放交换链();
+        设备上下文?.Dispose();
+        设备上下文 = null;
+        设备一?.Dispose();
+        设备一 = null;
+        设备?.Dispose();
+        设备 = null;
+        工厂?.Dispose();
+        工厂 = null;
     }
 
     private void 复制共享纹理并呈现()
@@ -328,10 +345,19 @@ public sealed class D3D11内嵌显示 : IDisposable
     private void 重建设备(IDXGIAdapter1? 适配器, DriverType 驱动类型, Luid? 标识)
     {
         释放交换链();
-        设备上下文?.Dispose();
-        设备一?.Dispose();
-        设备?.Dispose();
-        工厂?.Dispose();
+        var 旧上下文 = 设备上下文;
+        var 旧设备一 = 设备一;
+        var 旧设备 = 设备;
+        var 旧工厂 = 工厂;
+        设备上下文 = null;
+        设备一 = null;
+        设备 = null;
+        工厂 = null;
+        设备适配器标识 = null;
+        旧上下文?.Dispose();
+        旧设备一?.Dispose();
+        旧设备?.Dispose();
+        旧工厂?.Dispose();
 
         工厂 = CreateDXGIFactory2<IDXGIFactory2>(false);
         ID3D11Device 新设备;
@@ -371,17 +397,12 @@ public sealed class D3D11内嵌显示 : IDisposable
         显示高度 = 高度;
         显示格式 = 格式;
 
-        在界面线程执行(() =>
-        {
-            显示面板.Width = 宽度;
-            显示面板.Height = 高度;
-            using var 面板接口 = new ISwapChainPanelNative(WinRT.MarshalInspectable<SwapChainPanel>.FromManaged(显示面板));
-            面板接口.SetSwapChain(交换链).CheckError();
-        });
+        排队附加交换链(交换链, 宽度, 高度);
     }
 
     private void 释放交换链()
     {
+        Volatile.Write(ref 已附加交换链, 0);
         后台缓冲?.Dispose();
         后台缓冲 = null;
         交换链?.Dispose();
@@ -410,42 +431,64 @@ public sealed class D3D11内嵌显示 : IDisposable
         共享映射高度 = 0;
     }
 
-    private void 在界面线程执行(Action 操作)
+    private void 排队附加交换链(IDXGISwapChain1 新交换链, uint 宽度, uint 高度)
     {
-        if (界面队列.HasThreadAccess)
-        {
-            操作();
-            return;
-        }
-
-        var 完成 = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        // 投递期间 renderer 可能释放自己的引用，因此为界面队列单独持有一次 COM 引用。
+        var 交换链指针 = 新交换链.NativePointer;
+        Marshal.AddRef(交换链指针);
         if (!界面队列.TryEnqueue(() =>
+        {
+            using var 待附加交换链 = new IDXGISwapChain1(交换链指针);
+            if (Volatile.Read(ref 已释放) != 0) return;
+            try
             {
-                try
-                {
-                    操作();
-                    完成.SetResult();
-                }
-                catch (Exception 异常)
-                {
-                    完成.SetException(异常);
-                }
-            }))
+                显示面板.Width = 宽度;
+                显示面板.Height = 高度;
+                using var 面板接口 = 获取交换链面板接口();
+                面板接口.SetSwapChain(待附加交换链).CheckError();
+                Volatile.Write(ref 已附加交换链, 1);
+            }
+            catch (Exception exception)
+            {
+                Volatile.Write(ref 已附加交换链, 0);
+                应用日志.写("Attaching D3D11 swap chain failed: " + exception);
+            }
+        }))
+        {
+            Marshal.Release(交换链指针);
             throw new InvalidOperationException("无法把 D3D11 交换链附加到 WinUI 显示面板。");
-        完成.Task.GetAwaiter().GetResult();
+        }
+    }
+
+    private WinUISwapChainPanelNative 获取交换链面板接口()
+    {
+        var 可检查对象 = WinRT.MarshalInspectable<SwapChainPanel>.FromManaged(显示面板);
+        nint 面板接口指针 = 0;
+        try
+        {
+            var 接口标识 = typeof(WinUISwapChainPanelNative).GUID;
+            Marshal.ThrowExceptionForHR(Marshal.QueryInterface(可检查对象, ref 接口标识, out 面板接口指针));
+            var result = new WinUISwapChainPanelNative(面板接口指针);
+            面板接口指针 = 0;
+            return result;
+        }
+        finally
+        {
+            if (面板接口指针 != 0) Marshal.Release(面板接口指针);
+            Marshal.Release(可检查对象);
+        }
     }
 
     private void 检查未释放()
     {
-        ObjectDisposedException.ThrowIf(已释放, this);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref 已释放) != 0, this);
     }
 
     private static Format 规范交换链格式(Format 格式) => 格式 switch
     {
-        Format.B8G8R8A8_Typeless => Format.B8G8R8A8_UNorm,
-        Format.R8G8B8A8_Typeless => Format.R8G8B8A8_UNorm,
-        Format.B8G8R8A8_UNorm or Format.B8G8R8A8_UNorm_SRgb or
-        Format.R8G8B8A8_UNorm or Format.R8G8B8A8_UNorm_SRgb => 格式,
+        Format.B8G8R8A8_Typeless or Format.B8G8R8A8_UNorm_SRgb => Format.B8G8R8A8_UNorm,
+        Format.R8G8B8A8_Typeless or Format.R8G8B8A8_UNorm_SRgb => Format.R8G8B8A8_UNorm,
+        Format.B8G8R8A8_UNorm or Format.R8G8B8A8_UNorm => 格式,
         _ => throw new NotSupportedException($"尚不支持 QEMU D3D11 纹理格式 {格式}。")
     };
 

@@ -305,12 +305,18 @@
                                 </StackPanel>
                             </Grid>
                             <Grid x:Name="DisplaySurface" Grid.Row="1">
-                                <Image
-                                    x:Name="DisplayImage"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch"
-                                    Stretch="Uniform"
-                                    Visibility="Collapsed" />
+                                <Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
+                                    <SwapChainPanel
+                                        x:Name="EmbeddedDisplayPanel"
+                                        IsTabStop="True"
+                                        KeyDown="EmbeddedDisplayPanel_KeyDown"
+                                        KeyUp="EmbeddedDisplayPanel_KeyUp"
+                                        PointerMoved="EmbeddedDisplayPanel_PointerMoved"
+                                        PointerPressed="EmbeddedDisplayPanel_PointerPressed"
+                                        PointerReleased="EmbeddedDisplayPanel_PointerReleased"
+                                        PointerWheelChanged="EmbeddedDisplayPanel_PointerWheelChanged"
+                                        Visibility="Collapsed" />
+                                </Viewbox>
                                 <StackPanel x:Name="DisplayFallback" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                                     <FontIcon FontSize="52" Foreground="#5C6673" Glyph="&#xE740;" />
                                     <TextBlock x:Name="DisplayStateText" HorizontalAlignment="Center" Foreground="{ThemeResource DisplayTextBrush}" />

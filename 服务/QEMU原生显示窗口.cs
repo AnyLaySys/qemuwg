@@ -5,7 +5,6 @@ namespace QemuWG.服务;
 
 public sealed partial class QEMU会话
 {
-    private const int SwHide = 0;
     private const int SwShow = 5;
     private const int SwRestore = 9;
 
@@ -31,33 +30,6 @@ public sealed partial class QEMU会话
         ShowWindow(window, IsIconic(window) ? SwRestore : SwShow);
         SetForegroundWindow(window);
         return 操作结果.Ok(T("display.detached", "已显示 QEMU 原生图形窗口"));
-    }
-
-    private static async Task 准备原生显示窗口(Session session)
-    {
-        if (!支持原生窗口(session.NativeDisplayBackend)) return;
-        try
-        {
-            for (var attempt = 0; attempt < 60 && session.IsActive; attempt++)
-            {
-                session.Process.Refresh();
-                var window = session.Process.MainWindowHandle;
-                if (window != 0 && IsWindow(window))
-                {
-                    session.NativeWindowHandle = window;
-                    ShowWindow(window, SwHide);
-                    return;
-                }
-                await Task.Delay(100, session.Lifetime.Token);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        catch (Exception exception)
-        {
-            应用日志.写("Prepare native QEMU display window failed: " + exception);
-        }
     }
 
     private static bool 支持原生窗口(string backend) =>

@@ -1,6 +1,8 @@
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Principal;
 using System.Text.Json;
+using System.Threading.Channels;
 using QemuWG.数据;
 using Tmds.DBus.Protocol;
 
@@ -47,7 +49,8 @@ public sealed record 指针位置(int 横坐标, int 纵坐标, bool 可见);
 /// </summary>
 public sealed class DBus显示传输 : IAsyncDisposable
 {
-    public const string QEMU显示参数 = "dbus,p2p=on,gl=on";
+    public const string QEMU显示参数 = "dbus,p2p=on";
+    private static readonly TimeSpan 连接超时 = TimeSpan.FromSeconds(8);
 
     private readonly object 同步锁 = new();
     private DBusConnection? 主连接;
@@ -75,7 +78,7 @@ public sealed class DBus显示传输 : IAsyncDisposable
 
     /// <summary>
     /// 把一个 AF_UNIX 套接字复制给 QEMU，并通过 QMP 将其接入 dbus-display。
-    /// QEMU 必须已使用 -display dbus,p2p=on,gl=on 启动。
+    /// QEMU 必须已使用 -display dbus,p2p=on 启动；显式使用 GL 显卡时再追加 gl=on。
     /// </summary>
     public async Task 连接(
         int qemu进程标识,
@@ -105,12 +108,12 @@ public sealed class DBus显示传输 : IAsyncDisposable
             await 确保QMP成功(
                 执行QMP,
                 "add_client",
-                JsonSerializer.Serialize(new { protocol = "dbus-display", fdname }),
+                JsonSerializer.Serialize(new { protocol = "@dbus-display", fdname }),
                 cancellationToken);
 
             connection = 创建客户端连接(套接字对.本地套接字!);
             套接字对 = 套接字对 with { 本地套接字 = null };
-            await connection.ConnectAsync();
+            await connection.ConnectAsync().AsTask().WaitAsync(连接超时, cancellationToken);
 
             lock (同步锁)
             {
@@ -145,17 +148,15 @@ public sealed class DBus显示传输 : IAsyncDisposable
         try
         {
             var handler = new 显示监听处理器(this);
-            listenerConnection = 创建客户端连接(套接字对.本地套接字!);
+            listenerConnection = 创建客户端连接(套接字对.本地套接字!, handler);
             套接字对 = 套接字对 with { 本地套接字 = null };
-            listenerConnection.AddMethodHandler(handler);
-
             var 连接任务 = listenerConnection.ConnectAsync().AsTask();
             var 注册任务 = 调用注册监听器(
                 main,
                 控制台标识,
                 套接字对.远程套接字信息,
                 cancellationToken);
-            await Task.WhenAll(连接任务, 注册任务);
+            await Task.WhenAll(连接任务, 注册任务).WaitAsync(连接超时, cancellationToken);
 
             lock (同步锁)
             {
@@ -171,6 +172,21 @@ public sealed class DBus显示传输 : IAsyncDisposable
             listenerConnection?.Dispose();
         }
     }
+
+    public Task 按下按键(uint 按键码, int 控制台标识 = 0, CancellationToken cancellationToken = default) =>
+        调用输入方法(控制台标识, "org.qemu.Display1.Keyboard", "Press", 按键码, null, cancellationToken);
+
+    public Task 释放按键(uint 按键码, int 控制台标识 = 0, CancellationToken cancellationToken = default) =>
+        调用输入方法(控制台标识, "org.qemu.Display1.Keyboard", "Release", 按键码, null, cancellationToken);
+
+    public Task 设置鼠标位置(uint 横坐标, uint 纵坐标, int 控制台标识 = 0, CancellationToken cancellationToken = default) =>
+        调用输入方法(控制台标识, "org.qemu.Display1.Mouse", "SetAbsPosition", 横坐标, 纵坐标, cancellationToken);
+
+    public Task 按下鼠标按钮(uint 按钮, int 控制台标识 = 0, CancellationToken cancellationToken = default) =>
+        调用输入方法(控制台标识, "org.qemu.Display1.Mouse", "Press", 按钮, null, cancellationToken);
+
+    public Task 释放鼠标按钮(uint 按钮, int 控制台标识 = 0, CancellationToken cancellationToken = default) =>
+        调用输入方法(控制台标识, "org.qemu.Display1.Mouse", "Release", 按钮, null, cancellationToken);
 
     /// <summary>
     /// 主连接使用的 QEMU PID。集成到会话后应在连接前设置。
@@ -188,20 +204,32 @@ public sealed class DBus显示传输 : IAsyncDisposable
     {
         DBusConnection? main;
         DBusConnection? listener;
+        显示监听处理器? handler;
         lock (同步锁)
         {
             if (已释放) return;
             已释放 = true;
             main = 主连接;
             listener = 监听连接;
+            handler = 监听处理器;
             主连接 = null;
             监听连接 = null;
             监听处理器 = null;
         }
 
+        收到D3D11纹理 = null;
+        更新D3D11纹理 = null;
+        收到共享映射 = null;
+        更新共享映射 = null;
+        收到位图 = null;
+        更新位图 = null;
+        停用显示 = null;
+        设置指针位置 = null;
+        定义指针图像 = null;
+        handler?.停止接收();
         listener?.Dispose();
+        if (handler is not null) await handler.DisposeAsync();
         main?.Dispose();
-        await Task.CompletedTask;
     }
 
     private static async Task 确保QMP成功(
@@ -215,10 +243,45 @@ public sealed class DBus显示传输 : IAsyncDisposable
             throw new InvalidOperationException($"QMP {命令} 失败：{result.Output}");
     }
 
-    private static DBusConnection 创建客户端连接(Socket socket)
+    private static DBusConnection 创建客户端连接(Socket socket, IPathMethodHandler? 预注册处理器 = null)
     {
         var stream = new NetworkStream(socket, ownsSocket: true);
-        return new DBusConnection(new 已连接流选项(stream));
+        if (预注册处理器 is null)
+            return new DBusConnection(new 已连接流选项(stream));
+
+        DBusConnection? connection = null;
+        var options = new 已连接流选项(stream, () => 预注册方法处理器(connection!, 预注册处理器));
+        connection = new DBusConnection(options);
+        return connection;
+    }
+
+    /// <summary>
+    /// Tmds.DBus.Protocol 0.94.2 只允许在 ConnectAsync 完成后调用 AddMethodHandler，
+    /// 但 QEMU 会在 D-Bus 认证的 BEGIN 后立即发送 Listener 方法，形成无法关闭的竞态。
+    /// 在 BEGIN 写入对端之前，把处理器放入当前版本库的内部路径表，确保首个方法已有接收者。
+    /// </summary>
+    private static void 预注册方法处理器(DBusConnection connection, IPathMethodHandler handler)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        var inner = typeof(DBusConnection).GetField("_connection", flags)?.GetValue(connection)
+                    ?? throw new InvalidOperationException("D-Bus 内部连接尚未创建，无法预注册显示处理器。");
+        var pathNodes = inner.GetType().GetField("_pathNodes", flags)?.GetValue(inner)
+                        ?? throw new MissingFieldException(inner.GetType().FullName, "_pathNodes");
+        var addMethod = pathNodes.GetType().GetMethod(
+                            "AddMethodHandler",
+                            flags,
+                            binder: null,
+                            types: [typeof(IPathMethodHandler)],
+                            modifiers: null)
+                        ?? throw new MissingMethodException(pathNodes.GetType().FullName, "AddMethodHandler");
+        try
+        {
+            addMethod.Invoke(pathNodes, [handler]);
+        }
+        catch (TargetInvocationException exception) when (exception.InnerException is not null)
+        {
+            throw exception.InnerException;
+        }
     }
 
     private static async Task 调用注册监听器(
@@ -229,8 +292,43 @@ public sealed class DBus显示传输 : IAsyncDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         var message = 创建注册监听器消息(connection, 控制台标识, 远程套接字信息);
-        await connection.CallMethodAsync(message);
+        await connection.CallMethodAsync(message).WaitAsync(连接超时, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
+    }
+
+    private async Task 调用输入方法(
+        int 控制台标识,
+        string 接口,
+        string 成员,
+        uint 第一个参数,
+        uint? 第二个参数,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        DBusConnection connection;
+        lock (同步锁) connection = 主连接 ?? throw new InvalidOperationException("D-Bus 显示传输尚未连接。");
+        var message = 创建输入消息(connection, 控制台标识, 接口, 成员, 第一个参数, 第二个参数);
+        await connection.CallMethodAsync(message).WaitAsync(连接超时, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+    }
+
+    private static MessageBuffer 创建输入消息(
+        DBusConnection connection,
+        int 控制台标识,
+        string 接口,
+        string 成员,
+        uint 第一个参数,
+        uint? 第二个参数)
+    {
+        using var writer = connection.GetMessageWriter();
+        writer.WriteMethodCallHeader(
+            path: $"/org/qemu/Display1/Console_{控制台标识}",
+            @interface: 接口,
+            member: 成员,
+            signature: 第二个参数.HasValue ? "uu" : "u");
+        writer.WriteUInt32(第一个参数);
+        if (第二个参数.HasValue) writer.WriteUInt32(第二个参数.Value);
+        return writer.CreateMessage();
     }
 
     private static MessageBuffer 创建注册监听器消息(
@@ -293,14 +391,14 @@ public sealed class DBus显示传输 : IAsyncDisposable
 
     private sealed record 已复制套接字(Socket? 本地套接字, byte[] 远程套接字信息);
 
-    private sealed class 已连接流选项(Stream stream) : DBusConnectionOptions
+    private sealed class 已连接流选项(Stream stream, Action? 认证完成前操作 = null) : DBusConnectionOptions
     {
         protected override ValueTask<SetupResult> SetupAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return ValueTask.FromResult(new SetupResult
             {
-                ConnectionStream = stream,
+                ConnectionStream = 认证完成前操作 is null ? stream : new 认证门控流(stream, 认证完成前操作),
                 UserId = WindowsIdentity.GetCurrent().User?.Value
             });
         }
@@ -311,7 +409,69 @@ public sealed class DBus显示传输 : IAsyncDisposable
         }
     }
 
-    private sealed class 显示监听处理器(DBus显示传输 owner) : IPathMethodHandler
+    private sealed class 认证门控流(Stream stream, Action 认证完成前操作) : Stream
+    {
+        private Action? 待执行操作 = 认证完成前操作;
+
+        public override bool CanRead => stream.CanRead;
+        public override bool CanSeek => stream.CanSeek;
+        public override bool CanWrite => stream.CanWrite;
+        public override long Length => stream.Length;
+        public override long Position { get => stream.Position; set => stream.Position = value; }
+        public override void Flush() => stream.Flush();
+        public override Task FlushAsync(CancellationToken cancellationToken) => stream.FlushAsync(cancellationToken);
+        public override int Read(byte[] buffer, int offset, int count) => stream.Read(buffer, offset, count);
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
+            stream.ReadAsync(buffer, cancellationToken);
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
+            stream.ReadAsync(buffer, offset, count, cancellationToken);
+        public override long Seek(long offset, SeekOrigin origin) => stream.Seek(offset, origin);
+        public override void SetLength(long value) => stream.SetLength(value);
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            尝试预注册(buffer.AsSpan(offset, count));
+            stream.Write(buffer, offset, count);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            尝试预注册(buffer);
+            stream.Write(buffer);
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            尝试预注册(buffer.AsSpan(offset, count));
+            return stream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            尝试预注册(buffer.Span);
+            return stream.WriteAsync(buffer, cancellationToken);
+        }
+
+        private void 尝试预注册(ReadOnlySpan<byte> buffer)
+        {
+            if (!buffer.SequenceEqual("BEGIN\r\n"u8)) return;
+            Interlocked.Exchange(ref 待执行操作, null)?.Invoke();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) stream.Dispose();
+            base.Dispose(disposing);
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            await stream.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
+    }
+
+    private sealed class 显示监听处理器 : IPathMethodHandler, IAsyncDisposable
     {
         private static readonly string[] 接口 =
         [
@@ -319,14 +479,78 @@ public sealed class DBus显示传输 : IAsyncDisposable
             "org.qemu.Display1.Listener.Win32.Map"
         ];
 
+        private readonly DBus显示传输 owner;
+        private readonly Channel<MethodContext> 队列;
+        private readonly Task 队列任务;
+
+        public 显示监听处理器(DBus显示传输 owner)
+        {
+            this.owner = owner;
+            队列 = Channel.CreateUnbounded<MethodContext>(new UnboundedChannelOptions
+            {
+                SingleReader = true,
+                SingleWriter = false,
+                AllowSynchronousContinuations = false
+            });
+            队列任务 = Task.Run(处理队列);
+        }
+
         public string Path => "/org/qemu/Display1/Listener";
         public bool HandlesChildPaths => false;
 
         public ValueTask HandleMethodAsync(MethodContext context)
         {
+            // Properties.GetAll 属于 Listener 建立握手，必须立即回复；它不触碰 GPU 或界面。
+            if (context.Request.InterfaceAsString == "org.freedesktop.DBus.Properties")
+            {
+                try
+                {
+                    处理属性(context);
+                }
+                catch (Exception exception)
+                {
+                    try
+                    {
+                        if (!context.ReplySent)
+                            context.ReplyError("org.qemu.Display1.Listener.Error", exception.Message);
+                    }
+                    catch { }
+                }
+                return default;
+            }
+
             context.DisposesAsynchronously = true;
-            _ = 处理(context);
+            // 显示调用交给单读者队列：Tmds 接收循环立即返回，不会被 GPU 或界面调度阻塞。
+            // MethodContext 由队列持有，只有渲染完成（包括 KeyedMutex ReleaseSync）后才回复并释放，
+            // 因而不会为了异步化而破坏 QEMU 的纹理互斥时序。
+            if (!队列.Writer.TryWrite(context))
+            {
+                try
+                {
+                    context.ReplyError("org.qemu.Display1.Listener.Error", "显示监听器已停止接收请求。");
+                }
+                catch { }
+                finally
+                {
+                    context.Dispose();
+                }
+            }
             return default;
+        }
+
+        public void 停止接收() => 队列.Writer.TryComplete();
+
+        public async ValueTask DisposeAsync()
+        {
+            停止接收();
+            try { await 队列任务; }
+            catch { }
+        }
+
+        private async Task 处理队列()
+        {
+            await foreach (var context in 队列.Reader.ReadAllAsync())
+                await 处理(context);
         }
 
         private async Task 处理(MethodContext context)
@@ -336,9 +560,6 @@ public sealed class DBus显示传输 : IAsyncDisposable
                 var request = context.Request;
                 switch (request.InterfaceAsString)
                 {
-                    case "org.freedesktop.DBus.Properties":
-                        处理属性(context);
-                        return;
                     case "org.qemu.Display1.Listener":
                         await 处理基础显示(context);
                         return;
@@ -355,11 +576,20 @@ public sealed class DBus显示传输 : IAsyncDisposable
             }
             catch (Exception exception)
             {
-                context.ReplyError("org.qemu.Display1.Listener.Error", exception.Message);
+                try
+                {
+                    if (!context.ReplySent)
+                        context.ReplyError("org.qemu.Display1.Listener.Error", exception.Message);
+                }
+                catch
+                {
+                    // 对端可能已在回调执行期间断开；连接关闭即是完整的错误传播。
+                }
             }
             finally
             {
-                context.Dispose();
+                try { context.Dispose(); }
+                catch { }
             }
         }
 

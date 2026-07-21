@@ -76,6 +76,8 @@ public sealed partial class QEMU会话
                 var exitLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] QEMU exited with code {尝试获取退出码(process)}.";
                 AppendLog(exitLine);
                 session.Lifetime.Cancel();
+                if (session.DisplayTransport is not null)
+                    _ = session.DisplayTransport.DisposeAsync().AsTask();
                 lock (gate)
                 {
                     if (sessions.TryGetValue(vm.Id, out var current) && ReferenceEquals(current, session))
@@ -89,7 +91,6 @@ public sealed partial class QEMU会话
             if (!process.Start()) return 操作结果.Fail(T("session.startFailed", "QEMU 启动失败"));
             session = new Session(process, port, guestAgentPort, displayPort, vm.DisplayBackend);
             lock (gate) sessions[vm.Id] = session;
-            _ = 准备原生显示窗口(session);
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             vm.IsRunning = true;
@@ -198,33 +199,36 @@ public sealed partial class QEMU会话
         if (!string.IsNullOrWhiteSpace(vm.BootOrder)) arguments.AddRange(["-boot", $"order={vm.BootOrder}"]);
         if (!string.IsNullOrWhiteSpace(vm.RtcBase)) arguments.AddRange(["-rtc", $"base={vm.RtcBase}"]);
 
-        arguments.AddRange(["-display", "dbus,p2p=on,gl=on"]);
-        if (!string.IsNullOrWhiteSpace(vm.DisplayBackend)
-            && !string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(vm.DisplayBackend, "none", StringComparison.OrdinalIgnoreCase))
+        var useDbusDisplay = string.IsNullOrWhiteSpace(vm.DisplayBackend)
+                             || string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase);
+        if (useDbusDisplay)
+        {
+            var dbusDisplay = DBus显示传输.QEMU显示参数;
+            if (vm.VideoDevice.EndsWith("-gl", StringComparison.OrdinalIgnoreCase)) dbusDisplay += ",gl=on";
+            arguments.AddRange(["-display", dbusDisplay]);
+        }
+        else if (!string.Equals(vm.DisplayBackend, "none", StringComparison.OrdinalIgnoreCase))
         {
             if (string.Equals(vm.DisplayBackend, "vnc", StringComparison.OrdinalIgnoreCase))
                 arguments.AddRange(["-vnc", $"127.0.0.1:{displayPort - 5900},share=force-shared"]);
             else
             {
-                var nativeDisplay = vm.DisplayBackend;
-                if (nativeDisplay.StartsWith("gtk", StringComparison.OrdinalIgnoreCase)
-                    && !nativeDisplay.Contains("window-close=", StringComparison.OrdinalIgnoreCase))
-                    nativeDisplay += ",window-close=off";
-                arguments.AddRange(["-display", nativeDisplay]);
+                arguments.AddRange(["-display", vm.DisplayBackend]);
             }
         }
 
         var videoDevice = vm.VideoDevice;
-        if (string.Equals(videoDevice, "auto", StringComparison.OrdinalIgnoreCase)
-            && (string.Equals(vm.Arch, "x86_64", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(vm.Arch, "i386", StringComparison.OrdinalIgnoreCase)))
-            videoDevice = "virtio-vga-gl";
         if (!string.IsNullOrWhiteSpace(videoDevice) && videoDevice != "auto") arguments.AddRange(["-device", videoDevice]);
-        if (vm.NetworkMode != "none")
+        if (string.Equals(vm.NetworkMode, "none", StringComparison.OrdinalIgnoreCase))
         {
-            if (vm.NetworkModel == "auto") arguments.AddRange(["-nic", "user"]);
-            else arguments.AddRange(["-nic", $"user,model={vm.NetworkModel}"]);
+            arguments.AddRange(["-nic", "none"]);
+        }
+        else if (!string.IsNullOrWhiteSpace(vm.NetworkMode))
+        {
+            var network = vm.NetworkMode.Trim();
+            if (!string.IsNullOrWhiteSpace(vm.NetworkModel) && !string.Equals(vm.NetworkModel, "auto", StringComparison.OrdinalIgnoreCase))
+                network += $",model={vm.NetworkModel.Trim()}";
+            arguments.AddRange(["-nic", network]);
         }
         if (vm.AudioBackend == "none") arguments.AddRange(["-audiodev", "driver=none,id=audio0"]);
         else if (!string.IsNullOrWhiteSpace(vm.AudioBackend)) arguments.AddRange(["-audiodev", $"driver={vm.AudioBackend},id=audio0"]);
@@ -252,9 +256,9 @@ public sealed partial class QEMU会话
         }
         foreach (var option in vm.QemuOpts)
         {
-            var name = option.Name.Trim().TrimStart('-');
+            var name = option.Name.Trim();
             if (name.Length == 0) continue;
-            arguments.Add("-" + name);
+            arguments.Add(name.StartsWith('-') ? name : "-" + name);
             if (!string.IsNullOrWhiteSpace(option.Value)) arguments.Add(option.Value.Trim());
         }
         arguments.AddRange(解析命令行(vm.ExtraArgs));
@@ -331,6 +335,9 @@ public sealed partial class QEMU会话
         public int DisplayPort { get; } = displayPort;
         public string NativeDisplayBackend { get; } = nativeDisplayBackend;
         public nint NativeWindowHandle { get; set; }
+        public SemaphoreSlim DisplayConnectionGate { get; } = new(1, 1);
+        public DBus显示传输? DisplayTransport { get; set; }
+        public bool DisplayListenerRegistered { get; set; }
         public CancellationTokenSource Lifetime { get; } = new();
         public bool IsActive
         {

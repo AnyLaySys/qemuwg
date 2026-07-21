@@ -98,12 +98,14 @@
                                     x:Name="ArchCombo"
                                     HorizontalAlignment="Stretch"
                                     DisplayMemberPath="DisplayName"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
                                     MaxDropDownHeight="240"
                                     SelectionChanged="ArchitectureCombo_SelectionChanged" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.machine], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="MachineCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" />
+                                <ComboBox x:Name="MachineCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                             <StackPanel Grid.Row="1">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.firmware], Source={StaticResource Strings}}" />
@@ -114,7 +116,7 @@
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="1">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.accelerator], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="AcceleratorCombo" HorizontalAlignment="Stretch" MaxDropDownHeight="240" />
+                                <ComboBox x:Name="AcceleratorCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                         </Grid>
                         <TextBlock x:Name="CapsInfoText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
@@ -129,7 +131,7 @@
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuModel], Source={StaticResource Strings}}" />
-                            <ComboBox x:Name="CpuModelCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" />
+                            <ComboBox x:Name="CpuModelCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuCount], Source={StaticResource Strings}}" />
@@ -201,11 +203,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel>
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.displayBackend], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="DisplayCombo" HorizontalAlignment="Stretch" MaxDropDownHeight="240" />
+                                <ComboBox x:Name="DisplayCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.video], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="VideoCombo" HorizontalAlignment="Stretch" MaxDropDownHeight="240" />
+                                <ComboBox x:Name="VideoCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -219,14 +221,11 @@
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.connection], Source={StaticResource Strings}}" />
-                            <ComboBox x:Name="NetworkModeCombo" HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="user" Tag="user" />
-                                <ComboBoxItem Content="none" Tag="none" />
-                            </ComboBox>
+                            <ComboBox x:Name="NetworkModeCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.nic], Source={StaticResource Strings}}" />
-                            <ComboBox x:Name="NetworkModelCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" />
+                            <ComboBox x:Name="NetworkModelCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -244,15 +243,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel>
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.soundCard], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="AudioDeviceCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" />
+                                <ComboBox x:Name="AudioDeviceCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.audioBackend], Source={StaticResource Strings}}" />
-                                <ComboBox x:Name="AudioCombo" HorizontalAlignment="Stretch">
-                                    <x:String>none</x:String>
-                                    <x:String>dsound</x:String>
-                                    <x:String>sdl</x:String>
-                                </ComboBox>
+                                <ComboBox x:Name="AudioCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>

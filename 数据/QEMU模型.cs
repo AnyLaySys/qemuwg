@@ -12,7 +12,8 @@ public sealed class QEMU选项
 {
     public string Name { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
-    public string DisplayText => string.IsNullOrWhiteSpace(Value) ? $"-{Name}" : $"-{Name} {Value}";
+    public string ArgumentName => Name.StartsWith('-') ? Name : $"-{Name}";
+    public string DisplayText => string.IsNullOrWhiteSpace(Value) ? ArgumentName : $"{ArgumentName} {Value}";
 }
 
 public sealed class QEMU设备 : System.ComponentModel.INotifyPropertyChanged
@@ -62,7 +63,9 @@ public sealed class QEMU能力
     public IReadOnlyList<string> Accelerators { get; init; } = [];
     public IReadOnlyList<string> DisplayBackends { get; init; } = [];
     public IReadOnlyList<string> VideoDevices { get; init; } = [];
+    public IReadOnlyList<string> NetworkBackends { get; init; } = [];
     public IReadOnlyList<string> NetworkDevices { get; init; } = [];
+    public IReadOnlyList<string> AudioBackends { get; init; } = [];
     public IReadOnlyList<string> AudioDevices { get; init; } = [];
     public IReadOnlyList<string> AllDevices { get; init; } = [];
     public IReadOnlyList<QEMU命令选项> CmdOptions { get; init; } = [];

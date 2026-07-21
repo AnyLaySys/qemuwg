@@ -36,12 +36,14 @@ public sealed partial class 主窗
         DetailsView.Visibility = Visibility.Visible;
         VmNameText.Text = selectedVm.Name;
         VmStatusText.Text = selectedVm.StatusText;
-        DisplayBackendText.Text = string.Equals(selectedVm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
-            ? "D-Bus · D3D11"
-            : $"D-Bus · D3D11 + {selectedVm.DisplayBackend.ToUpperInvariant()}";
-        DisplayStateText.Text = selectedVm.IsRunning
-            ? T("main.displayRunning", "虚拟机显示器已连接")
-            : T("main.displayOff", "虚拟机已关机");
+        var useEmbeddedDisplay = string.Equals(selectedVm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase);
+        DisplayBackendText.Text = useEmbeddedDisplay ? "D-Bus · D3D11" : selectedVm.DisplayBackend.ToUpperInvariant();
+        DetachDisplayButton.Visibility = useEmbeddedDisplay ? Visibility.Collapsed : Visibility.Visible;
+        DisplayStateText.Text = !selectedVm.IsRunning
+            ? T("main.displayOff", "虚拟机已关机")
+            : useEmbeddedDisplay
+                ? T("main.displayConnecting", "正在连接虚拟机显示器…")
+                : T("main.displayNativeWindow", "虚拟机正在 QEMU 原生窗口中显示");
         FooterStatusText.Text = selectedVm.StatusText;
         VmPathText.Text = selectedVm.CfgPath;
         StatusDot.Fill = new SolidColorBrush(selectedVm.IsRunning ? ColorHelper.FromArgb(255, 67, 184, 119) : ColorHelper.FromArgb(255, 122, 128, 136));
@@ -57,7 +59,7 @@ public sealed partial class 主窗
         DeviceSummaries.Add(new 设备摘要("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)));
         DeviceSummaries.Add(new 设备摘要("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)));
         DeviceSummaries.Add(new 设备摘要("\uE7F4", T("device.display", "显示"),
-            $"dbus + {selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
+            $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
         DeviceSummaries.Add(new 设备摘要("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)));
         DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}", ColorHelper.FromArgb(255, 57, 153, 210)));
         DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.installMedia", "安装介质"),
@@ -263,12 +265,12 @@ public sealed partial class 主窗
         }
         try
         {
-            var dialog = new 来宾代理界面(WindowNative.GetWindowHandle(this), sessions, selectedVm) { XamlRoot = RootXamlRoot };
+            var dialog = new 来宾系统管理(WindowNative.GetWindowHandle(this), sessions, selectedVm) { XamlRoot = RootXamlRoot };
             await ShowDialogAsync(dialog);
         }
         catch (Exception exception)
         {
-            应用日志.写("来宾代理界面 failed: " + exception);
+            应用日志.写("来宾系统管理 failed: " + exception);
             await ShowMessageAsync(
                 T("dialog.operationFailed", "操作失败"),
                 string.Format(T("guestAgent.openFailed", "无法打开 Guest Agent：{0}"), exception.Message));

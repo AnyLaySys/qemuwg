@@ -20,7 +20,7 @@ public sealed class 虚拟机配置 : INotifyPropertyChanged
     public string MachineType { get; set; } = string.Empty;
     public string Accelerator { get; set; } = "tcg";
     public string CpuModel { get; set; } = "default";
-    public string DisplayBackend { get; set; } = "gtk";
+    public string DisplayBackend { get; set; } = "dbus";
     public string VideoDevice { get; set; } = "auto";
     public string AudioBackend { get; set; } = "none";
     public string AudioDevice { get; set; } = "auto";

@@ -19,7 +19,7 @@ public sealed partial class 主窗
     {
         try
         {
-            应用日志.写("Opening embedded QEMU工具界面");
+            应用日志.写("Opening embedded QEMU附加功能");
             ShowToolsView();
         }
         catch (Exception exception)
@@ -37,7 +37,7 @@ public sealed partial class 主窗
         LoadingView.Visibility = Visibility.Collapsed;
         EmptyView.Visibility = Visibility.Collapsed;
         DetailsView.Visibility = Visibility.Collapsed;
-        toolsView ??= new QEMU工具界面(WindowNative.GetWindowHandle(this), qemu, toolSessions);
+        toolsView ??= new QEMU附加功能(WindowNative.GetWindowHandle(this), qemu, toolSessions);
         ToolsHost.Content = toolsView;
         ToolsHost.Visibility = Visibility.Visible;
     }

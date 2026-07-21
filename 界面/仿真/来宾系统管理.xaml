@@ -1,5 +1,5 @@
 <ContentDialog
-    x:Class="QemuWG.界面.来宾代理界面"
+    x:Class="QemuWG.界面.来宾系统管理"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:数据="using:QemuWG.数据"

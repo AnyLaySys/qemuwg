@@ -11,7 +11,7 @@ using WinRT.Interop;
 
 namespace QemuWG.界面;
 
-public sealed partial class 来宾代理界面 : ContentDialog
+public sealed partial class 来宾系统管理 : ContentDialog
 {
     private const int FileChunkSize = 768 * 1024;
     private static readonly HashSet<string> ConfirmedCommands = new(StringComparer.OrdinalIgnoreCase)
@@ -29,7 +29,7 @@ public sealed partial class 来宾代理界面 : ContentDialog
     private readonly List<来宾代理命令> commands = [];
     private bool confirmationPending;
 
-    public 来宾代理界面(nint ownerHandle, QEMU会话 sessions, 虚拟机配置 machine)
+    public 来宾系统管理(nint ownerHandle, QEMU会话 sessions, 虚拟机配置 machine)
     {
         InitializeComponent();
         对话框布局.EnableAdaptiveSizing(this);
