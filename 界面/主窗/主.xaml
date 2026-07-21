@@ -1,0 +1,331 @@
+<Window
+    x:Class="QemuWG.主窗"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:数据="using:QemuWG.数据">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="BaseAlt" />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid" SizeChanged="RootGrid_SizeChanged">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="180" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid x:Name="TitleBarDragRegion" Grid.ColumnSpan="2" Background="Transparent" />
+
+        <Grid Grid.Row="1" Grid.Column="0" Background="{ThemeResource SidebarBackgroundBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Margin="12,12,12,8" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    x:Name="SidebarTitleText"
+                    VerticalAlignment="Center"
+                    FontSize="15"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource SidebarTextBrush}"
+                    Text="{Binding [main.virtualMachines], Source={StaticResource Strings}}"
+                    TextTrimming="CharacterEllipsis" />
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+                    <Button
+                        Click="QemuTools_Click"
+                        CornerRadius="6"
+                        ToolTipService.ToolTip="{Binding [main.qemuTools], Source={StaticResource Strings}}">
+                        <FontIcon Foreground="#2AA7A1" Glyph="&#xE90F;" />
+                    </Button>
+                    <Button
+                        Click="GlobalDiskManager_Click"
+                        CornerRadius="6"
+                        ToolTipService.ToolTip="{Binding [main.diskManager], Source={StaticResource Strings}}">
+                        <FontIcon Foreground="#DF9835" Glyph="&#xE958;" />
+                    </Button>
+                    <Button
+                        x:Name="NewVmButton"
+                        Click="NewVmButton_Click"
+                        CornerRadius="6"
+                        Style="{StaticResource AccentButtonStyle}"
+                        ToolTipService.ToolTip="{Binding [main.newVm], Source={StaticResource Strings}}">
+                        <SymbolIcon Symbol="Add" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <ListView
+                x:Name="VmList"
+                Grid.Row="1"
+                Margin="8,0"
+                Background="Transparent"
+                BorderThickness="0"
+                IsItemClickEnabled="True"
+                ItemClick="VmList_ItemClick"
+                ItemsSource="{x:Bind Machines}"
+                SelectionChanged="VmList_SelectionChanged"
+                SelectionMode="Single">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Margin" Value="0,2" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="6" />
+                        <Setter Property="MinHeight" Value="48" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="数据:虚拟机配置">
+                        <Grid Padding="10,6" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border
+                                Width="30"
+                                Height="30"
+                                Background="{ThemeResource VmIconBackgroundBrush}"
+                                CornerRadius="6">
+                                <FontIcon Foreground="{ThemeResource VmIconForegroundBrush}" Glyph="&#xE7F8;" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                <TextBlock
+                                    Foreground="{ThemeResource SidebarTextBrush}"
+                                    MaxLines="1"
+                                    Text="{x:Bind Name}" />
+                                <TextBlock
+                                    FontSize="11"
+                                    Foreground="{ThemeResource SidebarSecondaryTextBrush}"
+                                    Text="{x:Bind StatusText, Mode=OneWay}" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <StackPanel Grid.Row="2" Margin="8,8,8,10" Spacing="4">
+                <Button
+                    x:Name="SettingsButton"
+                    HorizontalContentAlignment="Left"
+                    Click="SettingsButton_Click"
+                    CornerRadius="6"
+                    Foreground="{ThemeResource SidebarTextBrush}"
+                    Background="Transparent">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <SymbolIcon Symbol="Setting" />
+                        <TextBlock Text="{Binding [main.settings], Source={StaticResource Strings}}" />
+                    </StackPanel>
+                </Button>
+                <Grid Padding="10,6" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource SidebarTextBrush}"
+                        Text="QemuWG" />
+                    <TextBlock
+                        x:Name="QemuVersionText"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        FontSize="10"
+                        Foreground="{ThemeResource SidebarSecondaryTextBrush}"
+                        TextAlignment="Right"
+                        TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid x:Name="LoadingView">
+                <ProgressRing IsActive="True" />
+            </Grid>
+
+            <Grid x:Name="EmptyView" Visibility="Collapsed">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                    <FontIcon FontSize="42" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Glyph="&#xE7F8;" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding [main.selectVm], Source={StaticResource Strings}}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="DetailsView" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="20,10,18,6" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                        <TextBlock x:Name="VmNameText" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="VmStatusText" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                        <Button x:Name="StartButton" Click="StartButton_Click" CornerRadius="6" Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <SymbolIcon Symbol="Play" />
+                                <TextBlock Text="{Binding [main.start], Source={StaticResource Strings}}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ShutdownButton" Click="ShutdownButton_Click" CornerRadius="6" ToolTipService.ToolTip="{Binding [main.shutdown], Source={StaticResource Strings}}">
+                            <FontIcon Glyph="&#xE7E8;" />
+                        </Button>
+                        <Button x:Name="EditButton" Click="EditButton_Click" CornerRadius="6" ToolTipService.ToolTip="{Binding [main.editConfig], Source={StaticResource Strings}}">
+                            <SymbolIcon Symbol="Edit" />
+                        </Button>
+                        <Button x:Name="MoreButton" CornerRadius="6" ToolTipService.ToolTip="{Binding [main.more], Source={StaticResource Strings}}">
+                            <SymbolIcon Symbol="More" />
+                            <Button.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Click="OpenFolder_Click" Text="{Binding [main.openVmFolder], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Folder" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="OpenLog_Click" Text="{Binding [main.openQemuLog], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Document" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="DiskManager_Click" Text="{Binding [main.diskManager], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE958;" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="QmpConsole_Click" Text="{Binding [main.qmpConsole], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE756;" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="GuestAgent_Click" Text="{Binding [main.guestAgent], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE770;" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Click="ForceStop_Click" Text="{Binding [main.forceStop], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Stop" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="DeleteButton_Click" Text="{Binding [main.deleteVm], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Delete" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="20,6,18,18" ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.32*" />
+                        <ColumnDefinition Width="0.68*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="44" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Margin="14,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding [main.configuration], Source={StaticResource Strings}}" />
+                            <ListView
+                                x:Name="DeviceList"
+                                Grid.Row="1"
+                                Padding="6,0,6,6"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                IsItemClickEnabled="False"
+                                ItemsSource="{x:Bind DeviceSummaries}"
+                                SelectionMode="None">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,1" />
+                                        <Setter Property="CornerRadius" Value="6" />
+                                        <Setter Property="MinHeight" Value="48" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="数据:设备摘要">
+                                        <Grid Padding="9,5" ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <FontIcon VerticalAlignment="Center" FontSize="16" Foreground="{x:Bind IconBrush}" Glyph="{x:Bind Glyph}" />
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Title}" />
+                                                <TextBlock MaxLines="1" Text="{x:Bind Value}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        Background="{ThemeResource DisplayBackgroundBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="44" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="38" />
+                            </Grid.RowDefinitions>
+                            <Grid Padding="14,0">
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding [main.display], Source={StaticResource Strings}}" />
+                                <TextBlock x:Name="DisplayBackendText" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Grid>
+                            <Grid x:Name="DisplaySurface" Grid.Row="1">
+                                <Image
+                                    x:Name="DisplayImage"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Stretch="Uniform"
+                                    Visibility="Collapsed" />
+                                <StackPanel x:Name="DisplayFallback" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                    <FontIcon FontSize="52" Foreground="#5C6673" Glyph="&#xE740;" />
+                                    <TextBlock x:Name="DisplayStateText" HorizontalAlignment="Center" Foreground="{ThemeResource DisplayTextBrush}" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="2" Padding="12,0" Background="{ThemeResource DisplayFooterBrush}" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.32*" />
+                                    <ColumnDefinition Width="0.68*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid VerticalAlignment="Center" ColumnSpacing="7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="#7A8088" />
+                                    <TextBlock x:Name="FooterStatusText" Grid.Column="1" FontSize="11" Foreground="{ThemeResource DisplayTextBrush}" TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                                <TextBlock x:Name="VmPathText" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontSize="10" Foreground="#7F8791" TextAlignment="Right" TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+            <ContentControl x:Name="ToolsHost" Visibility="Collapsed" />
+        </Grid>
+    </Grid>
+</Window>

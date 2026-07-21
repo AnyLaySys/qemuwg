@@ -1,0 +1,500 @@
+{
+  "common.cancel": "Cancel",
+  "common.close": "Close",
+  "common.done": "Done",
+  "common.create": "Create",
+  "common.save": "Save",
+  "common.execute": "Run",
+  "common.confirmExecute": "Confirm",
+  "common.output": "Output",
+  "common.on": "On",
+  "common.off": "Off",
+  "main.virtualMachines": "Virtual machines",
+  "main.diskManager": "Disk manager",
+  "main.qemuTools": "QEMU Toolbox",
+  "main.qmpConsole": "Virtual Machine Control",
+  "main.guestAgent": "Guest System Management",
+  "main.newVm": "New virtual machine",
+  "main.settings": "Settings",
+  "main.selectVm": "Select a virtual machine",
+  "main.start": "Start",
+  "main.shutdown": "Shut down",
+  "main.editConfig": "Edit configuration",
+  "main.more": "More",
+  "main.openVmFolder": "Open virtual machine folder",
+  "main.openQemuLog": "Open QEMU log",
+  "main.forceStop": "Force stop",
+  "main.deleteVm": "Delete virtual machine",
+  "main.configuration": "Configuration",
+  "main.display": "Display",
+  "main.displayRunning": "Virtual machine display connected",
+  "main.displayOff": "Virtual machine is powered off",
+  "device.processor": "Processor",
+  "device.cpuValue": "{0} cores · {1}",
+  "device.memory": "Memory",
+  "device.disk": "Disk",
+  "device.network": "Network",
+  "device.display": "Display",
+  "device.sound": "Sound card",
+  "device.platform": "Platform",
+  "device.installMedia": "Installation media",
+  "device.notConnected": "Not connected",
+  "device.additional": "Additional devices",
+  "device.additionalValue": "{0} devices · {1}",
+  "dialog.qemuMissingTitle": "QEMU not found",
+  "dialog.qemuMissingMessage": "Install QEMU or add its directory to PATH.",
+  "dialog.forceStopTitle": "Force stop this virtual machine?",
+  "dialog.forceStopMessage": "Unsaved data may be lost.",
+  "dialog.cannotDeleteTitle": "Cannot delete",
+  "dialog.closeVmFirst": "Shut down the virtual machine first.",
+  "dialog.deleteTitle": "Delete “{0}”?",
+  "dialog.deleteMessage": "The virtual machine folder will be moved to the Recycle Bin.",
+  "dialog.noLogTitle": "No log available",
+  "dialog.noLogMessage": "This virtual machine has not produced a QEMU log yet.",
+  "dialog.operationFailed": "Operation failed",
+  "dialog.shutdownTimeoutTitle": "The virtual machine did not respond to shutdown",
+  "dialog.shutdownTimeoutMessage": "The guest may not have started, may not support ACPI shutdown, or may still be shutting down. Keep waiting or force stop it.",
+  "dialog.keepWaiting": "Keep waiting",
+  "settings.title": "Settings",
+  "settings.library": "Virtual machine library",
+  "disk.manager": "Disk Manager",
+  "vmEditor.newTitle": "New virtual machine",
+  "vmEditor.editTitle": "Edit virtual machine",
+  "vmEditor.capabilityLoading": "Reading QEMU capabilities for this architecture…",
+  "vmEditor.capabilitySummary": "{0} · {1} machines · {2} CPUs · {3} sound devices · {4} devices",
+  "vmEditor.capabilityFailed": "Capability query failed: {0}",
+  "vmEditor.validation.name": "Enter a virtual machine name.",
+  "vmEditor.validation.architecture": "Select an architecture.",
+  "vmEditor.validation.location": "Select a save location.",
+  "vmEditor.validation.memory": "Memory must be at least 256 MB.",
+  "vmEditor.validation.cpu": "At least one processor is required.",
+  "vmEditor.validation.disk": "Disk size must be at least 1 GB.",
+  "vmEditor.validation.media": "The installation image does not exist.",
+  "vmEditor.name": "Virtual machine name",
+  "vmEditor.nameExample": "For example, Windows 11",
+  "vmEditor.location": "Save location",
+  "vmEditor.chooseLocation": "Choose location",
+  "vmEditor.platform": "Platform",
+  "vmEditor.architecture": "Architecture",
+  "vmEditor.machine": "Machine type",
+  "vmEditor.firmware": "Firmware",
+  "vmEditor.accelerator": "Accelerator",
+  "vmEditor.processor": "Processor",
+  "vmEditor.cpuModel": "CPU model",
+  "vmEditor.cpuCount": "Processor count",
+  "vmEditor.memory": "Memory",
+  "vmEditor.capacityMb": "Capacity (MB)",
+  "vmEditor.storage": "Storage",
+  "vmEditor.systemDiskGb": "System disk (GB)",
+  "vmEditor.installMedia": "Installation media",
+  "vmEditor.browseMedia": "Browse installation media",
+  "vmEditor.mediaPlaceholder": "ISO / IMG / QCOW2",
+  "vmEditor.display": "Display",
+  "vmEditor.displayBackend": "Display backend",
+  "vmEditor.video": "Video adapter",
+  "vmEditor.network": "Network",
+  "vmEditor.connection": "Connection",
+  "vmEditor.nic": "Network adapter",
+  "vmEditor.audio": "Audio",
+  "vmEditor.soundCard": "Sound card",
+  "vmEditor.audioBackend": "Audio backend",
+  "vmEditor.advanced": "Advanced",
+  "vmEditor.bootOrder": "Boot order",
+  "vmEditor.rtc": "Real-time clock",
+  "vmEditor.extraArgs": "Additional QEMU arguments",
+  "vmEditor.guestAgent": "Enable QEMU Guest Agent channel",
+  "vmEditor.extraArgsExample": "For example, -usb -device usb-tablet",
+  "vmEditor.qemuOptions": "All QEMU Startup Options",
+  "vmEditor.optionName": "Option",
+  "vmEditor.optionValue": "Value",
+  "vmEditor.addOption": "Add option",
+  "vmEditor.removeOption": "Remove option",
+  "vmEditor.devices": "Additional Devices"
+  ,"vmEditor.deviceModel": "QEMU device model"
+  ,"vmEditor.addDevice": "Add device"
+  ,"vmEditor.deviceProperties": "Device Properties"
+  ,"vmEditor.propertyName": "Property"
+  ,"vmEditor.propertyValue": "Value"
+  ,"vmEditor.devicePropertiesLoading": "Reading device properties…"
+  ,"vmEditor.devicePropertyCount": "{0} configurable properties"
+  ,"vmEditor.removeDevice": "Remove device"
+  ,"vmEditor.removeProperty": "Remove property"
+  ,
+  "disk.title": "Disk manager",
+  "disk.runningBlocked": "Commands that modify disks are disabled while the virtual machine is running.",
+  "disk.closeVmFirst": "Shut down the virtual machine first.",
+  "disk.destructiveConfirm": "This command may modify or overwrite disk data. Check the command preview and run it again to confirm.",
+  "disk.cancelled": "The operation was cancelled.",
+  "disk.noOutput": "(no output)",
+  "disk.exitCode": "Exit code {0}",
+  "disk.stateCancelled": "Cancelled",
+  "disk.stateFailed": "Failed",
+  "disk.virtualSize": "Virtual {0}",
+  "disk.actualSize": "Actual {0}",
+  "disk.backingFile": "Backing {0}",
+  "disk.imageFileType": "Disk image",
+  "disk.openFailed": "Unable to open Disk Manager: {0}",
+  "disk.required": "“{0}” is required.",
+  "disk.command.amend": "Amend Options",
+  "disk.command.bench": "Benchmark",
+  "disk.command.bitmap": "Bitmap Manager",
+  "disk.command.check": "Integrity Check",
+  "disk.command.commit": "Commit Backing",
+  "disk.command.compare": "Compare Images",
+  "disk.command.convert": "Convert Image",
+  "disk.command.create": "Create Image",
+  "disk.command.dd": "Block Copy",
+  "disk.command.info": "Image Information",
+  "disk.command.map": "Block Map",
+  "disk.command.measure": "Space Measure",
+  "disk.command.rebase": "Change Backing",
+  "disk.command.resize": "Resize Image",
+  "disk.command.snapshot": "Snapshot Manager",
+  "disk.description.info": "Display image information",
+  "disk.description.check": "Check image integrity",
+  "disk.description.map": "Display the image block map",
+  "disk.description.measure": "Calculate required target image space",
+  "disk.description.compare": "Compare the contents of two images",
+  "disk.description.bench": "Run an image I/O benchmark",
+  "disk.description.create": "Create a disk image",
+  "disk.description.convert": "Convert one or more images",
+  "disk.description.dd": "Copy an image by blocks",
+  "disk.description.resize": "Change virtual image capacity",
+  "disk.description.rebase": "Change the image backing file",
+  "disk.description.commit": "Commit into a backing image",
+  "disk.description.amend": "Change format-specific options",
+  "disk.description.snapshot": "Manage internal snapshots",
+  "disk.description.bitmap": "Manage persistent bitmaps",
+  "disk.category.inspect": "Inspect",
+  "disk.category.create": "Create",
+  "disk.category.convert": "Convert",
+  "disk.category.modify": "Modify",
+  "disk.category.snapshot": "Snapshots",
+  "disk.category.bitmap": "Bitmaps",
+  "disk.field.file": "Image file",
+  "disk.field.file1": "Image 1",
+  "disk.field.file2": "Image 2",
+  "disk.field.format": "Format",
+  "disk.field.format1": "Image 1 format",
+  "disk.field.format2": "Image 2 format",
+  "disk.field.cache": "Cache mode",
+  "disk.field.output": "Output format",
+  "disk.field.repair": "Repair",
+  "disk.field.start": "Start offset",
+  "disk.field.length": "Maximum length",
+  "disk.field.size": "Virtual size",
+  "disk.field.snapshot": "Snapshot",
+  "disk.field.targetFormat": "Target format",
+  "disk.field.targetOptions": "Target format options",
+  "disk.field.count": "Request count",
+  "disk.field.depth": "Queue depth",
+  "disk.field.offset": "Start offset",
+  "disk.field.buffer": "Buffer size",
+  "disk.field.step": "Step size",
+  "disk.field.pattern": "Write byte",
+  "disk.field.flush": "Flush interval",
+  "disk.field.aio": "AIO backend",
+  "disk.field.options": "Format options",
+  "disk.field.backing": "Backing file",
+  "disk.field.backingFormat": "Backing format",
+  "disk.field.sources": "Source images (semicolon-separated)",
+  "disk.field.target": "Target image",
+  "disk.field.sourceFormat": "Source format",
+  "disk.field.sourceCache": "Source cache",
+  "disk.field.targetCache": "Target cache",
+  "disk.field.sparse": "Sparse threshold",
+  "disk.field.rate": "Rate limit",
+  "disk.field.parallel": "Parallel jobs",
+  "disk.field.input": "Input image",
+  "disk.field.outputFormat": "Output format",
+  "disk.field.blockSize": "Block size",
+  "disk.field.newSize": "New size or delta",
+  "disk.field.preallocation": "Preallocation",
+  "disk.field.backingCache": "Backing cache",
+  "disk.field.clearBacking": "Remove backing file",
+  "disk.field.base": "Target backing image",
+  "disk.field.action": "Action",
+  "disk.field.mergeSource": "Source bitmap",
+  "disk.field.bitmap": "Target bitmap",
+  "disk.field.granularity": "Granularity",
+  "disk.field.sourceFile": "Source image",
+  "disk.field.object": "Object definitions (semicolon-separated)",
+  "disk.field.trace": "Trace rule",
+  "disk.field.extra": "Additional arguments",
+  "disk.field.create.file": "Output image",
+  "disk.field.measure.file": "Source image",
+  "disk.field.convert.snapshot": "Source snapshot",
+  "disk.field.dd.output": "Output image",
+  "disk.field.dd.format": "Input format",
+  "disk.field.dd.count": "Block count",
+  "disk.field.resize.size": "New size or delta",
+  "disk.field.rebase.backing": "New backing file (empty for none)",
+  "disk.field.commit.file": "Top image",
+  "disk.field.commit.base": "Target backing image",
+  "disk.field.snapshot.snapshot": "Snapshot name",
+  "status.running": "Running",
+  "status.off": "Powered off",
+  "qemu.notDetected": "Not detected",
+  "process.startFailed": "Unable to start process",
+  "session.alreadyRunning": "The virtual machine is already running",
+  "session.unsupportedArchitecture": "This architecture is not supported by the installed QEMU",
+  "session.diskMissing": "Virtual disk not found",
+  "session.startFailed": "QEMU failed to start",
+  "session.started": "Virtual machine started",
+  "session.notRunning": "The virtual machine is not running",
+  "session.shutdownRequested": "Shutdown request sent",
+  "session.shutdownFailed": "Failed to send shutdown request",
+  "session.forceStopped": "Virtual machine force stopped",
+  "session.stopFailed": "Unable to stop virtual machine",
+  "session.exitedEarly": "QEMU exited immediately after starting",
+  "session.shuttingDown": "Waiting for the guest system to shut down…",
+  "repo.imgMissing": "qemu-img not found",
+  "repo.diskCreateFailed": "Failed to create virtual disk",
+  "repo.created": "Virtual machine created",
+  "repo.unmanagedConfig": "The configuration is outside the QemuWG library",
+  "repo.invalidDirectory": "Invalid virtual machine directory",
+  "repo.recycled": "Virtual machine moved to the Recycle Bin",
+  "repo.deleteFailed": "Failed to delete virtual machine",
+  "repo.saved": "Configuration saved",
+  "repo.saveFailed": "Failed to save configuration",
+  "repo.defaultName": "New virtual machine"
+  ,"qmp.title": "Virtual Machine Control Center"
+  ,"qmp.search": "Search QMP commands"
+  ,"qmp.status": "Status"
+  ,"qmp.cpus": "Virtual CPUs"
+  ,"qmp.memory": "Memory"
+  ,"qmp.blockDevices": "Block devices"
+  ,"qmp.refresh": "Refresh"
+  ,"qmp.command": "Command"
+  ,"qmp.arguments": "Arguments (JSON)"
+  ,"qmp.schema": "Argument schema"
+  ,"qmp.result": "Result"
+  ,"qmp.loading": "Reading QMP schema…"
+  ,"qmp.commandCount": "{0} commands"
+  ,"qmp.unknown": "Unknown"
+  ,"qmp.argumentsObject": "QMP arguments must be a JSON object."
+  ,"qmp.connectionClosed": "The QMP connection was closed."
+  ,"qmp.openFailed": "Unable to open QMP Console: {0}"
+  ,"qmp.requiresRunning": "QMP Console is available only while the virtual machine is running."
+  ,"qmp.controls": "Control Center"
+  ,"qmp.advanced": "Advanced Commands"
+  ,"qmp.power": "Power and Run State"
+  ,"qmp.pause": "Pause"
+  ,"qmp.resume": "Resume"
+  ,"qmp.reset": "Reset"
+  ,"qmp.powerdown": "Shut Down"
+  ,"qmp.keyboard": "Keyboard Input"
+  ,"qmp.key": "Key"
+  ,"qmp.send": "Send"
+  ,"qmp.holdTime": "Hold time (ms)"
+  ,"qmp.diagnostics": "Diagnostics and Capture"
+  ,"qmp.injectNmi": "Inject NMI"
+  ,"qmp.screenshot": "Capture Virtual Machine Screen"
+  ,"qmp.activity": "Activity Result"
+  ,"qmp.commandSucceeded": "{0} executed."
+  ,"qmp.shutdownWaiting": "Shutdown request sent. Waiting for the guest system to respond…"
+  ,"qmp.shutdownComplete": "The virtual machine has shut down."
+  ,"qmp.shutdownNoResponse": "The guest system did not respond to the shutdown request. Keep waiting or force stop it."
+  ,"qmp.confirmForceStop": "Confirm force stop"
+  ,"qmp.resetRestarted": "QEMU exited during reset, so the virtual machine was restarted automatically."
+  ,"qmp.resetRestartFailed": "QEMU exited during reset and automatic restart failed:"
+  ,"qmp.state.running": "Running"
+  ,"qmp.state.paused": "Paused"
+  ,"qmp.state.shutdown": "Shutting down"
+  ,"qmp.state.prelaunch": "Preparing to start"
+  ,"qmp.state.suspended": "Suspended"
+  ,"qmp.state.internalError": "Internal error"
+  ,"qmp.state.ioError": "I/O error"
+  ,"qmp.state.guestPanicked": "Guest system crashed"
+  ,"qmp.opticalMedia": "Optical Media"
+  ,"qmp.eject": "Eject"
+  ,"qmp.mount": "Mount"
+  ,"qmp.memoryBalloon": "Memory Balloon"
+  ,"qmp.targetMemoryMb": "Target memory (MB)"
+  ,"qmp.apply": "Apply"
+  ,"qmp.snapshot": "Virtual Machine Snapshot"
+  ,"qmp.snapshotSave": "Create"
+  ,"qmp.snapshotLoad": "Restore"
+  ,"qmp.snapshotDelete": "Delete"
+  ,"qmp.selectMedia": "Select a valid optical disc image."
+  ,"qmp.snapshotNameInvalid": "Snapshot names may contain only letters, numbers, dots, hyphens, and underscores."
+  ,"guestAgent.title": "Guest System Management"
+  ,"guestAgent.status": "Connection Status"
+  ,"guestAgent.search": "Search Guest Agent commands"
+  ,"guestAgent.command": "Command"
+  ,"guestAgent.arguments": "Arguments (JSON)"
+  ,"guestAgent.systemInfo": "System Information"
+  ,"guestAgent.networkInfo": "Network Interfaces"
+  ,"guestAgent.diskInfo": "Disk Information"
+  ,"guestAgent.users": "Logged-in Users"
+  ,"guestAgent.connecting": "Connecting to the Guest Agent inside the virtual machine…"
+  ,"guestAgent.connected": "Connected. Guest Agent provides {0} commands."
+  ,"guestAgent.installHint": "Install and start QEMU Guest Agent inside the virtual machine. QemuWG has configured the virtual serial channel automatically."
+  ,"guestAgent.argumentsObject": "Guest Agent arguments must be a JSON object."
+  ,"guestAgent.unavailable": "Guest Agent is not connected or installed."
+  ,"guestAgent.dangerousConfirm": "This command may change guest system state. Check the arguments and run it again to confirm."
+  ,"guestAgent.requiresRunning": "Guest Agent is available only while the virtual machine is running."
+  ,"guestAgent.openFailed": "Unable to open Guest Agent: {0}"
+  ,"guestAgent.overview": "Overview"
+  ,"guestAgent.maintenance": "File System Maintenance"
+  ,"guestAgent.freeze": "Freeze"
+  ,"guestAgent.thaw": "Thaw"
+  ,"guestAgent.trim": "Run TRIM"
+  ,"guestAgent.processes": "Program Execution"
+  ,"guestAgent.program": "Guest program path"
+  ,"guestAgent.programArguments": "Program arguments"
+  ,"guestAgent.captureOutput": "Capture standard output and error"
+  ,"guestAgent.runProgram": "Run Program"
+  ,"guestAgent.files": "File Transfer"
+  ,"guestAgent.hostFile": "Host file"
+  ,"guestAgent.guestPath": "Guest file path"
+  ,"guestAgent.upload": "Upload to Guest"
+  ,"guestAgent.download": "Download to Host"
+  ,"guestAgent.advanced": "Advanced RPC"
+  ,"guestAgent.unavailableValue": "Unavailable"
+  ,"guestAgent.commandUnsupported": "The current Guest Agent does not support this operation."
+  ,"guestAgent.programRequired": "Enter a program path inside the guest system."
+  ,"guestAgent.processStarted": "Process {0} started; waiting for it to exit…"
+  ,"guestAgent.processStillRunning": "The process is still running. Its status can be queried later from Advanced RPC."
+  ,"guestAgent.exitCode": "Exit code {0}"
+  ,"guestAgent.signal": "Signal {0}"
+  ,"guestAgent.filePathsRequired": "Select a host file and enter a guest path."
+  ,"guestAgent.uploadProgress": "Uploaded {0} / {1}"
+  ,"guestAgent.uploadComplete": "Upload complete: {0}"
+  ,"guestAgent.downloadProgress": "Downloaded {0}"
+  ,"guestAgent.downloadComplete": "Download complete: {0}"
+  ,"tools.title": "QEMU Toolbox"
+  ,"tools.qemuIo": "Disk I/O"
+  ,"tools.edid": "EDID Generator"
+  ,"tools.services": "Service Tools"
+  ,"tools.image": "Image file"
+  ,"tools.format": "Format"
+  ,"tools.command": "Command"
+  ,"tools.readOnly": "Read only"
+  ,"tools.snapshot": "Temporary snapshot"
+  ,"tools.noCache": "Disable cache"
+  ,"tools.copyOnRead": "Copy on read"
+  ,"tools.forceShare": "Force share"
+  ,"tools.cache": "Cache mode"
+  ,"tools.aio": "AIO mode"
+  ,"tools.discard": "Discard mode"
+  ,"tools.run": "Run"
+  ,"tools.vendor": "Vendor code"
+  ,"tools.monitorName": "Monitor name"
+  ,"tools.serial": "Serial number"
+  ,"tools.dpi": "DPI"
+  ,"tools.preferredWidth": "Preferred width"
+  ,"tools.preferredHeight": "Preferred height"
+  ,"tools.maximumWidth": "Maximum width"
+  ,"tools.maximumHeight": "Maximum height"
+  ,"tools.outputFile": "Output file"
+  ,"tools.generate": "Generate"
+  ,"tools.tool": "Tool"
+  ,"tools.arguments": "Arguments"
+  ,"tools.runOnce": "Run once"
+  ,"tools.start": "Start service"
+  ,"tools.stop": "Stop service"
+  ,"tools.clear": "Clear output"
+  ,"tools.dangerousConfirm": "This qemu-io command may modify the image. Check the command and run it again to confirm."
+  ,"tools.selectImage": "Select an image file."
+  ,"tools.selectOutput": "Select an output file."
+  ,"tools.generated": "EDID generated."
+  ,"tools.alreadyRunning": "The tool is already running"
+  ,"tools.started": "Tool started"
+  ,"tools.startFailed": "Tool failed to start"
+  ,"tools.notRunning": "The tool is not running"
+  ,"tools.stopped": "Tool stopped"
+  ,"tools.stopFailed": "Unable to stop tool"
+  ,"tools.openFailed": "Unable to open QEMU Toolbox: {0}"
+  ,"tools.selectCommand": "Select or enter a command."
+  ,"tools.cancelled": "The operation was cancelled."
+  ,"tools.edidFile": "EDID file"
+  ,"tools.exitCode": "Exit code {0}"
+  ,"tools.noOutput": "(no output)"
+  ,"tools.nbdServer": "NBD Server"
+  ,"tools.storageDaemon": "Storage Daemon"
+  ,"tools.bindAddress": "Bind address"
+  ,"tools.port": "Port"
+  ,"tools.maxClients": "Maximum clients"
+  ,"tools.exportName": "Export name"
+  ,"tools.description": "Description"
+  ,"tools.persistent": "Keep running"
+  ,"tools.allocationDepth": "Expose allocation depth"
+  ,"tools.verbose": "Verbose logging"
+  ,"tools.extraArguments": "Additional arguments"
+  ,"tools.semicolonSeparated": "Separate multiple definitions with semicolons"
+  ,"tools.storageRequired": "The storage daemon requires at least one block device and one export definition."
+  ,"disk.operations": "Disk operations"
+  ,"disk.advanced": "Advanced options"
+  ,"disk.commandPreview": "Command preview"
+  ,"disk.field.imageOpts": "Use image option syntax"
+  ,"disk.field.backingChain": "Show complete backing chain"
+  ,"disk.field.forceShare": "Open for shared access (state may be inconsistent)"
+  ,"disk.field.limits": "Show format limits"
+  ,"disk.field.quiet": "Run quietly"
+  ,"disk.field.strict": "Strict comparison"
+  ,"disk.field.progress": "Show progress"
+  ,"disk.field.write": "Run write benchmark"
+  ,"disk.field.noDrain": "Skip write drain"
+  ,"disk.field.native": "Use native asynchronous I/O"
+  ,"disk.field.backingUnsafe": "Allow a missing or unverifiable backing file"
+  ,"disk.field.bitmaps": "Copy persistent bitmaps"
+  ,"disk.field.skipBroken": "Skip broken bitmaps"
+  ,"disk.field.salvage": "Recover as much readable data as possible"
+  ,"disk.field.targetImageOpts": "Use image option syntax for target"
+  ,"disk.field.noCreate": "Use an existing target file"
+  ,"disk.field.targetZero": "Assume the target is already zeroed"
+  ,"disk.field.compress": "Compress output data"
+  ,"disk.field.copyRange": "Use system copy-range offloading"
+  ,"disk.field.oobWrites": "Allow target writes to complete out of order"
+  ,"disk.field.shrink": "Allow reducing disk capacity"
+  ,"disk.field.drop": "Keep top-layer data after commit"
+  ,"disk.field.force": "Force the change"
+  ,"disk.choice.output.human": "Readable text"
+  ,"disk.choice.output.json": "JSON data"
+  ,"disk.choice.repair.none": "Check only"
+  ,"disk.choice.repair.leaks": "Repair leaked space"
+  ,"disk.choice.repair.all": "Repair all recoverable errors"
+  ,"disk.choice.aio.threads": "Thread pool"
+  ,"disk.choice.aio.native": "Windows native asynchronous I/O"
+  ,"disk.choice.aio.io_uring": "io_uring"
+  ,"disk.choice.preallocation.off": "No preallocation"
+  ,"disk.choice.preallocation.metadata": "Metadata only"
+  ,"disk.choice.preallocation.falloc": "Fast file-space allocation"
+  ,"disk.choice.preallocation.full": "Full preallocation"
+  ,"disk.choice.cache.writeback": "Write-back cache (honor flush requests)"
+  ,"disk.choice.cache.none": "Bypass host page cache (honor flush requests)"
+  ,"disk.choice.cache.writethrough": "Complete writes after storage flush"
+  ,"disk.choice.cache.directsync": "Bypass page cache and write synchronously"
+  ,"disk.choice.cache.unsafe": "Ignore flush requests (high risk)"
+  ,"disk.choice.sourceCache.writeback": "Write-back cache (honor flush requests)"
+  ,"disk.choice.sourceCache.none": "Bypass host page cache (honor flush requests)"
+  ,"disk.choice.sourceCache.writethrough": "Complete writes after storage flush"
+  ,"disk.choice.sourceCache.directsync": "Bypass page cache and write synchronously"
+  ,"disk.choice.sourceCache.unsafe": "Ignore flush requests (high risk)"
+  ,"disk.choice.targetCache.writeback": "Write-back cache (honor flush requests)"
+  ,"disk.choice.targetCache.none": "Bypass host page cache (honor flush requests)"
+  ,"disk.choice.targetCache.writethrough": "Complete writes after storage flush"
+  ,"disk.choice.targetCache.directsync": "Bypass page cache and write synchronously"
+  ,"disk.choice.targetCache.unsafe": "Ignore flush requests (high risk)"
+  ,"disk.choice.backingCache.writeback": "Write-back cache (honor flush requests)"
+  ,"disk.choice.backingCache.none": "Bypass host page cache (honor flush requests)"
+  ,"disk.choice.backingCache.writethrough": "Complete writes after storage flush"
+  ,"disk.choice.backingCache.directsync": "Bypass page cache and write synchronously"
+  ,"disk.choice.backingCache.unsafe": "Ignore flush requests (high risk)"
+  ,"disk.choice.snapshot.action.l": "List snapshots"
+  ,"disk.choice.snapshot.action.c": "Create snapshot"
+  ,"disk.choice.snapshot.action.a": "Restore snapshot"
+  ,"disk.choice.snapshot.action.d": "Delete snapshot"
+  ,"disk.choice.bitmap.action.add": "Add bitmap"
+  ,"disk.choice.bitmap.action.remove": "Remove bitmap"
+  ,"disk.choice.bitmap.action.clear": "Clear bitmap"
+  ,"disk.choice.bitmap.action.enable": "Enable bitmap"
+  ,"disk.choice.bitmap.action.disable": "Disable bitmap"
+  ,"disk.choice.bitmap.action.merge": "Merge bitmap"
+  ,"main.displayConnecting": "Connecting to the virtual machine display…"
+  ,"main.displayUnavailable": "Unable to connect to the virtual machine display"
+  ,"session.displayPortUnavailable": "No local display port is available."
+  ,"qmp.timeout": "The QMP operation timed out. Check that the virtual machine is still responding."
+  ,"guestAgent.timeout": "The Guest Agent operation timed out."
+}

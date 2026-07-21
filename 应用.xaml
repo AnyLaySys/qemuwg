@@ -1,0 +1,38 @@
+<Application
+    x:Class="QemuWG.应用"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:服务="using:QemuWG.服务">
+    <Application.Resources>
+        <ResourceDictionary>
+            <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+            <CornerRadius x:Key="OverlayCornerRadius">6</CornerRadius>
+            <服务:语言服务 x:Key="Strings" />
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#F3F3F3" />
+                    <SolidColorBrush x:Key="SidebarTextBrush" Color="#1A1A1A" />
+                    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#646464" />
+                    <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#DCE8F8" />
+                    <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#245A9C" />
+                    <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#F6F6F6" />
+                    <SolidColorBrush x:Key="DisplayFooterBrush" Color="#EAEAEA" />
+                    <SolidColorBrush x:Key="DisplayTextBrush" Color="#505050" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#15171A" />
+                    <SolidColorBrush x:Key="SidebarTextBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#AAB0B8" />
+                    <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#253046" />
+                    <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#8AB4F8" />
+                    <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#101215" />
+                    <SolidColorBrush x:Key="DisplayFooterBrush" Color="#171A1F" />
+                    <SolidColorBrush x:Key="DisplayTextBrush" Color="#AAB0B8" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
