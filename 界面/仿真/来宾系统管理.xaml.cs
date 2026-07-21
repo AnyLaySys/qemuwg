@@ -32,7 +32,7 @@ public sealed partial class 来宾系统管理 : ContentDialog
     public 来宾系统管理(nint ownerHandle, QEMU会话 sessions, 虚拟机配置 machine)
     {
         InitializeComponent();
-        对话框布局.EnableAdaptiveSizing(this);
+        对话框布局.启用自适应尺寸(this);
         this.ownerHandle = ownerHandle;
         this.sessions = sessions;
         this.machine = machine;

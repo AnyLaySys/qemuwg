@@ -131,7 +131,7 @@ public sealed partial class 磁盘管理
         pathGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         pathGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         pathGrid.Children.Add(textBox);
-        var browse = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(6) };
+        var browse = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(3) };
         browse.Click += async (_, _) => await BrowsePathAsync(field, textBox);
         Grid.SetColumn(browse, 1);
         pathGrid.Children.Add(browse);

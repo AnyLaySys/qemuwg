@@ -23,8 +23,10 @@ public sealed partial class 虚拟机编辑 : ContentDialog
 
     public ObservableCollection<QEMU选项> ConfiguredQemuOpts { get; } = [];
     public ObservableCollection<QEMU设备> ConfiguredDevices { get; } = [];
+    public ObservableCollection<QEMU设备> ConfiguredInputDevices { get; } = [];
     public ObservableCollection<QEMU选项> SelectedDeviceProperties { get; } = [];
     private IReadOnlyList<QEMU设备属性> availableDeviceProperties = [];
+    private IReadOnlySet<string> availableInputDeviceModels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     public 虚拟机编辑(
         nint ownerHandle,
@@ -34,7 +36,7 @@ public sealed partial class 虚拟机编辑 : ContentDialog
         虚拟机配置? source = null)
     {
         InitializeComponent();
-        对话框布局.EnableAdaptiveSizing(this);
+        对话框布局.启用自适应尺寸(this);
         this.ownerHandle = ownerHandle;
         this.install = install;
         this.qemuSvc = qemuSvc;
@@ -192,6 +194,9 @@ public sealed partial class 虚拟机编辑 : ContentDialog
             SetComboItems(NetworkModelCombo, caps.NetworkDevices, networkDevice);
             SetComboItems(AudioCombo, caps.AudioBackends, audioBackend);
             SetComboItems(AudioDeviceCombo, caps.AudioDevices, audioDevice);
+            InputDeviceModelCombo.ItemsSource = caps.InputDevices;
+            availableInputDeviceModels = new HashSet<string>(caps.InputDevices, StringComparer.OrdinalIgnoreCase);
+            RefreshConfiguredInputDevices();
             QemuOptCombo.ItemsSource = caps.CmdOptions;
             DeviceModelCombo.ItemsSource = caps.AllDevices;
         }

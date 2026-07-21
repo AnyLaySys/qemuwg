@@ -16,13 +16,16 @@ public sealed partial class 主窗
     private int embeddedDisplayWidth;
     private int embeddedDisplayHeight;
     private int displayVersion;
+    private int loggedPresentedVersion;
     private string failedDisplayMachineId = string.Empty;
+    private long displayRetryNotBefore;
 
     private async Task RefreshDisplayAsync(虚拟机配置? vm)
     {
         if (vm is not null && vm.IsRunning
             && string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(failedDisplayMachineId, vm.Id, StringComparison.Ordinal))
+            && string.Equals(failedDisplayMachineId, vm.Id, StringComparison.Ordinal)
+            && Environment.TickCount64 < Volatile.Read(ref displayRetryNotBefore))
         {
             DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
             EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
@@ -37,6 +40,7 @@ public sealed partial class 主窗
         {
             if (embeddedDisplay?.已准备 == true)
             {
+                DisplayStateText.Text = T("main.displayRunning", "虚拟机显示器已连接");
                 EmbeddedDisplayPanel.Visibility = Visibility.Visible;
                 DisplayFallback.Visibility = Visibility.Collapsed;
             }
@@ -57,6 +61,7 @@ public sealed partial class 主窗
 
         StopDisplay(false);
         failedDisplayMachineId = string.Empty;
+        Volatile.Write(ref displayRetryNotBefore, 0);
         displayMachine = vm;
         var connectionCancellation = new CancellationTokenSource();
         displayConnection = connectionCancellation;
@@ -65,6 +70,16 @@ public sealed partial class 主窗
         EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
         DisplayStateText.Text = T("main.displayConnecting", "正在连接虚拟机显示器…");
         DisplayFallback.Visibility = Visibility.Visible;
+        var connectStarted = System.Diagnostics.Stopwatch.GetTimestamp();
+        var firstCallbackLogged = 0;
+        应用日志.写($"D-Bus display connect started: vm={vm.Id}, version={version}.");
+
+        void 记录首个显示回调(string callback)
+        {
+            if (Interlocked.Exchange(ref firstCallbackLogged, 1) != 0) return;
+            var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(connectStarted).TotalMilliseconds;
+            应用日志.写($"D-Bus first display callback: {callback}, elapsed={elapsed:F1} ms.");
+        }
 
         try
         {
@@ -72,6 +87,7 @@ public sealed partial class 主窗
             {
                 transport.收到D3D11纹理 = (scanout, _) =>
                 {
+                    记录首个显示回调("ScanoutTexture2d");
                     设置内嵌显示尺寸(scanout.显示宽度 == 0 ? scanout.纹理宽度 : scanout.显示宽度,
                         scanout.显示高度 == 0 ? scanout.纹理高度 : scanout.显示高度);
                     renderer.接收共享纹理(scanout);
@@ -86,6 +102,7 @@ public sealed partial class 主窗
                 };
                 transport.收到共享映射 = (scanout, _) =>
                 {
+                    记录首个显示回调("ScanoutMap");
                     设置内嵌显示尺寸(scanout.宽度, scanout.高度);
                     renderer.接收共享映射(scanout);
                     显示内嵌画面(version, renderer);
@@ -99,6 +116,7 @@ public sealed partial class 主窗
                 };
                 transport.收到位图 = (scanout, _) =>
                 {
+                    记录首个显示回调("Scanout");
                     设置内嵌显示尺寸(scanout.宽度, scanout.高度);
                     renderer.接收位图(scanout);
                     显示内嵌画面(version, renderer);
@@ -117,6 +135,8 @@ public sealed partial class 主窗
                 };
             }, connectionCancellation.Token);
 
+            应用日志.写($"D-Bus display listener registered: elapsed={System.Diagnostics.Stopwatch.GetElapsedTime(connectStarted).TotalMilliseconds:F1} ms.");
+
             if (version != Volatile.Read(ref displayVersion)
                 || !ReferenceEquals(displayConnection, connectionCancellation)
                 || !ReferenceEquals(embeddedDisplay, renderer))
@@ -125,6 +145,7 @@ public sealed partial class 主窗
             }
             embeddedTransport = transport;
             failedDisplayMachineId = string.Empty;
+            await 初始化内嵌输入(transport, connectionCancellation.Token);
         }
         catch (OperationCanceledException)
         {
@@ -135,6 +156,7 @@ public sealed partial class 主窗
             if (version == Volatile.Read(ref displayVersion))
             {
                 failedDisplayMachineId = vm.Id;
+                Volatile.Write(ref displayRetryNotBefore, Environment.TickCount64 + 500);
                 if (ReferenceEquals(displayConnection, connectionCancellation))
                 {
                     displayConnection = null;
@@ -146,14 +168,23 @@ public sealed partial class 主窗
                     embeddedDisplay = null;
                     renderer.Dispose();
                 }
-                var failedTransport = Interlocked.Exchange(ref embeddedTransport, null);
-                if (failedTransport is not null) _ = failedTransport.DisposeAsync();
+                Interlocked.Exchange(ref embeddedTransport, null);
                 _ = 安全断开内嵌显示(vm);
                 DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
                 EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
                 DisplayFallback.Visibility = Visibility.Visible;
+                _ = 安排内嵌显示重试(vm, version);
             }
         }
+    }
+
+    private async Task 安排内嵌显示重试(虚拟机配置 vm, int failedVersion)
+    {
+        await Task.Delay(500);
+        if (failedVersion != Volatile.Read(ref displayVersion)
+            || !vm.IsRunning
+            || !ReferenceEquals(selectedVm, vm)) return;
+        DispatcherQueue.TryEnqueue(() => _ = RefreshDisplayAsync(vm));
     }
 
     private void 设置内嵌显示尺寸(uint width, uint height)
@@ -172,6 +203,11 @@ public sealed partial class 主窗
             DisplayStateText.Text = T("main.displayRunning", "虚拟机显示器已连接");
             EmbeddedDisplayPanel.Visibility = Visibility.Visible;
             DisplayFallback.Visibility = Visibility.Collapsed;
+            if (Volatile.Read(ref loggedPresentedVersion) != version)
+            {
+                Volatile.Write(ref loggedPresentedVersion, version);
+                应用日志.写($"D-Bus display presented in SwapChainPanel: version={version}.");
+            }
         });
     }
 
@@ -179,14 +215,15 @@ public sealed partial class 主窗
     {
         if (invalidateVersion) Interlocked.Increment(ref displayVersion);
         failedDisplayMachineId = string.Empty;
+        Volatile.Write(ref displayRetryNotBefore, 0);
         var vm = displayMachine;
         displayMachine = null;
         var cancellation = Interlocked.Exchange(ref displayConnection, null);
         try { cancellation?.Cancel(); } catch { }
         cancellation?.Dispose();
         var renderer = Interlocked.Exchange(ref embeddedDisplay, null);
-        var transport = Interlocked.Exchange(ref embeddedTransport, null);
-        if (transport is not null) _ = transport.DisposeAsync();
+        Interlocked.Exchange(ref embeddedTransport, null);
+        重置内嵌输入状态();
         Volatile.Write(ref embeddedDisplayWidth, 0);
         Volatile.Write(ref embeddedDisplayHeight, 0);
         renderer?.Dispose();

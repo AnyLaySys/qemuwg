@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:数据="using:QemuWG.数据"
+    CornerRadius="9"
     CloseButtonText="{Binding [common.done], Source={StaticResource Strings}}">
 
     <ContentDialog.Resources>
@@ -40,7 +41,7 @@
                             <Setter Property="MinHeight" Value="43" />
                             <Setter Property="Padding" Value="8,5" />
                             <Setter Property="Margin" Value="0,1" />
-                            <Setter Property="CornerRadius" Value="6" />
+                            <Setter Property="CornerRadius" Value="3" />
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>

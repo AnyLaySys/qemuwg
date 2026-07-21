@@ -23,7 +23,7 @@ public sealed partial class 虚拟机控制 : ContentDialog
     public 虚拟机控制(nint ownerHandle, QEMU安装 install, QEMU会话 sessions, 虚拟机配置 machine)
     {
         InitializeComponent();
-        对话框布局.EnableAdaptiveSizing(this);
+        对话框布局.启用自适应尺寸(this);
         this.install = install;
         this.sessions = sessions;
         this.machine = machine;

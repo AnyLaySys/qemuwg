@@ -23,7 +23,9 @@ namespace QemuWG.界面.显示;
 /// </summary>
 public sealed class D3D11内嵌显示 : IDisposable
 {
-    private const int 等待共享纹理毫秒数 = 5000;
+    // 显示更新位于 D-Bus 单读者队列中；长时间等待会把后续帧全部堵住。
+    // KeyedMutex 暂时被占用时应丢弃当前帧，下一次 Update 会继续尝试。
+    private const int 等待共享纹理毫秒数 = 1;
     private const uint 文件映射读取 = 0x0004;
     private const uint PixmanX8R8G8B8 = 0x20020888;
     private const uint PixmanA8R8G8B8 = 0x20028888;
@@ -67,6 +69,7 @@ public sealed class D3D11内嵌显示 : IDisposable
     private uint 共享映射宽度;
     private uint 共享映射高度;
     private int 已释放;
+    private long 上次共享纹理等待日志时间;
 
     public D3D11内嵌显示(SwapChainPanel 显示面板)
     {
@@ -294,7 +297,15 @@ public sealed class D3D11内嵌显示 : IDisposable
         var 已取得 = false;
         try
         {
-            互斥锁.AcquireSync(0, 等待共享纹理毫秒数);
+            try
+            {
+                互斥锁.AcquireSync(0, 等待共享纹理毫秒数);
+            }
+            catch (Exception exception) when (是共享纹理等待超时(exception))
+            {
+                记录共享纹理等待超时();
+                return;
+            }
             已取得 = true;
             var 区域 = new Box(
                 checked((int)纹理横向偏移),
@@ -310,6 +321,19 @@ public sealed class D3D11内嵌显示 : IDisposable
             if (已取得) 互斥锁.ReleaseSync(0);
         }
         交换链!.Present(0, PresentFlags.None).CheckError();
+    }
+
+    private static bool 是共享纹理等待超时(Exception exception) =>
+        exception.HResult == Vortice.DXGI.ResultCode.WaitTimeout.Code
+        || exception.HResult == 0x00000102;
+
+    private void 记录共享纹理等待超时()
+    {
+        var now = Environment.TickCount64;
+        var previous = Volatile.Read(ref 上次共享纹理等待日志时间);
+        if (now - previous < 2000) return;
+        Volatile.Write(ref 上次共享纹理等待日志时间, now);
+        应用日志.写("D3D11 shared texture is busy; dropped one display frame.");
     }
 
     private void 上传共享映射并呈现()

@@ -13,6 +13,7 @@ public sealed partial class 虚拟机编辑
         if (string.IsNullOrWhiteSpace(model)) return;
         var device = new QEMU设备 { Model = model };
         ConfiguredDevices.Add(device);
+        if (availableInputDeviceModels.Contains(device.Model)) ConfiguredInputDevices.Add(device);
         DeviceList.SelectedItem = device;
         RemoveDeviceButton.IsEnabled = true;
     }
@@ -21,6 +22,7 @@ public sealed partial class 虚拟机编辑
     {
         if (DeviceList.SelectedItem is not QEMU设备 device) return;
         ConfiguredDevices.Remove(device);
+        ConfiguredInputDevices.Remove(device);
         if (ReferenceEquals(DeviceList.SelectedItem, device))
         {
             SelectedDeviceProperties.Clear();

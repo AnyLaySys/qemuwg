@@ -75,13 +75,18 @@
                 ItemsSource="{x:Bind Machines}"
                 SelectionChanged="VmList_SelectionChanged"
                 SelectionMode="Single">
+                <ListView.Resources>
+                    <CornerRadius x:Key="ListViewItemCornerRadius">6</CornerRadius>
+                    <CornerRadius x:Key="ListViewItemSelectionIndicatorCornerRadius">3</CornerRadius>
+                </ListView.Resources>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="Margin" Value="0,2" />
                         <Setter Property="Padding" Value="0" />
-                        <Setter Property="CornerRadius" Value="6" />
                         <Setter Property="MinHeight" Value="48" />
+                        <Setter Property="UseSystemFocusVisuals" Value="True" />
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
@@ -95,7 +100,7 @@
                                 Width="30"
                                 Height="30"
                                 Background="{ThemeResource VmIconBackgroundBrush}"
-                                CornerRadius="6">
+                                CornerRadius="3">
                                 <FontIcon Foreground="{ThemeResource VmIconForegroundBrush}" Glyph="&#xE7F8;" />
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
@@ -255,7 +260,7 @@
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         <Setter Property="Padding" Value="0" />
                                         <Setter Property="Margin" Value="0,1" />
-                                        <Setter Property="CornerRadius" Value="6" />
+                                        <Setter Property="CornerRadius" Value="3" />
                                         <Setter Property="MinHeight" Value="48" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
@@ -297,7 +302,7 @@
                                     <Button
                                         x:Name="DetachDisplayButton"
                                         Click="DetachDisplayButton_Click"
-                                        CornerRadius="6"
+                                        CornerRadius="3"
                                         Padding="8,4"
                                         ToolTipService.ToolTip="{Binding [main.detachDisplay], Source={StaticResource Strings}}">
                                         <FontIcon FontSize="13" Glyph="&#xE8A7;" />
@@ -311,10 +316,16 @@
                                         IsTabStop="True"
                                         KeyDown="EmbeddedDisplayPanel_KeyDown"
                                         KeyUp="EmbeddedDisplayPanel_KeyUp"
+                                        LostFocus="EmbeddedDisplayPanel_LostFocus"
+                                        PointerCanceled="EmbeddedDisplayPanel_PointerCanceled"
+                                        PointerCaptureLost="EmbeddedDisplayPanel_PointerCaptureLost"
+                                        PointerEntered="EmbeddedDisplayPanel_PointerEntered"
+                                        PointerExited="EmbeddedDisplayPanel_PointerExited"
                                         PointerMoved="EmbeddedDisplayPanel_PointerMoved"
                                         PointerPressed="EmbeddedDisplayPanel_PointerPressed"
                                         PointerReleased="EmbeddedDisplayPanel_PointerReleased"
                                         PointerWheelChanged="EmbeddedDisplayPanel_PointerWheelChanged"
+                                        RightTapped="EmbeddedDisplayPanel_RightTapped"
                                         Visibility="Collapsed" />
                                 </Viewbox>
                                 <StackPanel x:Name="DisplayFallback" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">

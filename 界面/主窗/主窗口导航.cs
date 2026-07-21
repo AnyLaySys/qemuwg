@@ -97,7 +97,7 @@ public sealed partial class 主窗
         });
         Grid.SetColumn(details, 1);
         grid.Children.Add(details);
-        var button = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(6) };
+        var button = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(3) };
         button.Click += (_, _) => OpenPath(path);
         Grid.SetColumn(button, 2);
         grid.Children.Add(button);

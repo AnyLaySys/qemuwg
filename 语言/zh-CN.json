@@ -99,6 +99,10 @@
   "vmEditor.audio": "音频",
   "vmEditor.soundCard": "声卡",
   "vmEditor.audioBackend": "音频后端",
+  "vmEditor.inputDevices": "输入设备",
+  "vmEditor.inputDeviceModel": "选择键盘、鼠标或其他输入设备",
+  "vmEditor.addInputDevice": "添加输入设备",
+  "vmEditor.removeInputDevice": "移除输入设备",
   "vmEditor.advanced": "高级",
   "vmEditor.bootOrder": "启动顺序",
   "vmEditor.rtc": "实时时钟",
@@ -500,6 +504,8 @@
   ,"display.nativeWindowNotReady": "QEMU 原生图形窗口尚未就绪。"
   ,"display.detached": "已显示 QEMU 原生图形窗口"
   ,"display.dbusConnectionFailed": "无法建立 QEMU D-Bus 内嵌显示连接。"
+  ,"display.openGlDisabled": "所选显卡需要 OpenGL，但显示后端显式配置了 gl=off。"
+  ,"display.openGlUnsupported": "所选显卡需要 OpenGL，但当前显示后端不支持 OpenGL。"
   ,"session.displayPortUnavailable": "没有可用的本机显示端口。"
   ,"qmp.timeout": "QMP 操作超时，请确认虚拟机仍在响应。"
   ,"guestAgent.timeout": "Guest Agent 操作超时。"

@@ -83,6 +83,8 @@ public sealed partial class 主窗
             RefreshDetails();
             return;
         }
+        // 立即刷新会触发 D-Bus/D3D11 建链；下面的等待只用于判断 QEMU 是否早退。
+        RefreshDetails();
         await Task.Delay(700);
         if (!sessions.存在QMP会话(vm))
         {

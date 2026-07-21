@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:数据="using:QemuWG.数据"
     CloseButtonText="{Binding [common.cancel], Source={StaticResource Strings}}"
+    CornerRadius="9"
     DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
 
@@ -23,8 +24,9 @@
         </Style>
     </ContentDialog.Resources>
 
-    <ScrollViewer Margin="0,8" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-        <StackPanel HorizontalAlignment="Stretch" Spacing="8">
+    <Border x:Name="EditorContentFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ScrollViewer HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Disabled" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+            <StackPanel HorizontalAlignment="Stretch" Spacing="8">
             <Border Style="{StaticResource HardwareCardStyle}">
                 <Grid ColumnSpacing="10">
                     <Grid.ColumnDefinitions>
@@ -51,7 +53,7 @@
                             Grid.Column="1"
                             VerticalAlignment="Bottom"
                             Click="BrowseLocation_Click"
-                            CornerRadius="6"
+                            CornerRadius="3"
                             ToolTipService.ToolTip="{Binding [vmEditor.chooseLocation], Source={StaticResource Strings}}">
                             <SymbolIcon Symbol="Folder" />
                         </Button>
@@ -59,23 +61,9 @@
                 </Grid>
             </Border>
 
-            <Grid ColumnSpacing="8" RowSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <Grid x:Name="HardwareCardsGrid" ColumnSpacing="8" RowSpacing="8" SizeChanged="HardwareCardsGrid_SizeChanged">
 
-                <Border Grid.ColumnSpan="3" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="PlatformCard" Grid.ColumnSpan="6" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#45B8AC" Glyph="&#xE950;" />
@@ -123,7 +111,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="3" Grid.ColumnSpan="2" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="ProcessorCard" Grid.Column="6" Grid.ColumnSpan="3" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#6E9EFF" Glyph="&#xE950;" />
@@ -140,7 +128,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="5" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="MemoryCard" Grid.Column="9" Grid.ColumnSpan="3" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="12">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#70C67A" Glyph="&#xE7F8;" />
@@ -153,7 +141,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Grid.ColumnSpan="3" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="StorageCard" Grid.Row="1" Grid.ColumnSpan="6" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#E0AC4D" Glyph="&#xE7C3;" />
@@ -181,7 +169,7 @@
                                     Grid.Column="1"
                                     VerticalAlignment="Bottom"
                                     Click="BrowseIso_Click"
-                                    CornerRadius="6"
+                                    CornerRadius="3"
                                     ToolTipService.ToolTip="{Binding [vmEditor.browseMedia], Source={StaticResource Strings}}">
                                     <SymbolIcon Symbol="Folder" />
                                 </Button>
@@ -190,7 +178,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="DisplayCard" Grid.Row="1" Grid.Column="6" Grid.ColumnSpan="3" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#C07AE8" Glyph="&#xE7F4;" />
@@ -213,7 +201,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Grid.Column="5" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="NetworkCard" Grid.Row="1" Grid.Column="9" Grid.ColumnSpan="3" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#48BFC7" Glyph="&#xE968;" />
@@ -230,7 +218,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="2" Grid.ColumnSpan="2" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
+                <Border x:Name="AudioCard" Grid.Row="2" Grid.ColumnSpan="6" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#E06F7C" Glyph="&#xE767;" />
@@ -253,7 +241,51 @@
                     </StackPanel>
                 </Border>
 
-                <Expander Grid.Row="3" Grid.ColumnSpan="6" IsExpanded="False">
+                <Border x:Name="InputCard" Grid.Row="2" Grid.Column="6" Grid.ColumnSpan="6" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#E58B45" Glyph="&#xE765;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.inputDevices], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox
+                                x:Name="InputDeviceModelCombo"
+                                HorizontalAlignment="Stretch"
+                                MaxDropDownHeight="240"
+                                PlaceholderText="{Binding [vmEditor.inputDeviceModel], Source={StaticResource Strings}}" />
+                            <Button Grid.Column="1" Click="AddInputDevice_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.addInputDevice], Source={StaticResource Strings}}">
+                                <SymbolIcon Symbol="Add" />
+                            </Button>
+                        </Grid>
+                        <ListView
+                            x:Name="InputDeviceList"
+                            MaxHeight="92"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ItemsSource="{x:Bind ConfiguredInputDevices}"
+                            SelectionMode="None">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="6,2" /><Setter Property="CornerRadius" Value="3" /></Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="数据:QEMU设备">
+                                    <Grid>
+                                        <TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" />
+                                        <Button HorizontalAlignment="Right" Click="RemoveInputDevice_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.removeInputDevice], Source={StaticResource Strings}}">
+                                            <SymbolIcon Symbol="Delete" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+
+                <Expander x:Name="AdvancedCard" Grid.Row="3" Grid.ColumnSpan="12" IsExpanded="False">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#8A7BE8" Glyph="&#xE713;" />
@@ -311,7 +343,7 @@
                                         PlaceholderText="{Binding [vmEditor.optionName], Source={StaticResource Strings}}"
                                         SelectionChanged="QemuOptionCombo_SelectionChanged" />
                                     <TextBox x:Name="QemuOptValueBox" Grid.Column="1" PlaceholderText="{Binding [vmEditor.optionValue], Source={StaticResource Strings}}" />
-                                    <Button Grid.Column="2" Click="AddQemuOption_Click" CornerRadius="6" ToolTipService.ToolTip="{Binding [vmEditor.addOption], Source={StaticResource Strings}}">
+                                    <Button Grid.Column="2" Click="AddQemuOption_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.addOption], Source={StaticResource Strings}}">
                                         <SymbolIcon Symbol="Add" />
                                     </Button>
                                 </Grid>
@@ -324,13 +356,13 @@
                                     ItemsSource="{x:Bind ConfiguredQemuOpts}"
                                     SelectionMode="None">
                                     <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="6,2" /><Setter Property="CornerRadius" Value="6" /></Style>
+                                        <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="6,2" /><Setter Property="CornerRadius" Value="3" /></Style>
                                     </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="数据:QEMU选项">
                                             <Grid>
                                                 <TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" />
-                                                <Button HorizontalAlignment="Right" Click="RemoveQemuOption_Click" CornerRadius="6" ToolTipService.ToolTip="{Binding [vmEditor.removeOption], Source={StaticResource Strings}}">
+                                                <Button HorizontalAlignment="Right" Click="RemoveQemuOption_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.removeOption], Source={StaticResource Strings}}">
                                                     <SymbolIcon Symbol="Delete" />
                                                 </Button>
                                             </Grid>
@@ -342,14 +374,14 @@
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="1.2*" /></Grid.ColumnDefinitions>
                                 <StackPanel Spacing="5">
                                     <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding [vmEditor.devices], Source={StaticResource Strings}}" />
-                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DeviceModelCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="260" PlaceholderText="{Binding [vmEditor.deviceModel], Source={StaticResource Strings}}" /><Button Grid.Column="1" Click="AddDevice_Click" CornerRadius="6" ToolTipService.ToolTip="{Binding [vmEditor.addDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDeviceButton" Grid.Column="2" Click="RemoveDevice_Click" CornerRadius="6" IsEnabled="False" ToolTipService.ToolTip="{Binding [vmEditor.removeDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
+                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DeviceModelCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="260" PlaceholderText="{Binding [vmEditor.deviceModel], Source={StaticResource Strings}}" /><Button Grid.Column="1" Click="AddDevice_Click" CornerRadius="3" ToolTipService.ToolTip="{Binding [vmEditor.addDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDeviceButton" Grid.Column="2" Click="RemoveDevice_Click" CornerRadius="3" IsEnabled="False" ToolTipService.ToolTip="{Binding [vmEditor.removeDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
                                     <ListView x:Name="DeviceList" MaxHeight="120" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind ConfiguredDevices}" SelectionChanged="DeviceList_SelectionChanged" SelectionMode="Single">
                                         <ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMU设备"><TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" /></DataTemplate></ListView.ItemTemplate>
                                     </ListView>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="5">
                                     <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding [vmEditor.deviceProperties], Source={StaticResource Strings}}" />
-                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DevicePropertyCombo" DisplayMemberPath="Name" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" PlaceholderText="{Binding [vmEditor.propertyName], Source={StaticResource Strings}}" SelectionChanged="DevicePropertyCombo_SelectionChanged" /><ComboBox x:Name="DevicePropertyValueCombo" Grid.Column="1" HorizontalAlignment="Stretch" IsEditable="True" PlaceholderText="{Binding [vmEditor.propertyValue], Source={StaticResource Strings}}" /><Button Grid.Column="2" Click="AddDeviceProperty_Click" CornerRadius="6"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDevicePropertyButton" Grid.Column="3" Click="RemoveDeviceProperty_Click" CornerRadius="6" IsEnabled="False" ToolTipService.ToolTip="{Binding [vmEditor.removeProperty], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
+                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DevicePropertyCombo" DisplayMemberPath="Name" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" PlaceholderText="{Binding [vmEditor.propertyName], Source={StaticResource Strings}}" SelectionChanged="DevicePropertyCombo_SelectionChanged" /><ComboBox x:Name="DevicePropertyValueCombo" Grid.Column="1" HorizontalAlignment="Stretch" IsEditable="True" PlaceholderText="{Binding [vmEditor.propertyValue], Source={StaticResource Strings}}" /><Button Grid.Column="2" Click="AddDeviceProperty_Click" CornerRadius="3"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDevicePropertyButton" Grid.Column="3" Click="RemoveDeviceProperty_Click" CornerRadius="3" IsEnabled="False" ToolTipService.ToolTip="{Binding [vmEditor.removeProperty], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
                                     <TextBlock x:Name="DevicePropertyHintText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                     <ListView x:Name="DevicePropertyList" MaxHeight="92" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind SelectedDeviceProperties}" SelectionChanged="DevicePropertyList_SelectionChanged" SelectionMode="Single"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMU选项"><TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" /></DataTemplate></ListView.ItemTemplate></ListView>
                                 </StackPanel>
@@ -364,6 +396,7 @@
                 IsClosable="False"
                 IsOpen="False"
                 Severity="Error" />
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
 </ContentDialog>

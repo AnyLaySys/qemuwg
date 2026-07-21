@@ -99,6 +99,10 @@
   "vmEditor.audio": "Audio",
   "vmEditor.soundCard": "Sound card",
   "vmEditor.audioBackend": "Audio backend",
+  "vmEditor.inputDevices": "Input devices",
+  "vmEditor.inputDeviceModel": "Select a keyboard, mouse, or other input device",
+  "vmEditor.addInputDevice": "Add input device",
+  "vmEditor.removeInputDevice": "Remove input device",
   "vmEditor.advanced": "Advanced",
   "vmEditor.bootOrder": "Boot order",
   "vmEditor.rtc": "Real-time clock",
@@ -500,6 +504,8 @@
   ,"display.nativeWindowNotReady": "The native QEMU graphics window is not ready yet."
   ,"display.detached": "The native QEMU graphics window is now visible."
   ,"display.dbusConnectionFailed": "Unable to establish the embedded QEMU D-Bus display connection."
+  ,"display.openGlDisabled": "The selected video device requires OpenGL, but the display backend explicitly sets gl=off."
+  ,"display.openGlUnsupported": "The selected video device requires OpenGL, but the current display backend does not support OpenGL."
   ,"session.displayPortUnavailable": "No local display port is available."
   ,"qmp.timeout": "The QMP operation timed out. Check that the virtual machine is still responding."
   ,"guestAgent.timeout": "The Guest Agent operation timed out."
