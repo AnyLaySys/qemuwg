@@ -292,7 +292,7 @@
                                 <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
                             </ListView.ItemContainerTransitions>
                             <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
+                                <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="数据:QEMU设备">
@@ -382,7 +382,7 @@
                                         <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
                                     </ListView.ItemContainerTransitions>
                                     <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
                                     </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="数据:QEMU选项">

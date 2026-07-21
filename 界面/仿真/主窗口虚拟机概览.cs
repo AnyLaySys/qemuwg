@@ -59,23 +59,30 @@ public sealed partial class 主窗
         ShutdownButton.IsEnabled = selectedVm.IsRunning;
         _ = RefreshDisplayAsync(selectedVm);
 
-        DeviceSummaries.Clear();
-        DeviceSummaries.Add(new 设备摘要("\uE950", T("device.processor", "处理器"),
-            string.Format(T("device.cpuValue", "{0} 核 · {1}"), selectedVm.CpuCount, RawOrDefault(selectedVm.CpuModel)), ColorHelper.FromArgb(255, 82, 132, 230)));
-        DeviceSummaries.Add(new 设备摘要("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb), ColorHelper.FromArgb(255, 70, 173, 101)));
-        DeviceSummaries.Add(new 设备摘要("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)));
-        DeviceSummaries.Add(new 设备摘要("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)));
-        DeviceSummaries.Add(new 设备摘要("\uE7F4", T("device.display", "显示"),
-            $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)));
-        DeviceSummaries.Add(new 设备摘要("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)));
-        DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}", ColorHelper.FromArgb(255, 57, 153, 210)));
-        DeviceSummaries.Add(new 设备摘要("\uE8B7", T("device.installMedia", "安装介质"),
-            string.IsNullOrWhiteSpace(selectedVm.IsoPath) ? T("device.notConnected", "未连接") : Path.GetFileName(selectedVm.IsoPath), ColorHelper.FromArgb(255, 202, 118, 45)));
+        var summaries = new List<设备摘要>
+        {
+            new("\uE950", T("device.processor", "处理器"),
+                string.Format(T("device.cpuValue", "{0} 核 · {1}"), selectedVm.CpuCount, RawOrDefault(selectedVm.CpuModel)), ColorHelper.FromArgb(255, 82, 132, 230)),
+            new("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb), ColorHelper.FromArgb(255, 70, 173, 101)),
+            new("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)),
+            new("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)),
+            new("\uE7F4", T("device.display", "显示"), $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)),
+            new("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)),
+            new("\uE912", T("device.platform", "平台"), $"{selectedVm.Arch} · {selectedVm.Firmware}", ColorHelper.FromArgb(255, 57, 153, 210)),
+            new("\uE8A5", T("device.installMedia", "安装介质"),
+                string.IsNullOrWhiteSpace(selectedVm.IsoPath) ? T("device.notConnected", "未连接") : Path.GetFileName(selectedVm.IsoPath), ColorHelper.FromArgb(255, 202, 118, 45))
+        };
         if (selectedVm.Devices.Count > 0)
-            DeviceSummaries.Add(new 设备摘要("\uE950", T("device.additional", "附加设备"),
+            summaries.Add(new 设备摘要("\uE772", T("device.additional", "附加设备"),
                 string.Format(T("device.additionalValue", "{0} 个 · {1}"), selectedVm.Devices.Count,
                     string.Join(", ", selectedVm.Devices.Take(3).Select(device => device.Model))),
                 ColorHelper.FromArgb(255, 112, 121, 214)));
+        for (var index = 0; index < summaries.Count; index++)
+        {
+            if (index < DeviceSummaries.Count) DeviceSummaries[index] = summaries[index];
+            else DeviceSummaries.Add(summaries[index]);
+        }
+        while (DeviceSummaries.Count > summaries.Count) DeviceSummaries.RemoveAt(DeviceSummaries.Count - 1);
         lastAnimatedVmId = selectedVm.Id;
         if (animateDetails) _ = 页面过渡动画.渐进显示(DetailsView, 12);
     }
@@ -175,9 +182,13 @@ public sealed partial class 主窗
         CopyEditableValues(edited, selectedVm);
         var result = await vmRepo.更新(selectedVm);
         if (!result.Succeeded) await ShowOperationErrorAsync(result);
-        VmList.ItemsSource = null;
-        VmList.ItemsSource = Machines;
-        VmList.SelectedItem = selectedVm;
+        var selectedIndex = Machines.IndexOf(selectedVm);
+        if (selectedIndex >= 0)
+        {
+            Machines.RemoveAt(selectedIndex);
+            Machines.Insert(selectedIndex, selectedVm);
+            VmList.SelectedIndex = selectedIndex;
+        }
         RefreshDetails();
     }
 
@@ -255,7 +266,6 @@ public sealed partial class 主窗
             应用日志.写("虚拟机控制 constructed");
             await ShowDialogAsync(dialog);
             应用日志.写("虚拟机控制 closed");
-            RefreshDetails();
         }
         catch (Exception exception)
         {

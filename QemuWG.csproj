@@ -26,4 +26,13 @@
   <ItemGroup>
     <EmbeddedResource Include="语言\*.json" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="应用.xaml" />
+    <None Remove="应用.xaml" />
+    <ApplicationDefinition Include="应用.xaml" />
+    <Compile Update="应用.xaml.cs">
+      <DependentUpon>应用.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

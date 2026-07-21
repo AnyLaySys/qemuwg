@@ -36,7 +36,7 @@
                     SelectionChanged="CommandList_SelectionChanged"
                     SelectionMode="Single">
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="MinHeight" Value="43" />
                             <Setter Property="Padding" Value="6,3" />

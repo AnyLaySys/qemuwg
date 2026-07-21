@@ -18,7 +18,23 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid x:Name="TitleBarDragRegion" Grid.ColumnSpan="2" Background="Transparent" />
+        <Grid x:Name="TitleBarDragRegion" Grid.ColumnSpan="2" Background="Transparent">
+            <StackPanel
+                Margin="18,0,150,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False"
+                Orientation="Horizontal"
+                Spacing="9">
+                <TextBlock FontWeight="SemiBold" Foreground="{ThemeResource SidebarTextBrush}" Text="QemuWG" />
+                <TextBlock
+                    x:Name="QemuVersionText"
+                    MaxWidth="240"
+                    FontSize="10"
+                    Foreground="{ThemeResource SidebarSecondaryTextBrush}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1" Grid.Column="0" Background="{ThemeResource SidebarBackgroundBrush}">
             <Grid.RowDefinitions>
@@ -81,12 +97,8 @@
                         <ReorderThemeTransition />
                     </TransitionCollection>
                 </ListView.ItemContainerTransitions>
-                <ListView.Resources>
-                    <CornerRadius x:Key="ListViewItemCornerRadius">6</CornerRadius>
-                    <CornerRadius x:Key="ListViewItemSelectionIndicatorCornerRadius">3</CornerRadius>
-                </ListView.Resources>
                 <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
+                    <Style TargetType="ListViewItem" BasedOn="{StaticResource 宽行圆角列表项样式}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="Margin" Value="0,2" />
@@ -137,26 +149,6 @@
                         <TextBlock Text="{Binding [main.settings], Source={StaticResource Strings}}" />
                     </StackPanel>
                 </Button>
-                <Grid Padding="9,6" ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontWeight="SemiBold"
-                        Foreground="{ThemeResource SidebarTextBrush}"
-                        Text="QemuWG" />
-                    <TextBlock
-                        x:Name="QemuVersionText"
-                        Grid.Column="1"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Center"
-                        FontSize="10"
-                        Foreground="{ThemeResource SidebarSecondaryTextBrush}"
-                        TextAlignment="Right"
-                        TextTrimming="CharacterEllipsis" />
-                </Grid>
             </StackPanel>
         </Grid>
 
@@ -181,7 +173,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid Margin="20,10,18,6" ColumnSpacing="12">
+                <Grid Margin="9" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -235,7 +227,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Grid Grid.Row="1" Margin="20,6,18,18" ColumnSpacing="14">
+                <Grid Grid.Row="1" Margin="9,0,9,9" ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.32*" />
                         <ColumnDefinition Width="0.68*" />
@@ -262,7 +254,7 @@
                                 ItemsSource="{x:Bind DeviceSummaries}"
                                 SelectionMode="None">
                                 <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
+                                    <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         <Setter Property="Padding" Value="0" />
                                         <Setter Property="Margin" Value="0,1" />

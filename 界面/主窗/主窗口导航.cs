@@ -56,7 +56,6 @@ public sealed partial class 主窗
             };
             await ShowDialogAsync(dialog);
             应用日志.写("磁盘管理 closed");
-            RefreshDetails();
         }
         catch (Exception exception)
         {

@@ -10,11 +10,26 @@ namespace QemuWG.界面;
 internal static class 页面过渡动画
 {
     private static readonly ConditionalWeakTable<TabView, object> 已启用标签页 = new();
+    private static readonly ConditionalWeakTable<FrameworkElement, 动画状态> 活动动画 = new();
     private static readonly UISettings 系统界面设置 = new();
+
+    private sealed class 动画状态
+    {
+        public Storyboard? 故事板 { get; set; }
+        public TaskCompletionSource<bool>? 完成信号 { get; set; }
+        public int 版本 { get; set; }
+    }
 
     public static async Task 渐进显示(FrameworkElement? element, double verticalOffset = 12)
     {
         if (element is null) return;
+        var state = 活动动画.GetValue(element, _ => new 动画状态());
+        var version = ++state.版本;
+        state.故事板?.Stop();
+        state.完成信号?.TrySetResult(false);
+        state.故事板 = null;
+        state.完成信号 = null;
+
         element.Visibility = Visibility.Visible;
         if (!系统界面设置.AnimationsEnabled)
         {
@@ -41,9 +56,21 @@ internal static class 页面过渡动画
         storyboard.Children.Add(CreateAnimation(transform, "ScaleY", 1, 300, easing, true));
 
         var completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        state.故事板 = storyboard;
+        state.完成信号 = completed;
         storyboard.Completed += (_, _) => completed.TrySetResult(true);
         storyboard.Begin();
         await completed.Task;
+
+        if (state.版本 != version) return;
+        transform.TranslateY = 0;
+        transform.ScaleX = 1;
+        transform.ScaleY = 1;
+        element.Opacity = 1;
+        storyboard.Stop();
+        if (ReferenceEquals(element.RenderTransform, transform)) element.RenderTransform = null;
+        state.故事板 = null;
+        state.完成信号 = null;
     }
 
     public static void 启用标签页动画(TabView tabView)

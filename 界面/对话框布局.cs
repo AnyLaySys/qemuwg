@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace QemuWG.界面;
 
@@ -13,6 +14,8 @@ internal static class 对话框布局
     {
         XamlRoot? root = null;
         var updating = false;
+        var lastWidth = double.NaN;
+        var lastHeight = double.NaN;
 
         void Update()
         {
@@ -22,15 +25,26 @@ internal static class 对话框布局
 
             var dialogWidth = root.Size.Width * 对话框宽度比例;
             var contentHeight = root.Size.Height * 内容高度比例;
+            var dialogMaxHeight = root.Size.Height * 对话框最大高度比例;
+            if (Math.Abs(lastWidth - dialogWidth) < 0.5 && Math.Abs(lastHeight - contentHeight) < 0.5) return;
+
             updating = true;
             try
             {
-                dialog.Resources["ContentDialogMaxWidth"] = dialogWidth;
-                dialog.Resources["ContentDialogMaxHeight"] = root.Size.Height * 对话框最大高度比例;
-                content.Width = double.NaN;
-                content.Height = contentHeight;
+                if (!dialog.Resources.TryGetValue("ContentDialogMaxWidth", out var widthValue)
+                    || widthValue is not double currentWidth
+                    || Math.Abs(currentWidth - dialogWidth) >= 0.5)
+                    dialog.Resources["ContentDialogMaxWidth"] = dialogWidth;
+                if (!dialog.Resources.TryGetValue("ContentDialogMaxHeight", out var heightValue)
+                    || heightValue is not double currentHeight
+                    || Math.Abs(currentHeight - dialogMaxHeight) >= 0.5)
+                    dialog.Resources["ContentDialogMaxHeight"] = dialogMaxHeight;
+                if (!double.IsNaN(content.Width)) content.Width = double.NaN;
+                if (double.IsNaN(content.Height) || Math.Abs(content.Height - contentHeight) >= 0.5) content.Height = contentHeight;
                 content.HorizontalAlignment = HorizontalAlignment.Stretch;
                 content.VerticalAlignment = VerticalAlignment.Stretch;
+                lastWidth = dialogWidth;
+                lastHeight = contentHeight;
             }
             finally
             {
@@ -38,18 +52,26 @@ internal static class 对话框布局
             }
         }
 
-        void RootChanged(XamlRoot sender, XamlRootChangedEventArgs args) => Update();
-
         dialog.Loading += (_, _) => Update();
-        dialog.Opened += (_, _) =>
+        dialog.Opened += (_, _) => Update();
+        dialog.Closing += (_, _) =>
         {
-            Update();
-            if (root is not null) root.Changed += RootChanged;
+            var smokeLayer = 查找模板元素(dialog, "SmokeLayerBackground");
+            if (smokeLayer is not null) smokeLayer.Opacity = 0;
         };
-        dialog.Closed += (_, _) =>
+    }
+
+    private static FrameworkElement? 查找模板元素(DependencyObject root, string name)
+    {
+        var childCount = VisualTreeHelper.GetChildrenCount(root);
+        for (var index = 0; index < childCount; index++)
         {
-            if (root is not null) root.Changed -= RootChanged;
-        };
+            var child = VisualTreeHelper.GetChild(root, index);
+            if (child is FrameworkElement { Name: var childName } element && childName == name) return element;
+            var match = 查找模板元素(child, name);
+            if (match is not null) return match;
+        }
+        return null;
     }
 
     public static void 应用按钮圆角(ContentDialog dialog)
