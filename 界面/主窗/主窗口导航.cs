@@ -10,42 +10,7 @@ namespace QemuWG;
 
 public sealed partial class 主窗
 {
-    private async void GlobalDiskManager_Click(object sender, RoutedEventArgs e)
-    {
-        await ShowDiskManagerAsync(selectedVm ?? new 虚拟机配置 { Name = T("disk.manager", "磁盘管理") });
-    }
-
-    private async void QemuTools_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            应用日志.写("Opening embedded QEMU附加功能");
-            ShowToolsView();
-        }
-        catch (Exception exception)
-        {
-            应用日志.写("QemuToolsDialog failed: " + exception);
-            await ShowMessageAsync(
-                T("dialog.operationFailed", "操作失败"),
-                string.Format(T("tools.openFailed", "无法打开 QEMU 工具箱：{0}"), exception.Message));
-        }
-    }
-
-    private void ShowToolsView()
-    {
-        StopDisplay();
-        LoadingView.Visibility = Visibility.Collapsed;
-        EmptyView.Visibility = Visibility.Collapsed;
-        DetailsView.Visibility = Visibility.Collapsed;
-        toolsView ??= new QEMU附加功能(WindowNative.GetWindowHandle(this), qemu, toolSessions);
-        ToolsHost.Content = toolsView;
-        ToolsHost.Visibility = Visibility.Visible;
-        lastAnimatedVmId = null;
-        按钮交互动画.启用(toolsView);
-        _ = 页面过渡动画.渐进显示(ToolsHost, 12);
-    }
-
-    private async Task ShowDiskManagerAsync(虚拟机配置 machine)
+    private async Task ShowDiskManagerAsync(仿真配置 machine)
     {
         try
         {
@@ -70,7 +35,7 @@ public sealed partial class 主窗
     {
         var panel = new StackPanel { Spacing = 12, MinWidth = 460 };
         panel.Children.Add(CreateSettingsRow("QEMU", qemu.Version, qemu.RootDir));
-        panel.Children.Add(CreateSettingsRow(T("settings.library", "虚拟机库"), "Documents\\qemuwg\\vm", vmRepo.根目录));
+        panel.Children.Add(CreateSettingsRow(T("settings.library", "仿真库"), "Documents\\qemuwg\\vm", vmRepo.根目录));
         var dialog = new ContentDialog
         {
             XamlRoot = RootXamlRoot,
@@ -100,6 +65,7 @@ public sealed partial class 主窗
         Grid.SetColumn(details, 1);
         grid.Children.Add(details);
         var button = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(3) };
+        按钮样式应用.设为正方形(button);
         button.Click += (_, _) => OpenPath(path);
         Grid.SetColumn(button, 2);
         grid.Children.Add(button);

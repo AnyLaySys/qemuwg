@@ -25,10 +25,7 @@
                     <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#646464" />
                     <SolidColorBrush x:Key="VersionBadgeBackgroundBrush" Color="#DCEBFF" />
                     <SolidColorBrush x:Key="VersionBadgeForegroundBrush" Color="#145DA0" />
-                    <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#DCE8F8" />
-                    <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#245A9C" />
                     <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#F6F6F6" />
-                    <SolidColorBrush x:Key="DisplayFooterBrush" Color="#EAEAEA" />
                     <SolidColorBrush x:Key="DisplayTextBrush" Color="#505050" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
@@ -50,15 +47,13 @@
                     <SolidColorBrush x:Key="SidebarSecondaryTextBrush" Color="#AAB0B8" />
                     <SolidColorBrush x:Key="VersionBadgeBackgroundBrush" Color="#294A70" />
                     <SolidColorBrush x:Key="VersionBadgeForegroundBrush" Color="#D8E9FF" />
-                    <SolidColorBrush x:Key="VmIconBackgroundBrush" Color="#253046" />
-                    <SolidColorBrush x:Key="VmIconForegroundBrush" Color="#8AB4F8" />
                     <SolidColorBrush x:Key="DisplayBackgroundBrush" Color="#101215" />
-                    <SolidColorBrush x:Key="DisplayFooterBrush" Color="#171A1F" />
                     <SolidColorBrush x:Key="DisplayTextBrush" Color="#AAB0B8" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///界面/按钮样式.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
             <CornerRadius x:Key="OverlayCornerRadius">9</CornerRadius>

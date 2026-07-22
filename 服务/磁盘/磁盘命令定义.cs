@@ -95,11 +95,6 @@ public static partial class QEMU镜像命令
             Text("format", "格式", "-f"), Toggle("imageOpts", "--image-opts"), Cache("cache", "缓存模式", "-t", "writeback"),
             Toggle("force", "--force"), Toggle("progress", "-p"), Toggle("quiet", "-q")),
 
-        Cmd("snapshot", "快照", "管理内部快照", true,
-            Path("file", "镜像文件", true, false), Action("action", "操作", "-l", "-c", "-a", "-d"),
-            ConditionalText("snapshot", "快照名称", "action", "-l", true), Text("format", "格式", "-f"),
-            Toggle("imageOpts", "--image-opts"), Toggle("forceShare", "-U"), Toggle("quiet", "-q")),
-
         Cmd("bitmap", "位图", "管理持久化位图", true,
             Path("file", "镜像文件", true, false), Action("action", "操作", "--add", "--remove", "--clear", "--enable", "--disable", "--merge"),
             ConditionalText("mergeSource", "源位图", "action", "--merge", false),

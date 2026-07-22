@@ -11,9 +11,11 @@ public sealed class QEMU能力
     public IReadOnlyList<string> NetworkDevices { get; init; } = [];
     public IReadOnlyList<string> AudioBackends { get; init; } = [];
     public IReadOnlyList<string> AudioDevices { get; init; } = [];
+    public IReadOnlyList<string> AudioModels { get; init; } = [];
     public IReadOnlyList<string> InputDevices { get; init; } = [];
     public IReadOnlyList<string> KeyboardDevices { get; init; } = [];
     public IReadOnlyList<string> PointerDevices { get; init; } = [];
+    public IReadOnlyList<string> KeyboardLayouts { get; init; } = [];
     public IReadOnlyList<string> AllDevices { get; init; } = [];
     public IReadOnlyList<QEMU命令选项> CmdOptions { get; init; } = [];
 }

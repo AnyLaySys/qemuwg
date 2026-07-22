@@ -61,7 +61,6 @@ public static partial class QEMU镜像命令
         "rebase" => "\uE8A7",
         "commit" => "\uE74E",
         "amend" => "\uE70F",
-        "snapshot" => "\uE7B8",
         "bitmap" => "\uE91B",
         _ => "\uE958"
     };
@@ -77,7 +76,6 @@ public static partial class QEMU镜像命令
             "convert" or "dd" => ColorHelper.FromArgb(255, 225, 139, 40),
             "resize" or "amend" => ColorHelper.FromArgb(255, 218, 90, 116),
             "rebase" or "commit" => ColorHelper.FromArgb(255, 195, 92, 190),
-            "snapshot" => ColorHelper.FromArgb(255, 75, 113, 210),
             "bitmap" => ColorHelper.FromArgb(255, 80, 154, 128),
             _ => ColorHelper.FromArgb(255, 96, 110, 125)
         };
@@ -90,7 +88,6 @@ public static partial class QEMU镜像命令
         "创建" => "disk.category.create",
         "转换" => "disk.category.convert",
         "修改" => "disk.category.modify",
-        "快照" => "disk.category.snapshot",
         "位图" => "disk.category.bitmap",
         _ => category
     };

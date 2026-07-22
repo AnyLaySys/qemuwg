@@ -9,7 +9,7 @@ internal static class QEMU显示要求
         "dbus", "gtk", "sdl", "spice-app"
     };
 
-    public static bool 需要OpenGL(虚拟机配置 vm, IReadOnlyList<string> extraArguments)
+    public static bool 需要OpenGL(仿真配置 vm, IReadOnlyList<string> extraArguments)
     {
         if (是OpenGL设备(vm.VideoDevice)) return true;
         if (vm.Devices.Any(device => 是OpenGL设备(device.Model))) return true;
@@ -23,7 +23,7 @@ internal static class QEMU显示要求
         return false;
     }
 
-    public static IEnumerable<string> 枚举显示后端(虚拟机配置 vm, IReadOnlyList<string> extraArguments)
+    public static IEnumerable<string> 枚举显示后端(仿真配置 vm, IReadOnlyList<string> extraArguments)
     {
         yield return string.IsNullOrWhiteSpace(vm.DisplayBackend) ? "dbus" : vm.DisplayBackend.Trim();
         foreach (var option in vm.QemuOpts)

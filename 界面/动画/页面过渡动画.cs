@@ -1,109 +1,178 @@
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Hosting;
 using Windows.UI.ViewManagement;
 
 namespace QemuWG.界面;
 
 internal static class 页面过渡动画
 {
-    private static readonly ConditionalWeakTable<TabView, object> 已启用标签页 = new();
-    private static readonly ConditionalWeakTable<FrameworkElement, 动画状态> 活动动画 = new();
+    private static readonly ConditionalWeakTable<TabView, 标签页状态> 已启用标签页 = new();
+    private static readonly ConditionalWeakTable<FrameworkElement, 可见性动画状态> 可见性动画 = new();
     private static readonly UISettings 系统界面设置 = new();
 
-    private sealed class 动画状态
+    private sealed class 标签页状态
     {
-        public Storyboard? 故事板 { get; set; }
-        public TaskCompletionSource<bool>? 完成信号 { get; set; }
-        public int 版本 { get; set; }
+        public FrameworkElement? 上次内容 { get; set; }
     }
 
-    public static async Task 渐进显示(FrameworkElement? element, double verticalOffset = 12)
+    private sealed class 可见性动画状态
     {
-        if (element is null) return;
-        var state = 活动动画.GetValue(element, _ => new 动画状态());
-        var version = ++state.版本;
-        state.故事板?.Stop();
-        state.完成信号?.TrySetResult(false);
-        state.故事板 = null;
-        state.完成信号 = null;
+        public long 版本;
+        public Vector3? 待恢复偏移;
+    }
 
+    public static Task 渐进显示(FrameworkElement? element, double verticalOffset = 12)
+    {
+        if (element is null) return Task.CompletedTask;
+
+        var animationState = 可见性动画.GetOrCreateValue(element);
+        Interlocked.Increment(ref animationState.版本);
         element.Visibility = Visibility.Visible;
+        element.IsHitTestVisible = true;
+        element.Opacity = 1;
         if (!系统界面设置.AnimationsEnabled)
         {
-            element.Opacity = 1;
-            element.RenderTransform = null;
-            return;
+            return Task.CompletedTask;
         }
 
-        var transform = new CompositeTransform
-        {
-            TranslateY = verticalOffset,
-            ScaleX = 0.985,
-            ScaleY = 0.985
-        };
-        element.RenderTransformOrigin = new Windows.Foundation.Point(0.5, 0.5);
-        element.RenderTransform = transform;
-        element.Opacity = 0;
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        停止显现动画(visual);
+        恢复隐藏动画偏移(visual, animationState);
+        visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
+        var compositor = visual.Compositor;
+        var easing = 创建缓动(compositor);
+        var targetOffset = visual.Offset;
 
-        var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
-        var storyboard = new Storyboard();
-        storyboard.Children.Add(CreateAnimation(element, "Opacity", 1, 210, easing, false));
-        storyboard.Children.Add(CreateAnimation(transform, "TranslateY", 0, 280, easing, true));
-        storyboard.Children.Add(CreateAnimation(transform, "ScaleX", 1, 300, easing, true));
-        storyboard.Children.Add(CreateAnimation(transform, "ScaleY", 1, 300, easing, true));
+        var opacity = compositor.CreateScalarKeyFrameAnimation();
+        opacity.Duration = TimeSpan.FromMilliseconds(210);
+        opacity.InsertKeyFrame(0, 0);
+        opacity.InsertKeyFrame(1, 1, easing);
+        visual.StartAnimation("Opacity", opacity);
 
-        var completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        state.故事板 = storyboard;
-        state.完成信号 = completed;
-        storyboard.Completed += (_, _) => completed.TrySetResult(true);
-        storyboard.Begin();
-        await completed.Task;
+        var offset = compositor.CreateVector3KeyFrameAnimation();
+        offset.Duration = TimeSpan.FromMilliseconds(260);
+        offset.InsertKeyFrame(0, targetOffset + new Vector3(0, (float)verticalOffset, 0));
+        offset.InsertKeyFrame(1, targetOffset, easing);
+        visual.StartAnimation("Offset", offset);
 
-        if (state.版本 != version) return;
-        transform.TranslateY = 0;
-        transform.ScaleX = 1;
-        transform.ScaleY = 1;
-        element.Opacity = 1;
-        storyboard.Stop();
-        if (ReferenceEquals(element.RenderTransform, transform)) element.RenderTransform = null;
-        state.故事板 = null;
-        state.完成信号 = null;
+        var scale = compositor.CreateVector3KeyFrameAnimation();
+        scale.Duration = TimeSpan.FromMilliseconds(280);
+        scale.InsertKeyFrame(0, new Vector3(0.985f, 0.985f, 1));
+        scale.InsertKeyFrame(1, Vector3.One, easing);
+        visual.StartAnimation("Scale", scale);
+        return Task.CompletedTask;
     }
 
     public static void 启用标签页动画(TabView tabView)
     {
         if (已启用标签页.TryGetValue(tabView, out _)) return;
-        已启用标签页.Add(tabView, new object());
-        tabView.SelectionChanged += (_, _) => AnimateSelectedTab(tabView);
-        tabView.Loaded += (_, _) => AnimateSelectedTab(tabView);
+        var state = new 标签页状态();
+        已启用标签页.Add(tabView, state);
+        tabView.SelectionChanged += (_, _) =>
+        {
+            if (tabView.IsLoaded) AnimateSelectedTab(tabView, state);
+        };
+        tabView.Loaded += (_, _) => AnimateSelectedTab(tabView, state);
     }
 
-    private static void AnimateSelectedTab(TabView tabView)
+    private static void AnimateSelectedTab(TabView tabView, 标签页状态 state)
     {
         if (tabView.SelectedItem is not TabViewItem { Content: FrameworkElement content }) return;
+        if (ReferenceEquals(state.上次内容, content)) return;
+        state.上次内容 = content;
         content.DispatcherQueue.TryEnqueue(() => _ = 渐进显示(content, 9));
     }
 
-    private static DoubleAnimation CreateAnimation(
-        DependencyObject target,
-        string property,
-        double value,
-        int durationMilliseconds,
-        EasingFunctionBase easing,
-        bool allowDependentAnimation)
+    public static void 渐进隐藏(FrameworkElement? element, double horizontalOffset = 6)
     {
-        var animation = new DoubleAnimation
+        if (element is null || element.Visibility != Visibility.Visible) return;
+        var animationState = 可见性动画.GetOrCreateValue(element);
+        var version = Interlocked.Increment(ref animationState.版本);
+        element.IsHitTestVisible = false;
+        if (!系统界面设置.AnimationsEnabled)
         {
-            To = value,
-            Duration = new Duration(TimeSpan.FromMilliseconds(durationMilliseconds)),
-            EasingFunction = easing,
-            EnableDependentAnimation = allowDependentAnimation
+            element.Visibility = Visibility.Collapsed;
+            element.IsHitTestVisible = true;
+            return;
+        }
+
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        停止显现动画(visual);
+        var compositor = visual.Compositor;
+        var targetOffset = visual.Offset;
+        animationState.待恢复偏移 = targetOffset;
+        var easing = 创建缓动(compositor);
+        var batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+
+        var opacity = compositor.CreateScalarKeyFrameAnimation();
+        opacity.Duration = TimeSpan.FromMilliseconds(120);
+        opacity.InsertKeyFrame(0, 1);
+        opacity.InsertKeyFrame(1, 0, easing);
+        visual.StartAnimation("Opacity", opacity);
+
+        var offset = compositor.CreateVector3KeyFrameAnimation();
+        offset.Duration = TimeSpan.FromMilliseconds(150);
+        offset.InsertKeyFrame(0, targetOffset);
+        offset.InsertKeyFrame(1, targetOffset + new Vector3((float)horizontalOffset, 0, 0), easing);
+        visual.StartAnimation("Offset", offset);
+        batch.Completed += (_, _) =>
+        {
+            if (Volatile.Read(ref animationState.版本) != version) return;
+            element.Visibility = Visibility.Collapsed;
+            element.IsHitTestVisible = true;
+            停止显现动画(visual);
+            恢复隐藏动画偏移(visual, animationState);
         };
-        Storyboard.SetTarget(animation, target);
-        Storyboard.SetTargetProperty(animation, property);
-        return animation;
+        batch.End();
+    }
+
+    public static void 布局稳定(params FrameworkElement?[] elements)
+    {
+        if (!系统界面设置.AnimationsEnabled) return;
+        foreach (var element in elements)
+        {
+            if (element is null || element.Visibility != Visibility.Visible) continue;
+            var visual = ElementCompositionPreview.GetElementVisual(element);
+            停止显现动画(visual);
+            visual.CenterPoint = new Vector3((float)element.ActualWidth / 2, (float)element.ActualHeight / 2, 0);
+            var compositor = visual.Compositor;
+            var easing = 创建缓动(compositor);
+            var targetOffset = visual.Offset;
+
+            var offset = compositor.CreateVector3KeyFrameAnimation();
+            offset.Duration = TimeSpan.FromMilliseconds(180);
+            offset.InsertKeyFrame(0, targetOffset + new Vector3(0, 3, 0));
+            offset.InsertKeyFrame(1, targetOffset, easing);
+            visual.StartAnimation("Offset", offset);
+
+            var scale = compositor.CreateVector3KeyFrameAnimation();
+            scale.Duration = TimeSpan.FromMilliseconds(220);
+            scale.InsertKeyFrame(0, new Vector3(0.996f, 0.996f, 1));
+            scale.InsertKeyFrame(1, Vector3.One, easing);
+            visual.StartAnimation("Scale", scale);
+        }
+    }
+
+    private static CubicBezierEasingFunction 创建缓动(Compositor compositor) =>
+        compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+
+    private static void 停止显现动画(Visual visual)
+    {
+        visual.StopAnimation("Opacity");
+        visual.StopAnimation("Offset");
+        visual.StopAnimation("Scale");
+        visual.Opacity = 1;
+        visual.Scale = Vector3.One;
+    }
+
+    private static void 恢复隐藏动画偏移(Visual visual, 可见性动画状态 animationState)
+    {
+        if (animationState.待恢复偏移 is not { } offset) return;
+        visual.Offset = offset;
+        animationState.待恢复偏移 = null;
     }
 }

@@ -13,7 +13,7 @@ public sealed partial class 主窗
     private CancellationTokenSource? displayConnection;
     private D3D11内嵌显示? embeddedDisplay;
     private DBus显示传输? embeddedTransport;
-    private 虚拟机配置? displayMachine;
+    private 仿真配置? displayMachine;
     private int embeddedDisplayWidth;
     private int embeddedDisplayHeight;
     private int displayVersion;
@@ -21,16 +21,14 @@ public sealed partial class 主窗
     private string failedDisplayMachineId = string.Empty;
     private long displayRetryNotBefore;
 
-    private async Task RefreshDisplayAsync(虚拟机配置? vm)
+    private async Task RefreshDisplayAsync(仿真配置? vm)
     {
         if (vm is not null && vm.IsRunning
             && string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase)
             && string.Equals(failedDisplayMachineId, vm.Id, StringComparison.Ordinal)
             && Environment.TickCount64 < Volatile.Read(ref displayRetryNotBefore))
         {
-            DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
-            EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
-            DisplayFallback.Visibility = Visibility.Visible;
+            显示占位状态(T("main.displayUnavailable", "无法连接仿真显示器"));
             return;
         }
 
@@ -41,7 +39,7 @@ public sealed partial class 主窗
         {
             if (embeddedDisplay?.已准备 == true)
             {
-                DisplayStateText.Text = T("main.displayRunning", "虚拟机显示器已连接");
+                DisplayStateText.Text = T("main.displayRunning", "仿真显示器已连接");
                 EmbeddedDisplayPanel.Visibility = Visibility.Visible;
                 DisplayFallback.Visibility = Visibility.Collapsed;
             }
@@ -53,10 +51,9 @@ public sealed partial class 主窗
             || !string.Equals(vm.DisplayBackend, "dbus", StringComparison.OrdinalIgnoreCase))
         {
             StopDisplay(false);
-            EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
-            DisplayFallback.Visibility = Visibility.Visible;
-            if (vm?.IsRunning == true)
-                DisplayStateText.Text = T("main.displayNativeWindow", "虚拟机正在 QEMU 原生窗口中显示");
+            显示占位状态(vm?.IsRunning == true
+                ? T("main.displayNativeWindow", "仿真正在 QEMU 原生窗口中显示")
+                : T("main.displayOff", "仿真已关机"));
             return;
         }
 
@@ -68,9 +65,7 @@ public sealed partial class 主窗
         displayConnection = connectionCancellation;
         var renderer = new D3D11内嵌显示(EmbeddedDisplayPanel);
         embeddedDisplay = renderer;
-        EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
-        DisplayStateText.Text = T("main.displayConnecting", "正在连接虚拟机显示器…");
-        DisplayFallback.Visibility = Visibility.Visible;
+        显示占位状态(T("main.displayConnecting", "正在连接仿真显示器…"));
         var connectStarted = System.Diagnostics.Stopwatch.GetTimestamp();
         var firstCallbackLogged = 0;
         应用日志.写($"D-Bus display connect started: vm={vm.Id}, version={version}.");
@@ -171,15 +166,13 @@ public sealed partial class 主窗
                 }
                 Interlocked.Exchange(ref embeddedTransport, null);
                 _ = 安全断开内嵌显示(vm);
-                DisplayStateText.Text = T("main.displayUnavailable", "无法连接虚拟机显示器");
-                EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
-                DisplayFallback.Visibility = Visibility.Visible;
+                显示占位状态(T("main.displayUnavailable", "无法连接仿真显示器"));
                 _ = 安排内嵌显示重试(vm, version);
             }
         }
     }
 
-    private async Task 安排内嵌显示重试(虚拟机配置 vm, int failedVersion)
+    private async Task 安排内嵌显示重试(仿真配置 vm, int failedVersion)
     {
         await Task.Delay(500);
         if (failedVersion != Volatile.Read(ref displayVersion)
@@ -188,10 +181,34 @@ public sealed partial class 主窗
         DispatcherQueue.TryEnqueue(() => _ = RefreshDisplayAsync(vm));
     }
 
+    private void 显示占位状态(string text)
+    {
+        var animate = DisplayFallback.Visibility != Visibility.Visible
+                      || !string.Equals(DisplayStateText.Text, text, StringComparison.Ordinal);
+        DisplayStateText.Text = text;
+        EmbeddedDisplayPanel.Visibility = Visibility.Collapsed;
+        DisplayFallback.Visibility = Visibility.Visible;
+        if (animate) _ = 页面过渡动画.渐进显示(DisplayFallback, 4);
+    }
+
     private void 设置内嵌显示尺寸(uint width, uint height)
     {
         Volatile.Write(ref embeddedDisplayWidth, checked((int)width));
         Volatile.Write(ref embeddedDisplayHeight, checked((int)height));
+        DispatcherQueue.TryEnqueue(更新内嵌画面布局);
+    }
+
+    private void 更新内嵌画面布局()
+    {
+        var guestWidth = Volatile.Read(ref embeddedDisplayWidth);
+        var guestHeight = Volatile.Read(ref embeddedDisplayHeight);
+        var availableWidth = Math.Max(0, DisplaySurface.ActualWidth);
+        var availableHeight = Math.Max(0, DisplaySurface.ActualHeight);
+        if (guestWidth <= 0 || guestHeight <= 0 || availableWidth <= 0 || availableHeight <= 0) return;
+
+        var scale = Math.Min(availableWidth / guestWidth, availableHeight / guestHeight);
+        EmbeddedDisplayHost.Width = Math.Max(1, guestWidth * scale);
+        EmbeddedDisplayHost.Height = Math.Max(1, guestHeight * scale);
     }
 
     private void 显示内嵌画面(int version, D3D11内嵌显示 renderer)
@@ -201,7 +218,7 @@ public sealed partial class 主窗
             if (version != Volatile.Read(ref displayVersion)
                 || !ReferenceEquals(embeddedDisplay, renderer)
                 || !renderer.已准备) return;
-            DisplayStateText.Text = T("main.displayRunning", "虚拟机显示器已连接");
+            DisplayStateText.Text = T("main.displayRunning", "仿真显示器已连接");
             EmbeddedDisplayPanel.Visibility = Visibility.Visible;
             DisplayFallback.Visibility = Visibility.Collapsed;
             if (Volatile.Read(ref loggedPresentedVersion) != version)
@@ -231,7 +248,7 @@ public sealed partial class 主窗
         if (vm is not null) _ = 安全断开内嵌显示(vm);
     }
 
-    private async Task 安全断开内嵌显示(虚拟机配置 vm)
+    private async Task 安全断开内嵌显示(仿真配置 vm)
     {
         try
         {

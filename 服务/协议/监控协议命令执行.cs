@@ -9,7 +9,7 @@ namespace QemuWG.服务;
 public sealed partial class QEMU会话
 {
     public async Task<QMP结果> 执行QMP(
-        虚拟机配置 vm,
+        仿真配置 vm,
         string command,
         string argumentsJson = "",
         CancellationToken cancellationToken = default)
@@ -22,7 +22,7 @@ public sealed partial class QEMU会话
     }
 
     public async Task<IReadOnlyList<QMP结果>> 执行QMP批次(
-        虚拟机配置 vm,
+        仿真配置 vm,
         IReadOnlyList<QMP请求> requests,
         CancellationToken cancellationToken = default)
     {
@@ -32,7 +32,7 @@ public sealed partial class QEMU会话
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
         if (session is null || !session.IsActive)
-            return [new QMP结果(false, T("session.notRunning", "虚拟机没有运行"), "NotRunning")];
+            return [new QMP结果(false, T("session.notRunning", "仿真没有运行"), "NotRunning")];
 
         try
         {
@@ -84,7 +84,7 @@ public sealed partial class QEMU会话
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return [new QMP结果(false, T("qmp.timeout", "QMP 操作超时，请确认虚拟机仍在响应。"), "Timeout")];
+            return [new QMP结果(false, T("qmp.timeout", "QMP 操作超时，请确认仿真仍在响应。"), "Timeout")];
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

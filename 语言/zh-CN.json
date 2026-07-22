@@ -9,27 +9,30 @@
   "common.output": "输出",
   "common.on": "开",
   "common.off": "关",
-  "main.virtualMachines": "虚拟机",
+  "main.virtualMachines": "仿真",
   "main.diskManager": "磁盘管理",
-  "main.qemuTools": "QEMU 工具箱",
-  "main.qmpConsole": "虚拟机控制",
-  "main.guestAgent": "来宾系统管理",
-  "main.newVm": "新建虚拟机",
+  "main.snapshotManager": "快照管理器",
+  "main.vmDeviceServices": "设备与存储服务",
+  "main.backToDisplay": "返回仿真显示器",
+  "main.newVm": "新建仿真",
   "main.settings": "设置",
-  "main.selectVm": "选择一台虚拟机",
+  "main.selectVm": "选择一台仿真",
   "main.start": "启动",
   "main.shutdown": "关机",
   "main.editConfig": "编辑配置",
   "main.more": "更多",
-  "main.openVmFolder": "打开虚拟机目录",
+  "main.openVmFolder": "打开仿真目录",
   "main.openQemuLog": "打开 QEMU 日志",
   "main.forceStop": "强制停止",
-  "main.deleteVm": "删除虚拟机",
+  "main.holdToForceStop": "长按 3 秒强制停止",
+  "main.holdToForceStopHint": "来宾系统仍未关机。请继续等待，或长按电源按钮 3 秒强制停止。",
+  "main.screenshotSaved": "截图已保存至 {0}",
+  "main.deleteVm": "删除仿真",
   "main.configuration": "配置",
   "main.display": "显示器",
   "main.detachDisplay": "分离到 QEMU 原生窗口",
-  "main.displayRunning": "虚拟机显示器已连接",
-  "main.displayOff": "虚拟机已关机",
+  "main.displayRunning": "仿真显示器已连接",
+  "main.displayOff": "仿真已关机",
   "device.processor": "处理器",
   "device.cpuValue": "{0} 核 · {1}",
   "device.memory": "内存",
@@ -44,34 +47,36 @@
   "device.additionalValue": "{0} 个 · {1}",
   "dialog.qemuMissingTitle": "未找到 QEMU",
   "dialog.qemuMissingMessage": "请先安装 QEMU，或将 QEMU 目录加入 PATH。",
-  "dialog.forceStopTitle": "强制停止虚拟机？",
+  "dialog.forceStopTitle": "强制停止仿真？",
   "dialog.forceStopMessage": "未保存的数据可能丢失。",
   "dialog.cannotDeleteTitle": "无法删除",
-  "dialog.closeVmFirst": "请先关闭虚拟机。",
+  "dialog.closeVmFirst": "请先关闭仿真。",
   "dialog.deleteTitle": "删除“{0}”？",
-  "dialog.deleteMessage": "虚拟机目录将移至回收站。",
+  "dialog.deleteMessage": "仿真目录将移至回收站。",
   "dialog.noLogTitle": "暂无日志",
-  "dialog.noLogMessage": "该虚拟机还没有生成 QEMU 日志。",
+  "dialog.noLogMessage": "该仿真还没有生成 QEMU 日志。",
   "dialog.operationFailed": "操作失败",
-  "dialog.shutdownTimeoutTitle": "虚拟机没有响应关机请求",
+  "dialog.shutdownTimeoutTitle": "仿真没有响应关机请求",
   "dialog.shutdownTimeoutMessage": "来宾系统可能尚未启动、未启用 ACPI，或正在处理关机。可以继续等待，也可以强制停止。",
   "dialog.keepWaiting": "继续等待",
   "settings.title": "设置",
-  "settings.library": "虚拟机库",
+  "settings.library": "仿真库",
   "disk.manager": "磁盘管理",
-  "vmEditor.newTitle": "新建虚拟机",
-  "vmEditor.editTitle": "编辑虚拟机",
+  "vmEditor.newTitle": "新建仿真",
+  "vmEditor.editTitle": "编辑仿真",
   "vmEditor.capabilityLoading": "正在读取该架构的 QEMU 能力…",
   "vmEditor.capabilitySummary": "{0} · {1} 种机器 · {2} 种 CPU · {3} 种声卡 · {4} 种设备",
   "vmEditor.capabilityFailed": "能力读取失败：{0}",
-  "vmEditor.validation.name": "请输入虚拟机名称。",
+  "vmEditor.validation.name": "请输入仿真名称。",
   "vmEditor.validation.architecture": "请选择系统架构。",
   "vmEditor.validation.location": "请选择保存位置。",
   "vmEditor.validation.memory": "内存至少为 256 MB。",
   "vmEditor.validation.cpu": "处理器数量至少为 1。",
+  "vmEditor.validation.cpuTopology": "处理器插槽、核心和线程数必须至少为 1。",
+  "vmEditor.validation.cpuMaximum": "vCPU 总数不能超过 1024。",
   "vmEditor.validation.disk": "磁盘至少为 1 GB。",
   "vmEditor.validation.media": "安装镜像不存在。",
-  "vmEditor.name": "虚拟机名称",
+  "vmEditor.name": "仿真名称",
   "vmEditor.nameExample": "例如 Windows 11",
   "vmEditor.location": "保存位置",
   "vmEditor.chooseLocation": "选择位置",
@@ -83,6 +88,9 @@
   "vmEditor.processor": "处理器",
   "vmEditor.cpuModel": "CPU 型号",
   "vmEditor.cpuCount": "处理器数量",
+  "vmEditor.cpuSockets": "插槽",
+  "vmEditor.cpuCores": "核心",
+  "vmEditor.cpuThreads": "线程",
   "vmEditor.memory": "内存",
   "vmEditor.capacityMb": "容量 (MB)",
   "vmEditor.storage": "存储",
@@ -90,23 +98,60 @@
   "vmEditor.installMedia": "安装介质",
   "vmEditor.browseMedia": "浏览安装介质",
   "vmEditor.mediaPlaceholder": "ISO / IMG / QCOW2",
+  "vmEditor.diskInterface": "磁盘接口",
+  "vmEditor.diskCache": "缓存模式",
+  "vmEditor.diskAio": "异步 I/O",
+  "vmEditor.diskDiscard": "空间回收",
+  "vmEditor.detectZeroes": "零块检测",
+  "vmEditor.physicalStorage": "物理磁盘与分区",
+  "vmEditor.partition": "分区",
+  "vmEditor.physicalStorageWarning": "只读模式不会修改物理存储；读写模式会将客户机写入直接传到真实磁盘且不会静默降级。分区按原盘偏移和长度精确切片。",
+  "vmEditor.physicalStorageScanning": "正在扫描物理磁盘和分区…",
+  "vmEditor.physicalStorageUnavailable": "未发现物理磁盘或分区。",
+  "vmEditor.physicalStorageCount": "发现 {0} 个物理磁盘或分区。",
+  "vmEditor.addPhysicalStorage": "挂载物理磁盘或分区",
+  "vmEditor.removePhysicalStorage": "移除物理存储挂载",
+  "vmEditor.readOnly": "只读",
+  "vmEditor.readWrite": "读写",
   "vmEditor.display": "显示",
   "vmEditor.displayBackend": "图形后端",
+  "vmEditor.resolutionPreset": "分辨率",
+  "vmEditor.resolutionWidth": "宽度",
+  "vmEditor.resolutionHeight": "高度",
+  "vmEditor.resolutionAutomatic": "自动",
+  "vmEditor.resolutionCustom": "自定义",
+  "vmEditor.resolutionSelectVideo": "明确选择支持分辨率设置的显卡后可用。",
+  "vmEditor.resolutionUnsupported": "当前显卡不公开 xres/yres 属性，保持由来宾系统自动决定。",
   "vmEditor.video": "显卡",
   "vmEditor.network": "网络",
   "vmEditor.connection": "连接方式",
   "vmEditor.nic": "网卡",
+  "vmEditor.macAddress": "MAC 地址",
+  "vmEditor.hostForwarding": "主机端口转发（分号分隔）",
   "vmEditor.audio": "音频",
   "vmEditor.soundCard": "声卡",
   "vmEditor.audioBackend": "音频后端",
   "vmEditor.inputDevices": "输入设备",
   "vmEditor.keyboard": "键盘",
   "vmEditor.mouse": "鼠标",
+  "vmEditor.keyboardLayout": "键盘布局",
+  "vmEditor.bootAndIntegration": "启动与来宾集成",
   "vmEditor.advanced": "高级",
   "vmEditor.bootOrder": "启动顺序",
+  "vmEditor.bootOnce": "仅本次启动",
+  "vmEditor.bootOnceHelp": "只在下一次启动时临时优先使用所选设备，之后自动恢复正常启动顺序。",
+  "vmEditor.bootDefault": "不临时覆盖",
+  "vmEditor.bootCdThenDisk": "光盘 → 硬盘",
+  "vmEditor.bootDiskThenCd": "硬盘 → 光盘",
+  "vmEditor.bootDisk": "硬盘",
+  "vmEditor.bootCd": "光盘",
+  "vmEditor.bootNetwork": "网络",
+  "vmEditor.bootNetworkThenDisk": "网络 → 硬盘",
+  "vmEditor.bootMenu": "显示启动菜单",
   "vmEditor.rtc": "实时时钟",
+  "vmEditor.snapshotMode": "临时运行（关机后丢弃磁盘更改）",
+  "vmEditor.startPaused": "暂停启动",
   "vmEditor.extraArgs": "额外 QEMU 参数",
-  "vmEditor.guestAgent": "启用 QEMU Guest Agent 通道",
   "vmEditor.extraArgsExample": "例如 -no-reboot -S",
   "vmEditor.qemuOptions": "全部 QEMU 启动选项",
   "vmEditor.optionName": "选项",
@@ -125,8 +170,8 @@
   ,"vmEditor.removeProperty": "移除属性"
   ,
   "disk.title": "磁盘管理",
-  "disk.runningBlocked": "虚拟机运行时禁止执行会修改磁盘的命令。",
-  "disk.closeVmFirst": "请先关闭虚拟机。",
+  "disk.runningBlocked": "仿真运行时禁止执行会修改磁盘的命令。",
+  "disk.closeVmFirst": "请先关闭仿真。",
   "disk.destructiveConfirm": "该命令可能修改或覆盖磁盘数据。请检查命令预览后再次执行。",
   "disk.cancelled": "操作已取消。",
   "disk.noOutput": "（无输出）",
@@ -153,7 +198,6 @@
   "disk.command.measure": "空间测量",
   "disk.command.rebase": "更改后备",
   "disk.command.resize": "调整容量",
-  "disk.command.snapshot": "快照管理",
   "disk.description.info": "显示镜像信息",
   "disk.description.check": "检查镜像完整性",
   "disk.description.map": "输出镜像块映射",
@@ -167,13 +211,11 @@
   "disk.description.rebase": "修改镜像后备文件",
   "disk.description.commit": "提交到后备镜像",
   "disk.description.amend": "修改格式专用选项",
-  "disk.description.snapshot": "管理内部快照",
   "disk.description.bitmap": "管理持久化位图",
   "disk.category.inspect": "检查",
   "disk.category.create": "创建",
   "disk.category.convert": "转换",
   "disk.category.modify": "修改",
-  "disk.category.snapshot": "快照",
   "disk.category.bitmap": "位图",
   "disk.field.file": "镜像文件",
   "disk.field.file1": "镜像 1",
@@ -235,142 +277,52 @@
   "disk.field.rebase.backing": "新后备文件（留空为无）",
   "disk.field.commit.file": "顶层镜像",
   "disk.field.commit.base": "目标后备镜像",
-  "disk.field.snapshot.snapshot": "快照名称",
   "status.running": "运行中",
   "status.off": "已关机",
   "qemu.notDetected": "未检测到",
   "process.startFailed": "无法启动进程",
-  "session.alreadyRunning": "虚拟机已在运行",
+  "session.alreadyRunning": "仿真已在运行",
   "session.unsupportedArchitecture": "当前 QEMU 不支持该系统架构",
   "session.diskMissing": "找不到虚拟磁盘",
+  "session.uefiMissing": "找不到所选架构的 UEFI 固件，已取消启动，未回退到 BIOS。",
+  "session.physicalStorageConflict": "物理磁盘、分区或重叠范围不能重复挂载。",
+  "session.physicalStorageMissing": "找不到先前选择的物理磁盘或分区，已取消启动。",
+  "session.physicalStorageInUse": "所选物理磁盘或分区正在被其他运行中的仿真使用。",
   "session.startFailed": "QEMU 启动失败",
-  "session.started": "虚拟机已启动",
-  "session.notRunning": "虚拟机没有运行",
+  "session.started": "仿真已启动",
+  "session.notRunning": "仿真没有运行",
   "session.shutdownRequested": "已发送关机请求",
   "session.shutdownFailed": "发送关机请求失败",
-  "session.forceStopped": "虚拟机已强制停止",
-  "session.stopFailed": "无法停止虚拟机",
+  "session.forceStopped": "仿真已强制停止",
+  "session.stopFailed": "无法停止仿真",
   "session.exitedEarly": "QEMU 启动后立即退出",
   "session.shuttingDown": "正在等待来宾系统关机…",
+  "session.statusQueryFailed": "无法查询仿真运行状态",
+  "session.statusQueried": "已读取仿真运行状态",
+  "session.screenshotPathRequired": "截图路径不能为空",
+  "session.screenshotComplete": "截图已保存",
+  "session.screenshotFailed": "截取仿真屏幕失败",
+  "session.controlComplete": "{0}已执行",
+  "session.controlFailed": "{0}失败",
   "repo.imgMissing": "未找到 qemu-img",
   "repo.diskCreateFailed": "创建虚拟磁盘失败",
-  "repo.created": "虚拟机已创建",
-  "repo.unmanagedConfig": "配置文件不在 QemuWG 虚拟机库中",
-  "repo.invalidDirectory": "虚拟机目录无效",
-  "repo.recycled": "虚拟机已移至回收站",
-  "repo.deleteFailed": "删除虚拟机失败",
+  "repo.created": "仿真已创建",
+  "repo.unmanagedConfig": "配置文件不在 QemuWG 仿真库中",
+  "repo.invalidDirectory": "仿真目录无效",
+  "repo.recycled": "仿真已移至回收站",
+  "repo.deleteFailed": "删除仿真失败",
   "repo.saved": "配置已保存",
   "repo.saveFailed": "保存配置失败",
-  "repo.defaultName": "新建虚拟机"
-  ,"qmp.title": "虚拟机控制中心"
-  ,"qmp.search": "搜索 QMP 命令"
-  ,"qmp.status": "状态"
-  ,"qmp.cpus": "虚拟 CPU"
-  ,"qmp.memory": "内存"
-  ,"qmp.blockDevices": "块设备"
-  ,"qmp.refresh": "刷新"
-  ,"qmp.command": "命令"
-  ,"qmp.arguments": "参数 (JSON)"
-  ,"qmp.schema": "参数结构"
-  ,"qmp.result": "返回结果"
-  ,"qmp.loading": "正在读取 QMP Schema…"
-  ,"qmp.commandCount": "{0} 个命令"
-  ,"qmp.unknown": "未知"
+  "repo.defaultName": "新建仿真"
   ,"qmp.argumentsObject": "QMP 参数必须是 JSON 对象。"
   ,"qmp.connectionClosed": "QMP 连接已关闭。"
-  ,"qmp.openFailed": "无法打开 QMP 控制台：{0}"
-  ,"qmp.requiresRunning": "QMP 控制台仅在虚拟机运行时可用。"
-  ,"qmp.controls": "控制中心"
-  ,"qmp.advanced": "高级命令"
-  ,"qmp.power": "电源与运行状态"
   ,"qmp.pause": "暂停"
   ,"qmp.resume": "继续"
   ,"qmp.reset": "重置"
-  ,"qmp.powerdown": "正常关机"
-  ,"qmp.keyboard": "键盘输入"
-  ,"qmp.key": "按键"
-  ,"qmp.send": "发送"
-  ,"qmp.holdTime": "按住时间（毫秒）"
-  ,"qmp.diagnostics": "诊断与捕获"
-  ,"qmp.injectNmi": "注入 NMI"
-  ,"qmp.screenshot": "截取虚拟机屏幕"
-  ,"qmp.activity": "操作结果"
-  ,"qmp.commandSucceeded": "{0} 已执行。"
-  ,"qmp.shutdownWaiting": "关机请求已发送，正在等待来宾系统响应…"
-  ,"qmp.shutdownComplete": "虚拟机已关机。"
-  ,"qmp.shutdownNoResponse": "来宾系统没有响应关机请求。可以继续等待，或使用强制停止。"
-  ,"qmp.confirmForceStop": "确认强制停止"
-  ,"qmp.resetRestarted": "QEMU 在重置时退出，虚拟机已自动重新启动。"
-  ,"qmp.resetRestartFailed": "QEMU 在重置时退出，自动重新启动失败："
-  ,"qmp.state.running": "运行中"
+  ,"qmp.screenshot": "截取仿真屏幕"
   ,"qmp.state.paused": "已暂停"
-  ,"qmp.state.shutdown": "正在关机"
-  ,"qmp.state.prelaunch": "准备启动"
-  ,"qmp.state.suspended": "已挂起"
-  ,"qmp.state.internalError": "内部错误"
-  ,"qmp.state.ioError": "I/O 错误"
-  ,"qmp.state.guestPanicked": "来宾系统崩溃"
-  ,"qmp.opticalMedia": "光盘介质"
-  ,"qmp.eject": "弹出"
-  ,"qmp.mount": "装载"
-  ,"qmp.memoryBalloon": "动态内存"
-  ,"qmp.targetMemoryMb": "目标内存（MB）"
-  ,"qmp.apply": "应用"
-  ,"qmp.snapshot": "虚拟机快照"
-  ,"qmp.snapshotSave": "创建"
-  ,"qmp.snapshotLoad": "恢复"
-  ,"qmp.snapshotDelete": "删除"
-  ,"qmp.selectMedia": "请选择有效的光盘镜像。"
-  ,"qmp.snapshotNameInvalid": "快照名称只能包含字母、数字、点、连字符和下划线。"
-  ,"guestAgent.title": "来宾系统管理"
-  ,"guestAgent.status": "连接状态"
-  ,"guestAgent.search": "搜索 Guest Agent 命令"
-  ,"guestAgent.command": "命令"
-  ,"guestAgent.arguments": "参数（JSON）"
-  ,"guestAgent.systemInfo": "系统信息"
-  ,"guestAgent.networkInfo": "网络接口"
-  ,"guestAgent.diskInfo": "磁盘信息"
-  ,"guestAgent.users": "登录用户"
-  ,"guestAgent.connecting": "正在连接虚拟机内的 Guest Agent…"
-  ,"guestAgent.connected": "已连接，Guest Agent 提供 {0} 个命令。"
-  ,"guestAgent.installHint": "请在虚拟机内安装并启动 QEMU Guest Agent；虚拟串口通道已由 QemuWG 自动配置。"
-  ,"guestAgent.argumentsObject": "Guest Agent 参数必须是 JSON 对象。"
-  ,"guestAgent.unavailable": "Guest Agent 未连接或未安装。"
-  ,"guestAgent.dangerousConfirm": "该命令可能改变来宾系统状态。请检查参数后再次执行。"
-  ,"guestAgent.requiresRunning": "Guest Agent 仅在虚拟机运行时可用。"
-  ,"guestAgent.openFailed": "无法打开 Guest Agent：{0}"
-  ,"guestAgent.overview": "概览"
-  ,"guestAgent.maintenance": "文件系统维护"
-  ,"guestAgent.freeze": "冻结"
-  ,"guestAgent.thaw": "解冻"
-  ,"guestAgent.trim": "执行 TRIM"
-  ,"guestAgent.processes": "程序执行"
-  ,"guestAgent.program": "来宾程序路径"
-  ,"guestAgent.programArguments": "程序参数"
-  ,"guestAgent.captureOutput": "捕获标准输出与错误输出"
-  ,"guestAgent.runProgram": "运行程序"
-  ,"guestAgent.files": "文件传输"
-  ,"guestAgent.hostFile": "宿主文件"
-  ,"guestAgent.guestPath": "来宾文件路径"
-  ,"guestAgent.upload": "上传到来宾"
-  ,"guestAgent.download": "下载到宿主"
-  ,"guestAgent.advanced": "高级 RPC"
-  ,"guestAgent.unavailableValue": "不可用"
-  ,"guestAgent.commandUnsupported": "当前 Guest Agent 不支持此操作。"
-  ,"guestAgent.programRequired": "请输入来宾系统中的程序路径。"
-  ,"guestAgent.processStarted": "进程 {0} 已启动，正在等待退出…"
-  ,"guestAgent.processStillRunning": "进程仍在运行；可以稍后通过高级命令查询状态。"
-  ,"guestAgent.exitCode": "退出码 {0}"
-  ,"guestAgent.signal": "信号 {0}"
-  ,"guestAgent.filePathsRequired": "请选择宿主文件并填写来宾路径。"
-  ,"guestAgent.uploadProgress": "已上传 {0} / {1}"
-  ,"guestAgent.uploadComplete": "上传完成：{0}"
-  ,"guestAgent.downloadProgress": "已下载 {0}"
-  ,"guestAgent.downloadComplete": "下载完成：{0}"
-  ,"tools.title": "QEMU 工具箱"
   ,"tools.qemuIo": "磁盘 I/O"
   ,"tools.edid": "EDID 生成"
-  ,"tools.services": "服务工具"
   ,"tools.image": "镜像文件"
   ,"tools.format": "格式"
   ,"tools.command": "命令"
@@ -393,12 +345,8 @@
   ,"tools.maximumHeight": "最大高度"
   ,"tools.outputFile": "输出文件"
   ,"tools.generate": "生成"
-  ,"tools.tool": "工具"
-  ,"tools.arguments": "参数"
-  ,"tools.runOnce": "运行一次"
   ,"tools.start": "启动服务"
   ,"tools.stop": "停止服务"
-  ,"tools.clear": "清空输出"
   ,"tools.dangerousConfirm": "该 qemu-io 命令可能修改镜像。检查命令后再次执行。"
   ,"tools.selectImage": "请选择镜像文件。"
   ,"tools.selectOutput": "请选择输出文件。"
@@ -409,7 +357,7 @@
   ,"tools.notRunning": "工具没有运行"
   ,"tools.stopped": "工具已停止"
   ,"tools.stopFailed": "无法停止工具"
-  ,"tools.openFailed": "无法打开 QEMU 工具箱：{0}"
+  ,"tools.vmDiskBusy": "仿真运行时不能对其主磁盘启动此操作。请先关闭仿真，或选择其他磁盘。"
   ,"tools.selectCommand": "请选择或输入命令。"
   ,"tools.cancelled": "操作已取消。"
   ,"tools.edidFile": "EDID 文件"
@@ -486,26 +434,86 @@
   ,"disk.choice.backingCache.writethrough": "写入落盘后返回"
   ,"disk.choice.backingCache.directsync": "绕过页缓存并同步写入"
   ,"disk.choice.backingCache.unsafe": "忽略刷盘请求（高风险）"
-  ,"disk.choice.snapshot.action.l": "列出快照"
-  ,"disk.choice.snapshot.action.c": "创建快照"
-  ,"disk.choice.snapshot.action.a": "恢复快照"
-  ,"disk.choice.snapshot.action.d": "删除快照"
   ,"disk.choice.bitmap.action.add": "添加位图"
   ,"disk.choice.bitmap.action.remove": "删除位图"
   ,"disk.choice.bitmap.action.clear": "清空位图"
   ,"disk.choice.bitmap.action.enable": "启用位图"
   ,"disk.choice.bitmap.action.disable": "禁用位图"
   ,"disk.choice.bitmap.action.merge": "合并位图"
-  ,"main.displayConnecting": "正在连接虚拟机显示器…"
-  ,"main.displayUnavailable": "无法连接虚拟机显示器"
-  ,"main.displayNativeWindow": "虚拟机正在 QEMU 原生窗口中显示"
+  ,"main.displayConnecting": "正在连接仿真显示器…"
+  ,"main.displayUnavailable": "无法连接仿真显示器"
+  ,"main.displayNativeWindow": "仿真正在 QEMU 原生窗口中显示"
   ,"display.nativeWindowUnavailable": "当前配置没有 QEMU 原生图形窗口。"
   ,"display.nativeWindowNotReady": "QEMU 原生图形窗口尚未就绪。"
   ,"display.detached": "已显示 QEMU 原生图形窗口"
   ,"display.dbusConnectionFailed": "无法建立 QEMU D-Bus 内嵌显示连接。"
   ,"display.openGlDisabled": "所选显卡需要 OpenGL，但显示后端显式配置了 gl=off。"
   ,"display.openGlUnsupported": "所选显卡需要 OpenGL，但当前显示后端不支持 OpenGL。"
+  ,"snapshot.title": "快照管理器"
+  ,"snapshot.tree": "快照树"
+  ,"snapshot.refresh": "刷新快照"
+  ,"snapshot.refreshing": "正在读取快照…"
+  ,"snapshot.summary": "{0} 个快照 · {1}"
+  ,"snapshot.running": "仿真运行中"
+  ,"snapshot.stopped": "仿真已关机"
+  ,"snapshot.unavailable": "无法读取快照"
+  ,"snapshot.current": "当前"
+  ,"snapshot.currentState": "当前状态"
+  ,"snapshot.currentStateDetail": "尚未保存的当前状态"
+  ,"snapshot.createTitle": "创建新快照"
+  ,"snapshot.name": "名称"
+  ,"snapshot.namePlaceholder": "例如：安装系统之前"
+  ,"snapshot.description": "说明"
+  ,"snapshot.descriptionPlaceholder": "记录这个状态的用途或变更内容"
+  ,"snapshot.createHint": "快照会保存磁盘、内存和设备状态；创建时间取决于当前内存用量。"
+  ,"snapshot.createHintStopped": "仿真已关机，将创建磁盘与 UEFI 状态快照，不包含内存。"
+  ,"snapshot.create": "创建快照"
+  ,"snapshot.selectPrompt": "选择一个快照"
+  ,"snapshot.selectPromptDetail": "从左侧快照树选择节点以查看详情、恢复或删除。"
+  ,"snapshot.restore": "恢复快照"
+  ,"snapshot.delete": "删除快照"
+  ,"snapshot.createdAt": "创建时间"
+  ,"snapshot.memoryState": "内存状态"
+  ,"snapshot.vmClock": "仿真时钟"
+  ,"snapshot.internalId": "内部标识"
+  ,"snapshot.completeState": "包含磁盘、内存和设备状态"
+  ,"snapshot.diskState": "磁盘状态"
+  ,"snapshot.broken": "快照不可用"
+  ,"snapshot.noDescription": "没有说明"
+  ,"snapshot.unknown": "未知"
+  ,"snapshot.memorySize": "已保存 · {0}"
+  ,"snapshot.noMemory": "未保存内存状态"
+  ,"snapshot.problem": "快照存在问题"
+  ,"snapshot.creating": "正在创建快照…"
+  ,"snapshot.restoring": "正在恢复快照…"
+  ,"snapshot.deleting": "正在删除快照…"
+  ,"snapshot.restoreConfirmTitle": "恢复此快照？"
+  ,"snapshot.restoreConfirmMessage": "当前未保存的状态将被替换。运行中的仿真会回到创建快照时的状态。"
+  ,"snapshot.confirmRestore": "确认恢复"
+  ,"snapshot.deleteConfirmTitle": "删除此快照？"
+  ,"snapshot.deleteConfirmMessage": "该操作不可撤销；其子快照会保留并接到上一级分支。"
+  ,"snapshot.confirmDelete": "确认删除"
+  ,"snapshot.operationComplete": "操作完成"
+  ,"snapshot.waitForOperation": "请等待当前快照操作完成。"
+  ,"snapshot.openFailed": "无法打开快照管理器：{0}"
+  ,"snapshot.service.nameRequired": "快照名称不能为空。"
+  ,"snapshot.service.tagRequired": "快照标签不能为空。"
+  ,"snapshot.service.createdFull": "已创建包含内存状态的快照。"
+  ,"snapshot.service.createdDisk": "已创建磁盘快照。"
+  ,"snapshot.service.configurationChanged": "仿真硬件配置已在创建快照后发生变化。请恢复原配置后再恢复此完整状态快照。"
+  ,"snapshot.service.diskRestoreRequiresStopped": "磁盘快照只能在仿真关机后恢复，请先关机。"
+  ,"snapshot.service.restoredFull": "已恢复快照及内存状态。"
+  ,"snapshot.service.restoredDisk": "已恢复磁盘快照。"
+  ,"snapshot.service.deleted": "快照已删除。"
+  ,"snapshot.service.temporaryModeBlocked": "一次性启动模式不会写回磁盘，不能管理持久快照。"
+  ,"snapshot.service.physicalWriteBlocked": "挂载读写物理磁盘或分区时不能管理快照。"
+  ,"snapshot.service.fullRestoreStartFailed": "QEMU 未能从完整状态快照启动。"
+  ,"snapshot.service.fullRestoreLoaded": "完整状态快照已载入。"
+  ,"snapshot.service.fullRestoreTimeout": "QEMU 仍在载入完整状态快照，尚未确认恢复成功。请稍后刷新状态。"
+  ,"snapshot.service.operationFailed": "快照操作失败。"
+  ,"session.uefiVariablesMissing": "找不到可写的 UEFI 变量存储文件。"
+  ,"session.uefiVariablesConvertFailed": "无法将 UEFI 变量存储转换为支持快照的格式。"
   ,"session.displayPortUnavailable": "没有可用的本机显示端口。"
-  ,"qmp.timeout": "QMP 操作超时，请确认虚拟机仍在响应。"
-  ,"guestAgent.timeout": "Guest Agent 操作超时。"
+  ,"qmp.timeout": "QMP 操作超时，请确认仿真仍在响应。"
+  ,"qmp.commandRequired": "QMP 命令不能为空。"
 }

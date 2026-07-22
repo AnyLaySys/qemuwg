@@ -12,7 +12,6 @@ internal static class 对话框布局
 
     public static void 启用自适应尺寸(ContentDialog dialog)
     {
-        XamlRoot? root = null;
         var updating = false;
         var lastWidth = double.NaN;
         var lastHeight = double.NaN;
@@ -20,7 +19,7 @@ internal static class 对话框布局
         void Update()
         {
             if (updating) return;
-            root = dialog.XamlRoot;
+            var root = dialog.XamlRoot;
             if (root is null || dialog.Content is not FrameworkElement content) return;
 
             var dialogWidth = root.Size.Width * 对话框宽度比例;
@@ -52,8 +51,22 @@ internal static class 对话框布局
             }
         }
 
+        void RootChanged(XamlRoot sender, XamlRootChangedEventArgs args) => Update();
+
         dialog.Loading += (_, _) => Update();
-        dialog.Opened += (_, _) => Update();
+        dialog.Opened += (_, _) =>
+        {
+            Update();
+            if (dialog.XamlRoot is { } root)
+            {
+                root.Changed -= RootChanged;
+                root.Changed += RootChanged;
+            }
+        };
+        dialog.Closed += (_, _) =>
+        {
+            if (dialog.XamlRoot is { } root) root.Changed -= RootChanged;
+        };
         dialog.Closing += (_, _) =>
         {
             var smokeLayer = 查找模板元素(dialog, "SmokeLayerBackground");

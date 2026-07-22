@@ -85,17 +85,7 @@ public sealed partial class QEMU镜像
     {
         if (!values.TryGetValue("action", out var action) || string.IsNullOrWhiteSpace(action)) return;
 
-        if (command.Name == "snapshot")
-        {
-            options.Add(action);
-            consumed.Add("action");
-            if (action != "-l" && values.TryGetValue("snapshot", out var snapshot) && !string.IsNullOrWhiteSpace(snapshot))
-            {
-                options.Add(snapshot.Trim());
-                consumed.Add("snapshot");
-            }
-        }
-        else if (command.Name == "bitmap" && action == "--merge")
+        if (command.Name == "bitmap" && action == "--merge")
         {
             options.Add(action);
             if (values.TryGetValue("mergeSource", out var source) && !string.IsNullOrWhiteSpace(source))

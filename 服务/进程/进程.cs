@@ -29,15 +29,15 @@ public static class 进程
         var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
         try
         {
-            await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
             if (!process.HasExited) process.Kill(true);
-            await process.WaitForExitAsync(CancellationToken.None);
+            await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
             throw;
         }
-        var output = (await outputTask) + (await errorTask);
+        var output = (await outputTask.ConfigureAwait(false)) + (await errorTask.ConfigureAwait(false));
         return new 进程结果(process.ExitCode, output.Trim());
     }
 }

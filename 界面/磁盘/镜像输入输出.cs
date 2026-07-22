@@ -65,6 +65,7 @@ public sealed partial class QEMU附加功能
         var image = IoImageBox.Text.Trim();
         var command = IoCommandBox.Text.Trim();
         if (!File.Exists(image)) { IoOutputBox.Text = T("tools.selectImage", "请选择镜像文件。"); return; }
+        if (仿真正在占用主磁盘(image)) { IoOutputBox.Text = 主磁盘占用提示(); return; }
         if (command.Length == 0) { IoOutputBox.Text = T("tools.selectCommand", "请选择或输入命令。"); return; }
         var name = command.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
         if (MutatingCommands.Contains(name) && !confirmationPending)

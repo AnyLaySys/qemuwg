@@ -71,11 +71,10 @@ public sealed partial class 磁盘管理
         UpdateDependencies();
         UpdatePreview();
         按钮交互动画.启用(FormGrid);
-        _ = 页面过渡动画.渐进显示(FormGrid, 6);
         ExecuteButton.IsEnabled = !(machine.IsRunning && command.CanWrite);
         if (!ExecuteButton.IsEnabled)
         {
-            SafetyInfo.Message = T("disk.runningBlocked", "虚拟机运行时禁止执行会修改磁盘的命令。");
+            SafetyInfo.Message = T("disk.runningBlocked", "仿真运行时禁止执行会修改磁盘的命令。");
             SafetyInfo.IsOpen = true;
         }
     }
@@ -134,6 +133,7 @@ public sealed partial class 磁盘管理
         pathGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         pathGrid.Children.Add(textBox);
         var browse = new Button { Content = new SymbolIcon(Symbol.Folder), CornerRadius = new CornerRadius(3) };
+        按钮样式应用.设为正方形(browse);
         browse.Click += async (_, _) => await BrowsePathAsync(field, textBox);
         Grid.SetColumn(browse, 1);
         pathGrid.Children.Add(browse);

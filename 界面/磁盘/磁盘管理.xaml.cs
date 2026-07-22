@@ -13,7 +13,7 @@ public sealed partial class 磁盘管理 : ContentDialog
 
     private readonly nint ownerHandle;
     private readonly QEMU安装 install;
-    private readonly 虚拟机配置 machine;
+    private readonly 仿真配置 machine;
     private readonly QEMU镜像 qemuImgSvc = new();
     private readonly Dictionary<string, FrameworkElement> inputs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FrameworkElement> fieldContainers = new(StringComparer.OrdinalIgnoreCase);
@@ -21,7 +21,7 @@ public sealed partial class 磁盘管理 : ContentDialog
     private CancellationTokenSource? runCancellation;
     private bool awaitingConfirmation;
 
-    public 磁盘管理(nint ownerHandle, QEMU安装 install, 虚拟机配置 machine)
+    public 磁盘管理(nint ownerHandle, QEMU安装 install, 仿真配置 machine)
     {
         InitializeComponent();
         对话框布局.启用自适应尺寸(this);
@@ -50,7 +50,7 @@ public sealed partial class 磁盘管理 : ContentDialog
         if (selectedCmd is null) return;
         if (machine.IsRunning && selectedCmd.CanWrite)
         {
-            SafetyInfo.Message = T("disk.closeVmFirst", "请先关闭虚拟机。");
+            SafetyInfo.Message = T("disk.closeVmFirst", "请先关闭仿真。");
             SafetyInfo.IsOpen = true;
             return;
         }

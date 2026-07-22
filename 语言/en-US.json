@@ -9,27 +9,30 @@
   "common.output": "Output",
   "common.on": "On",
   "common.off": "Off",
-  "main.virtualMachines": "Virtual machines",
+  "main.virtualMachines": "VMs",
   "main.diskManager": "Disk manager",
-  "main.qemuTools": "QEMU Toolbox",
-  "main.qmpConsole": "Virtual Machine Control",
-  "main.guestAgent": "Guest System Management",
-  "main.newVm": "New virtual machine",
+  "main.snapshotManager": "Snapshot manager",
+  "main.vmDeviceServices": "Device and storage services",
+  "main.backToDisplay": "Back to VM display",
+  "main.newVm": "New VM",
   "main.settings": "Settings",
-  "main.selectVm": "Select a virtual machine",
+  "main.selectVm": "Select a VM",
   "main.start": "Start",
   "main.shutdown": "Shut down",
   "main.editConfig": "Edit configuration",
   "main.more": "More",
-  "main.openVmFolder": "Open virtual machine folder",
+  "main.openVmFolder": "Open VM folder",
   "main.openQemuLog": "Open QEMU log",
   "main.forceStop": "Force stop",
-  "main.deleteVm": "Delete virtual machine",
+  "main.holdToForceStop": "Hold for 3 seconds to force stop",
+  "main.holdToForceStopHint": "The guest is still running. Keep waiting, or hold the power button for 3 seconds to force stop it.",
+  "main.screenshotSaved": "Screenshot saved to {0}",
+  "main.deleteVm": "Delete VM",
   "main.configuration": "Configuration",
   "main.display": "Display",
   "main.detachDisplay": "Detach to QEMU native window",
-  "main.displayRunning": "Virtual machine display connected",
-  "main.displayOff": "Virtual machine is powered off",
+  "main.displayRunning": "VM display connected",
+  "main.displayOff": "VM is powered off",
   "device.processor": "Processor",
   "device.cpuValue": "{0} cores · {1}",
   "device.memory": "Memory",
@@ -44,34 +47,36 @@
   "device.additionalValue": "{0} devices · {1}",
   "dialog.qemuMissingTitle": "QEMU not found",
   "dialog.qemuMissingMessage": "Install QEMU or add its directory to PATH.",
-  "dialog.forceStopTitle": "Force stop this virtual machine?",
+  "dialog.forceStopTitle": "Force stop this VM?",
   "dialog.forceStopMessage": "Unsaved data may be lost.",
   "dialog.cannotDeleteTitle": "Cannot delete",
-  "dialog.closeVmFirst": "Shut down the virtual machine first.",
+  "dialog.closeVmFirst": "Shut down the VM first.",
   "dialog.deleteTitle": "Delete “{0}”?",
-  "dialog.deleteMessage": "The virtual machine folder will be moved to the Recycle Bin.",
+  "dialog.deleteMessage": "The VM folder will be moved to the Recycle Bin.",
   "dialog.noLogTitle": "No log available",
-  "dialog.noLogMessage": "This virtual machine has not produced a QEMU log yet.",
+  "dialog.noLogMessage": "This VM has not produced a QEMU log yet.",
   "dialog.operationFailed": "Operation failed",
-  "dialog.shutdownTimeoutTitle": "The virtual machine did not respond to shutdown",
+  "dialog.shutdownTimeoutTitle": "The VM did not respond to shutdown",
   "dialog.shutdownTimeoutMessage": "The guest may not have started, may not support ACPI shutdown, or may still be shutting down. Keep waiting or force stop it.",
   "dialog.keepWaiting": "Keep waiting",
   "settings.title": "Settings",
-  "settings.library": "Virtual machine library",
+  "settings.library": "VM library",
   "disk.manager": "Disk Manager",
-  "vmEditor.newTitle": "New virtual machine",
-  "vmEditor.editTitle": "Edit virtual machine",
+  "vmEditor.newTitle": "New VM",
+  "vmEditor.editTitle": "Edit VM",
   "vmEditor.capabilityLoading": "Reading QEMU capabilities for this architecture…",
   "vmEditor.capabilitySummary": "{0} · {1} machines · {2} CPUs · {3} sound devices · {4} devices",
   "vmEditor.capabilityFailed": "Capability query failed: {0}",
-  "vmEditor.validation.name": "Enter a virtual machine name.",
+  "vmEditor.validation.name": "Enter a VM name.",
   "vmEditor.validation.architecture": "Select an architecture.",
   "vmEditor.validation.location": "Select a save location.",
   "vmEditor.validation.memory": "Memory must be at least 256 MB.",
   "vmEditor.validation.cpu": "At least one processor is required.",
+  "vmEditor.validation.cpuTopology": "CPU sockets, cores, and threads must each be at least 1.",
+  "vmEditor.validation.cpuMaximum": "The total vCPU count cannot exceed 1024.",
   "vmEditor.validation.disk": "Disk size must be at least 1 GB.",
   "vmEditor.validation.media": "The installation image does not exist.",
-  "vmEditor.name": "Virtual machine name",
+  "vmEditor.name": "VM name",
   "vmEditor.nameExample": "For example, Windows 11",
   "vmEditor.location": "Save location",
   "vmEditor.chooseLocation": "Choose location",
@@ -83,6 +88,9 @@
   "vmEditor.processor": "Processor",
   "vmEditor.cpuModel": "CPU model",
   "vmEditor.cpuCount": "Processor count",
+  "vmEditor.cpuSockets": "Sockets",
+  "vmEditor.cpuCores": "Cores",
+  "vmEditor.cpuThreads": "Threads",
   "vmEditor.memory": "Memory",
   "vmEditor.capacityMb": "Capacity (MB)",
   "vmEditor.storage": "Storage",
@@ -90,23 +98,60 @@
   "vmEditor.installMedia": "Installation media",
   "vmEditor.browseMedia": "Browse installation media",
   "vmEditor.mediaPlaceholder": "ISO / IMG / QCOW2",
+  "vmEditor.diskInterface": "Disk interface",
+  "vmEditor.diskCache": "Cache mode",
+  "vmEditor.diskAio": "Asynchronous I/O",
+  "vmEditor.diskDiscard": "Discard",
+  "vmEditor.detectZeroes": "Detect zeroes",
+  "vmEditor.physicalStorage": "Physical disks and partitions",
+  "vmEditor.partition": "Partition",
+  "vmEditor.physicalStorageWarning": "Read-only mode does not modify physical storage. Read/write mode sends guest writes directly to the real disk and never silently falls back. Partitions use their exact offset and length on the source disk.",
+  "vmEditor.physicalStorageScanning": "Scanning physical disks and partitions…",
+  "vmEditor.physicalStorageUnavailable": "No physical disks or partitions were found.",
+  "vmEditor.physicalStorageCount": "Found {0} physical disks or partitions.",
+  "vmEditor.addPhysicalStorage": "Attach physical disk or partition",
+  "vmEditor.removePhysicalStorage": "Remove physical storage attachment",
+  "vmEditor.readOnly": "Read-only",
+  "vmEditor.readWrite": "Read/write",
   "vmEditor.display": "Display",
   "vmEditor.displayBackend": "Display backend",
+  "vmEditor.resolutionPreset": "Resolution",
+  "vmEditor.resolutionWidth": "Width",
+  "vmEditor.resolutionHeight": "Height",
+  "vmEditor.resolutionAutomatic": "Automatic",
+  "vmEditor.resolutionCustom": "Custom",
+  "vmEditor.resolutionSelectVideo": "Select a video device that supports resolution properties to enable this setting.",
+  "vmEditor.resolutionUnsupported": "The selected video device does not expose xres/yres; the guest decides the resolution automatically.",
   "vmEditor.video": "Video adapter",
   "vmEditor.network": "Network",
   "vmEditor.connection": "Connection",
   "vmEditor.nic": "Network adapter",
+  "vmEditor.macAddress": "MAC address",
+  "vmEditor.hostForwarding": "Host forwarding (semicolon-separated)",
   "vmEditor.audio": "Audio",
   "vmEditor.soundCard": "Sound card",
   "vmEditor.audioBackend": "Audio backend",
   "vmEditor.inputDevices": "Input devices",
   "vmEditor.keyboard": "Keyboard",
   "vmEditor.mouse": "Mouse",
+  "vmEditor.keyboardLayout": "Keyboard layout",
+  "vmEditor.bootAndIntegration": "Boot and guest integration",
   "vmEditor.advanced": "Advanced",
   "vmEditor.bootOrder": "Boot order",
+  "vmEditor.bootOnce": "Next boot only",
+  "vmEditor.bootOnceHelp": "Temporarily prioritizes the selected device for the next startup, then returns to the normal boot order.",
+  "vmEditor.bootDefault": "Do not override",
+  "vmEditor.bootCdThenDisk": "Optical disc → Disk",
+  "vmEditor.bootDiskThenCd": "Disk → Optical disc",
+  "vmEditor.bootDisk": "Disk",
+  "vmEditor.bootCd": "Optical disc",
+  "vmEditor.bootNetwork": "Network",
+  "vmEditor.bootNetworkThenDisk": "Network → Disk",
+  "vmEditor.bootMenu": "Show boot menu",
   "vmEditor.rtc": "Real-time clock",
+  "vmEditor.snapshotMode": "Temporary run (discard disk changes on shutdown)",
+  "vmEditor.startPaused": "Start paused",
   "vmEditor.extraArgs": "Additional QEMU arguments",
-  "vmEditor.guestAgent": "Enable QEMU Guest Agent channel",
   "vmEditor.extraArgsExample": "For example, -no-reboot -S",
   "vmEditor.qemuOptions": "All QEMU Startup Options",
   "vmEditor.optionName": "Option",
@@ -125,8 +170,8 @@
   ,"vmEditor.removeProperty": "Remove property"
   ,
   "disk.title": "Disk manager",
-  "disk.runningBlocked": "Commands that modify disks are disabled while the virtual machine is running.",
-  "disk.closeVmFirst": "Shut down the virtual machine first.",
+  "disk.runningBlocked": "Commands that modify disks are disabled while the VM is running.",
+  "disk.closeVmFirst": "Shut down the VM first.",
   "disk.destructiveConfirm": "This command may modify or overwrite disk data. Check the command preview and run it again to confirm.",
   "disk.cancelled": "The operation was cancelled.",
   "disk.noOutput": "(no output)",
@@ -153,7 +198,6 @@
   "disk.command.measure": "Space Measure",
   "disk.command.rebase": "Change Backing",
   "disk.command.resize": "Resize Image",
-  "disk.command.snapshot": "Snapshot Manager",
   "disk.description.info": "Display image information",
   "disk.description.check": "Check image integrity",
   "disk.description.map": "Display the image block map",
@@ -167,13 +211,11 @@
   "disk.description.rebase": "Change the image backing file",
   "disk.description.commit": "Commit into a backing image",
   "disk.description.amend": "Change format-specific options",
-  "disk.description.snapshot": "Manage internal snapshots",
   "disk.description.bitmap": "Manage persistent bitmaps",
   "disk.category.inspect": "Inspect",
   "disk.category.create": "Create",
   "disk.category.convert": "Convert",
   "disk.category.modify": "Modify",
-  "disk.category.snapshot": "Snapshots",
   "disk.category.bitmap": "Bitmaps",
   "disk.field.file": "Image file",
   "disk.field.file1": "Image 1",
@@ -235,142 +277,52 @@
   "disk.field.rebase.backing": "New backing file (empty for none)",
   "disk.field.commit.file": "Top image",
   "disk.field.commit.base": "Target backing image",
-  "disk.field.snapshot.snapshot": "Snapshot name",
   "status.running": "Running",
   "status.off": "Powered off",
   "qemu.notDetected": "Not detected",
   "process.startFailed": "Unable to start process",
-  "session.alreadyRunning": "The virtual machine is already running",
+  "session.alreadyRunning": "The VM is already running",
   "session.unsupportedArchitecture": "This architecture is not supported by the installed QEMU",
   "session.diskMissing": "Virtual disk not found",
+  "session.uefiMissing": "No UEFI firmware was found for the selected architecture. Startup was cancelled instead of falling back to BIOS.",
+  "session.physicalStorageConflict": "A physical disk, partition, or overlapping range cannot be attached more than once.",
+  "session.physicalStorageMissing": "The previously selected physical disk or partition could not be found. Startup was cancelled.",
+  "session.physicalStorageInUse": "The selected physical disk or partition is already in use by another running VM.",
   "session.startFailed": "QEMU failed to start",
-  "session.started": "Virtual machine started",
-  "session.notRunning": "The virtual machine is not running",
+  "session.started": "VM started",
+  "session.notRunning": "The VM is not running",
   "session.shutdownRequested": "Shutdown request sent",
   "session.shutdownFailed": "Failed to send shutdown request",
-  "session.forceStopped": "Virtual machine force stopped",
-  "session.stopFailed": "Unable to stop virtual machine",
+  "session.forceStopped": "VM force stopped",
+  "session.stopFailed": "Unable to stop VM",
   "session.exitedEarly": "QEMU exited immediately after starting",
   "session.shuttingDown": "Waiting for the guest system to shut down…",
+  "session.statusQueryFailed": "Unable to query the VM run state",
+  "session.statusQueried": "VM run state queried",
+  "session.screenshotPathRequired": "A screenshot path is required",
+  "session.screenshotComplete": "Screenshot saved",
+  "session.screenshotFailed": "Failed to capture the VM screen",
+  "session.controlComplete": "{0} completed",
+  "session.controlFailed": "{0} failed",
   "repo.imgMissing": "qemu-img not found",
   "repo.diskCreateFailed": "Failed to create virtual disk",
-  "repo.created": "Virtual machine created",
+  "repo.created": "VM created",
   "repo.unmanagedConfig": "The configuration is outside the QemuWG library",
-  "repo.invalidDirectory": "Invalid virtual machine directory",
-  "repo.recycled": "Virtual machine moved to the Recycle Bin",
-  "repo.deleteFailed": "Failed to delete virtual machine",
+  "repo.invalidDirectory": "Invalid VM directory",
+  "repo.recycled": "VM moved to the Recycle Bin",
+  "repo.deleteFailed": "Failed to delete VM",
   "repo.saved": "Configuration saved",
   "repo.saveFailed": "Failed to save configuration",
-  "repo.defaultName": "New virtual machine"
-  ,"qmp.title": "Virtual Machine Control Center"
-  ,"qmp.search": "Search QMP commands"
-  ,"qmp.status": "Status"
-  ,"qmp.cpus": "Virtual CPUs"
-  ,"qmp.memory": "Memory"
-  ,"qmp.blockDevices": "Block devices"
-  ,"qmp.refresh": "Refresh"
-  ,"qmp.command": "Command"
-  ,"qmp.arguments": "Arguments (JSON)"
-  ,"qmp.schema": "Argument schema"
-  ,"qmp.result": "Result"
-  ,"qmp.loading": "Reading QMP schema…"
-  ,"qmp.commandCount": "{0} commands"
-  ,"qmp.unknown": "Unknown"
+  "repo.defaultName": "New VM"
   ,"qmp.argumentsObject": "QMP arguments must be a JSON object."
   ,"qmp.connectionClosed": "The QMP connection was closed."
-  ,"qmp.openFailed": "Unable to open QMP Console: {0}"
-  ,"qmp.requiresRunning": "QMP Console is available only while the virtual machine is running."
-  ,"qmp.controls": "Control Center"
-  ,"qmp.advanced": "Advanced Commands"
-  ,"qmp.power": "Power and Run State"
   ,"qmp.pause": "Pause"
   ,"qmp.resume": "Resume"
   ,"qmp.reset": "Reset"
-  ,"qmp.powerdown": "Shut Down"
-  ,"qmp.keyboard": "Keyboard Input"
-  ,"qmp.key": "Key"
-  ,"qmp.send": "Send"
-  ,"qmp.holdTime": "Hold time (ms)"
-  ,"qmp.diagnostics": "Diagnostics and Capture"
-  ,"qmp.injectNmi": "Inject NMI"
-  ,"qmp.screenshot": "Capture Virtual Machine Screen"
-  ,"qmp.activity": "Activity Result"
-  ,"qmp.commandSucceeded": "{0} executed."
-  ,"qmp.shutdownWaiting": "Shutdown request sent. Waiting for the guest system to respond…"
-  ,"qmp.shutdownComplete": "The virtual machine has shut down."
-  ,"qmp.shutdownNoResponse": "The guest system did not respond to the shutdown request. Keep waiting or force stop it."
-  ,"qmp.confirmForceStop": "Confirm force stop"
-  ,"qmp.resetRestarted": "QEMU exited during reset, so the virtual machine was restarted automatically."
-  ,"qmp.resetRestartFailed": "QEMU exited during reset and automatic restart failed:"
-  ,"qmp.state.running": "Running"
+  ,"qmp.screenshot": "Capture VM Screen"
   ,"qmp.state.paused": "Paused"
-  ,"qmp.state.shutdown": "Shutting down"
-  ,"qmp.state.prelaunch": "Preparing to start"
-  ,"qmp.state.suspended": "Suspended"
-  ,"qmp.state.internalError": "Internal error"
-  ,"qmp.state.ioError": "I/O error"
-  ,"qmp.state.guestPanicked": "Guest system crashed"
-  ,"qmp.opticalMedia": "Optical Media"
-  ,"qmp.eject": "Eject"
-  ,"qmp.mount": "Mount"
-  ,"qmp.memoryBalloon": "Memory Balloon"
-  ,"qmp.targetMemoryMb": "Target memory (MB)"
-  ,"qmp.apply": "Apply"
-  ,"qmp.snapshot": "Virtual Machine Snapshot"
-  ,"qmp.snapshotSave": "Create"
-  ,"qmp.snapshotLoad": "Restore"
-  ,"qmp.snapshotDelete": "Delete"
-  ,"qmp.selectMedia": "Select a valid optical disc image."
-  ,"qmp.snapshotNameInvalid": "Snapshot names may contain only letters, numbers, dots, hyphens, and underscores."
-  ,"guestAgent.title": "Guest System Management"
-  ,"guestAgent.status": "Connection Status"
-  ,"guestAgent.search": "Search Guest Agent commands"
-  ,"guestAgent.command": "Command"
-  ,"guestAgent.arguments": "Arguments (JSON)"
-  ,"guestAgent.systemInfo": "System Information"
-  ,"guestAgent.networkInfo": "Network Interfaces"
-  ,"guestAgent.diskInfo": "Disk Information"
-  ,"guestAgent.users": "Logged-in Users"
-  ,"guestAgent.connecting": "Connecting to the Guest Agent inside the virtual machine…"
-  ,"guestAgent.connected": "Connected. Guest Agent provides {0} commands."
-  ,"guestAgent.installHint": "Install and start QEMU Guest Agent inside the virtual machine. QemuWG has configured the virtual serial channel automatically."
-  ,"guestAgent.argumentsObject": "Guest Agent arguments must be a JSON object."
-  ,"guestAgent.unavailable": "Guest Agent is not connected or installed."
-  ,"guestAgent.dangerousConfirm": "This command may change guest system state. Check the arguments and run it again to confirm."
-  ,"guestAgent.requiresRunning": "Guest Agent is available only while the virtual machine is running."
-  ,"guestAgent.openFailed": "Unable to open Guest Agent: {0}"
-  ,"guestAgent.overview": "Overview"
-  ,"guestAgent.maintenance": "File System Maintenance"
-  ,"guestAgent.freeze": "Freeze"
-  ,"guestAgent.thaw": "Thaw"
-  ,"guestAgent.trim": "Run TRIM"
-  ,"guestAgent.processes": "Program Execution"
-  ,"guestAgent.program": "Guest program path"
-  ,"guestAgent.programArguments": "Program arguments"
-  ,"guestAgent.captureOutput": "Capture standard output and error"
-  ,"guestAgent.runProgram": "Run Program"
-  ,"guestAgent.files": "File Transfer"
-  ,"guestAgent.hostFile": "Host file"
-  ,"guestAgent.guestPath": "Guest file path"
-  ,"guestAgent.upload": "Upload to Guest"
-  ,"guestAgent.download": "Download to Host"
-  ,"guestAgent.advanced": "Advanced RPC"
-  ,"guestAgent.unavailableValue": "Unavailable"
-  ,"guestAgent.commandUnsupported": "The current Guest Agent does not support this operation."
-  ,"guestAgent.programRequired": "Enter a program path inside the guest system."
-  ,"guestAgent.processStarted": "Process {0} started; waiting for it to exit…"
-  ,"guestAgent.processStillRunning": "The process is still running. Its status can be queried later from Advanced RPC."
-  ,"guestAgent.exitCode": "Exit code {0}"
-  ,"guestAgent.signal": "Signal {0}"
-  ,"guestAgent.filePathsRequired": "Select a host file and enter a guest path."
-  ,"guestAgent.uploadProgress": "Uploaded {0} / {1}"
-  ,"guestAgent.uploadComplete": "Upload complete: {0}"
-  ,"guestAgent.downloadProgress": "Downloaded {0}"
-  ,"guestAgent.downloadComplete": "Download complete: {0}"
-  ,"tools.title": "QEMU Toolbox"
   ,"tools.qemuIo": "Disk I/O"
   ,"tools.edid": "EDID Generator"
-  ,"tools.services": "Service Tools"
   ,"tools.image": "Image file"
   ,"tools.format": "Format"
   ,"tools.command": "Command"
@@ -393,12 +345,8 @@
   ,"tools.maximumHeight": "Maximum height"
   ,"tools.outputFile": "Output file"
   ,"tools.generate": "Generate"
-  ,"tools.tool": "Tool"
-  ,"tools.arguments": "Arguments"
-  ,"tools.runOnce": "Run once"
   ,"tools.start": "Start service"
   ,"tools.stop": "Stop service"
-  ,"tools.clear": "Clear output"
   ,"tools.dangerousConfirm": "This qemu-io command may modify the image. Check the command and run it again to confirm."
   ,"tools.selectImage": "Select an image file."
   ,"tools.selectOutput": "Select an output file."
@@ -409,7 +357,7 @@
   ,"tools.notRunning": "The tool is not running"
   ,"tools.stopped": "Tool stopped"
   ,"tools.stopFailed": "Unable to stop tool"
-  ,"tools.openFailed": "Unable to open QEMU Toolbox: {0}"
+  ,"tools.vmDiskBusy": "This operation cannot access the VM's primary disk while it is running. Shut it down or select another disk."
   ,"tools.selectCommand": "Select or enter a command."
   ,"tools.cancelled": "The operation was cancelled."
   ,"tools.edidFile": "EDID file"
@@ -486,26 +434,86 @@
   ,"disk.choice.backingCache.writethrough": "Complete writes after storage flush"
   ,"disk.choice.backingCache.directsync": "Bypass page cache and write synchronously"
   ,"disk.choice.backingCache.unsafe": "Ignore flush requests (high risk)"
-  ,"disk.choice.snapshot.action.l": "List snapshots"
-  ,"disk.choice.snapshot.action.c": "Create snapshot"
-  ,"disk.choice.snapshot.action.a": "Restore snapshot"
-  ,"disk.choice.snapshot.action.d": "Delete snapshot"
   ,"disk.choice.bitmap.action.add": "Add bitmap"
   ,"disk.choice.bitmap.action.remove": "Remove bitmap"
   ,"disk.choice.bitmap.action.clear": "Clear bitmap"
   ,"disk.choice.bitmap.action.enable": "Enable bitmap"
   ,"disk.choice.bitmap.action.disable": "Disable bitmap"
   ,"disk.choice.bitmap.action.merge": "Merge bitmap"
-  ,"main.displayConnecting": "Connecting to the virtual machine display…"
-  ,"main.displayUnavailable": "Unable to connect to the virtual machine display"
-  ,"main.displayNativeWindow": "The virtual machine is displayed in its native QEMU window."
+  ,"main.displayConnecting": "Connecting to the VM display…"
+  ,"main.displayUnavailable": "Unable to connect to the VM display"
+  ,"main.displayNativeWindow": "The VM is displayed in its native QEMU window."
   ,"display.nativeWindowUnavailable": "The current configuration has no native QEMU graphics window."
   ,"display.nativeWindowNotReady": "The native QEMU graphics window is not ready yet."
   ,"display.detached": "The native QEMU graphics window is now visible."
   ,"display.dbusConnectionFailed": "Unable to establish the embedded QEMU D-Bus display connection."
   ,"display.openGlDisabled": "The selected video device requires OpenGL, but the display backend explicitly sets gl=off."
   ,"display.openGlUnsupported": "The selected video device requires OpenGL, but the current display backend does not support OpenGL."
+  ,"snapshot.title": "Snapshot Manager"
+  ,"snapshot.tree": "Snapshot tree"
+  ,"snapshot.refresh": "Refresh snapshots"
+  ,"snapshot.refreshing": "Reading snapshots…"
+  ,"snapshot.summary": "{0} snapshots · {1}"
+  ,"snapshot.running": "VM running"
+  ,"snapshot.stopped": "VM powered off"
+  ,"snapshot.unavailable": "Unable to read snapshots"
+  ,"snapshot.current": "Current"
+  ,"snapshot.currentState": "Current state"
+  ,"snapshot.currentStateDetail": "Current unsaved state"
+  ,"snapshot.createTitle": "Create a new snapshot"
+  ,"snapshot.name": "Name"
+  ,"snapshot.namePlaceholder": "For example: Before OS installation"
+  ,"snapshot.description": "Description"
+  ,"snapshot.descriptionPlaceholder": "Record the purpose of this state or what changed"
+  ,"snapshot.createHint": "A snapshot saves disk, memory, and device state; creation time depends on current memory usage."
+  ,"snapshot.createHintStopped": "The VM is powered off. The snapshot will save disk and UEFI state without memory."
+  ,"snapshot.create": "Create snapshot"
+  ,"snapshot.selectPrompt": "Select a snapshot"
+  ,"snapshot.selectPromptDetail": "Select a node in the snapshot tree to view details, restore, or delete it."
+  ,"snapshot.restore": "Restore snapshot"
+  ,"snapshot.delete": "Delete snapshot"
+  ,"snapshot.createdAt": "Created"
+  ,"snapshot.memoryState": "Memory state"
+  ,"snapshot.vmClock": "VM clock"
+  ,"snapshot.internalId": "Internal ID"
+  ,"snapshot.completeState": "Includes disk, memory, and device state"
+  ,"snapshot.diskState": "Disk state"
+  ,"snapshot.broken": "Snapshot unavailable"
+  ,"snapshot.noDescription": "No description"
+  ,"snapshot.unknown": "Unknown"
+  ,"snapshot.memorySize": "Saved · {0}"
+  ,"snapshot.noMemory": "Memory state not saved"
+  ,"snapshot.problem": "Snapshot problem"
+  ,"snapshot.creating": "Creating snapshot…"
+  ,"snapshot.restoring": "Restoring snapshot…"
+  ,"snapshot.deleting": "Deleting snapshot…"
+  ,"snapshot.restoreConfirmTitle": "Restore this snapshot?"
+  ,"snapshot.restoreConfirmMessage": "The current unsaved state will be replaced. A running VM will return to the state captured by this snapshot."
+  ,"snapshot.confirmRestore": "Restore"
+  ,"snapshot.deleteConfirmTitle": "Delete this snapshot?"
+  ,"snapshot.deleteConfirmMessage": "This cannot be undone. Child snapshots will be kept and attached to the parent branch."
+  ,"snapshot.confirmDelete": "Delete"
+  ,"snapshot.operationComplete": "Operation complete"
+  ,"snapshot.waitForOperation": "Wait for the current snapshot operation to finish."
+  ,"snapshot.openFailed": "Unable to open Snapshot Manager: {0}"
+  ,"snapshot.service.nameRequired": "Snapshot name is required."
+  ,"snapshot.service.tagRequired": "Snapshot tag is required."
+  ,"snapshot.service.createdFull": "A snapshot including memory state was created."
+  ,"snapshot.service.createdDisk": "A disk snapshot was created."
+  ,"snapshot.service.configurationChanged": "The VM hardware configuration changed after this snapshot was created. Restore the original configuration first."
+  ,"snapshot.service.diskRestoreRequiresStopped": "Disk snapshots can only be restored while the VM is powered off."
+  ,"snapshot.service.restoredFull": "The snapshot and memory state were restored."
+  ,"snapshot.service.restoredDisk": "The disk snapshot was restored."
+  ,"snapshot.service.deleted": "The snapshot was deleted."
+  ,"snapshot.service.temporaryModeBlocked": "Temporary run discards disk writes and cannot manage persistent snapshots."
+  ,"snapshot.service.physicalWriteBlocked": "Snapshots are unavailable while a writable physical disk or partition is attached."
+  ,"snapshot.service.fullRestoreStartFailed": "QEMU could not start from the full-state snapshot."
+  ,"snapshot.service.fullRestoreLoaded": "The full-state snapshot was loaded."
+  ,"snapshot.service.fullRestoreTimeout": "QEMU is still loading the full-state snapshot; success has not been confirmed. Refresh later."
+  ,"snapshot.service.operationFailed": "Snapshot operation failed."
+  ,"session.uefiVariablesMissing": "The writable UEFI variable store could not be found."
+  ,"session.uefiVariablesConvertFailed": "The UEFI variable store could not be converted to a snapshot-capable format."
   ,"session.displayPortUnavailable": "No local display port is available."
-  ,"qmp.timeout": "The QMP operation timed out. Check that the virtual machine is still responding."
-  ,"guestAgent.timeout": "The Guest Agent operation timed out."
+  ,"qmp.timeout": "The QMP operation timed out. Check that the VM is still responding."
+  ,"qmp.commandRequired": "The QMP command cannot be empty."
 }

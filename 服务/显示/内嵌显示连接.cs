@@ -5,7 +5,7 @@ namespace QemuWG.服务;
 public sealed partial class QEMU会话
 {
     public async Task<DBus显示传输> 连接内嵌显示(
-        虚拟机配置 vm,
+        仿真配置 vm,
         Action<DBus显示传输> 配置回调,
         CancellationToken cancellationToken = default)
     {
@@ -14,7 +14,7 @@ public sealed partial class QEMU会话
         lock (gate)
         {
             if (!sessions.TryGetValue(vm.Id, out session!) || !session.IsActive)
-                throw new InvalidOperationException(T("session.notRunning", "虚拟机没有运行"));
+                throw new InvalidOperationException(T("session.notRunning", "仿真没有运行"));
         }
 
         var requestVersion = Interlocked.Increment(ref session.DisplayRequestVersion);
@@ -26,7 +26,7 @@ public sealed partial class QEMU会话
             if (requestVersion != Volatile.Read(ref session.DisplayRequestVersion))
                 throw new OperationCanceledException(cancellationToken);
             if (!session.IsActive)
-                throw new InvalidOperationException(T("session.notRunning", "虚拟机没有运行"));
+                throw new InvalidOperationException(T("session.notRunning", "仿真没有运行"));
 
             if (session.DisplayTransport is null)
             {
@@ -59,7 +59,7 @@ public sealed partial class QEMU会话
                     throw new InvalidOperationException(
                         T("display.dbusConnectionFailed", "无法建立 QEMU D-Bus 内嵌显示连接。"), lastError);
                 if (!session.IsActive)
-                    throw new InvalidOperationException(T("session.notRunning", "虚拟机没有运行"));
+                    throw new InvalidOperationException(T("session.notRunning", "仿真没有运行"));
                 cancellationToken.ThrowIfCancellationRequested();
                 if (requestVersion != Volatile.Read(ref session.DisplayRequestVersion))
                     throw new OperationCanceledException(cancellationToken);
@@ -110,7 +110,7 @@ public sealed partial class QEMU会话
             "Timeout";
     }
 
-    public async Task 断开内嵌显示(虚拟机配置 vm)
+    public async Task 断开内嵌显示(仿真配置 vm)
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);

@@ -8,12 +8,12 @@ public sealed partial class QEMU会话
     private const int SwShow = 5;
     private const int SwRestore = 9;
 
-    public 操作结果 分离显示(虚拟机配置 vm)
+    public 操作结果 分离显示(仿真配置 vm)
     {
         Session? session;
         lock (gate) sessions.TryGetValue(vm.Id, out session);
         if (session is null || !session.IsActive)
-            return 操作结果.Fail(T("session.notRunning", "虚拟机没有运行"));
+            return 操作结果.Fail(T("session.notRunning", "仿真没有运行"));
         if (!支持原生窗口(session.NativeDisplayBackend))
             return 操作结果.Fail(T("display.nativeWindowUnavailable", "当前配置没有 QEMU 原生图形窗口。"));
 

@@ -7,6 +7,18 @@ public sealed partial class QEMU附加功能
 {
     private void StartStorageDaemon_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        if (参数引用主磁盘(
+                StorageBlockdevBox.Text,
+                StorageNbdServerBox.Text,
+                StorageExportBox.Text,
+                StorageMonitorBox.Text,
+                StorageChardevBox.Text,
+                StorageObjectsBox.Text,
+                StoragePidFileBox.Text))
+        {
+            StorageOutputBox.Text = 主磁盘占用提示();
+            return;
+        }
         var arguments = new List<string>();
         AddRepeated(arguments, "--blockdev", StorageBlockdevBox.Text);
         AddOption(arguments, "--nbd-server", StorageNbdServerBox.Text);
@@ -20,12 +32,12 @@ public sealed partial class QEMU附加功能
             StorageOutputBox.Text = T("tools.storageRequired", "存储守护进程至少需要一个块设备和一个导出定义。");
             return;
         }
-        AppendStorageResult(sessions.启动(install, "qemu-storage-daemon.exe", JoinArguments(arguments)));
+        AppendStorageResult(sessions.启动(install, machine.Id, "qemu-storage-daemon.exe", JoinArguments(arguments)));
     }
 
     private void StopStorageDaemon_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (sessions.正在运行("qemu-storage-daemon.exe")) AppendStorageResult(sessions.停止("qemu-storage-daemon.exe"));
+        if (sessions.正在运行(machine.Id, "qemu-storage-daemon.exe")) AppendStorageResult(sessions.停止(machine.Id, "qemu-storage-daemon.exe"));
         else StorageOutputBox.Text = T("tools.notRunning", "工具没有运行");
     }
 

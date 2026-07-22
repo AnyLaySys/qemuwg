@@ -1,0 +1,584 @@
+<ContentDialog
+    x:Class="QemuWG.界面.仿真编辑"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:数据="using:QemuWG.数据"
+    CloseButtonText="{Binding [common.cancel], Source={StaticResource Strings}}"
+    CornerRadius="9"
+    DefaultButton="Primary"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">900</x:Double>
+        <Style x:Key="DenseLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,3" />
+        </Style>
+        <Style x:Key="HardwareCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="9" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+    </ContentDialog.Resources>
+
+    <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ScrollViewer
+            x:Name="EditorScrollViewer"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalAlignment="Stretch"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Enabled"
+            SizeChanged="EditorScrollViewer_SizeChanged"
+            ZoomMode="Disabled">
+            <StackPanel HorizontalAlignment="Stretch" Spacing="8">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="9" IsStaggeringEnabled="True" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
+            <Border Style="{StaticResource HardwareCardStyle}">
+                <Grid x:Name="IdentityGrid" ColumnSpacing="10" RowSpacing="9">
+                    <Grid.ChildrenTransitions>
+                        <TransitionCollection>
+                            <RepositionThemeTransition IsStaggeringEnabled="False" />
+                        </TransitionCollection>
+                    </Grid.ChildrenTransitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="26" />
+                        <ColumnDefinition Width="0.85*" />
+                        <ColumnDefinition Width="1.4*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon x:Name="IdentityIcon" VerticalAlignment="Center" Foreground="#59A8FF" Glyph="&#xE77B;" />
+                    <StackPanel x:Name="NameField" Grid.Column="1">
+                        <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.name], Source={StaticResource Strings}}" />
+                        <TextBox x:Name="NameBox" PlaceholderText="{Binding [vmEditor.nameExample], Source={StaticResource Strings}}" />
+                    </StackPanel>
+                    <Grid x:Name="LocationField" Grid.Column="2" ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.location], Source={StaticResource Strings}}" />
+                            <TextBox x:Name="LocationBox" IsReadOnly="True" />
+                        </StackPanel>
+                        <Button
+                            x:Name="BrowseLocationButton"
+                            Grid.Column="1"
+                            VerticalAlignment="Bottom"
+                            Click="BrowseLocation_Click"
+                            CornerRadius="3"
+                            Style="{StaticResource 正方形按钮样式}"
+                            ToolTipService.ToolTip="{Binding [vmEditor.chooseLocation], Source={StaticResource Strings}}">
+                            <SymbolIcon Symbol="Folder" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Grid x:Name="HardwareCardsGrid" ColumnSpacing="8" RowSpacing="8">
+                <Grid.ChildrenTransitions>
+                    <TransitionCollection>
+                        <RepositionThemeTransition IsStaggeringEnabled="False" />
+                    </TransitionCollection>
+                </Grid.ChildrenTransitions>
+
+                <Border x:Name="PlatformCard" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#45B8AC" Glyph="&#xE950;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.platform], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.architecture], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="ArchCombo"
+                                    HorizontalAlignment="Stretch"
+                                    DisplayMemberPath="DisplayName"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
+                                    MaxDropDownHeight="240"
+                                    SelectionChanged="ArchitectureCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.machine], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="MachineCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.firmware], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="FirmwareCombo" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="uefi" Tag="uefi" />
+                                    <ComboBoxItem Content="bios" Tag="bios" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.accelerator], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="AcceleratorCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock x:Name="CapsInfoText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="ProcessorCard" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#6E9EFF" Glyph="&#xE950;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.processor], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuModel], Source={StaticResource Strings}}" />
+                            <ComboBox x:Name="CpuModelCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuSockets], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="CpuSocketsBox" Minimum="1" Maximum="64" SmallChange="1" SpinButtonPlacementMode="Compact" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuCores], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="CpuCoresBox" Minimum="1" Maximum="256" SmallChange="1" SpinButtonPlacementMode="Compact" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.cpuThreads], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="CpuThreadsBox" Minimum="1" Maximum="16" SmallChange="1" SpinButtonPlacementMode="Compact" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="MemoryCard" MinHeight="166" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#70C67A" Glyph="&#xE7F8;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.memory], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.capacityMb], Source={StaticResource Strings}}" />
+                            <NumberBox x:Name="MemoryBox" Minimum="256" Maximum="1048576" SmallChange="512" SpinButtonPlacementMode="Compact" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="StorageCard" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#E0AC4D" Glyph="&#xE7C3;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.storage], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.65*" />
+                                <ColumnDefinition Width="1.35*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.systemDiskGb], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="DiskBox" Minimum="1" Maximum="8192" SmallChange="8" SpinButtonPlacementMode="Compact" />
+                            </StackPanel>
+                            <Grid Grid.Column="1" ColumnSpacing="6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.installMedia], Source={StaticResource Strings}}" />
+                                    <TextBox x:Name="IsoBox" PlaceholderText="{Binding [vmEditor.mediaPlaceholder], Source={StaticResource Strings}}" />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="1"
+                                    VerticalAlignment="Bottom"
+                                    Click="BrowseIso_Click"
+                                    CornerRadius="3"
+                                    Style="{StaticResource 正方形按钮样式}"
+                                    ToolTipService.ToolTip="{Binding [vmEditor.browseMedia], Source={StaticResource Strings}}">
+                                    <SymbolIcon Symbol="Folder" />
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Grid ColumnSpacing="6" RowSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.diskInterface], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="DiskInterfaceCombo" HorizontalAlignment="Stretch">
+                                    <x:String>virtio</x:String><x:String>ide</x:String><x:String>scsi</x:String><x:String>sata</x:String><x:String>sd</x:String><x:String>mtd</x:String><x:String>floppy</x:String><x:String>none</x:String>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.diskCache], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="DiskCacheCombo" HorizontalAlignment="Stretch">
+                                    <x:String>default</x:String><x:String>writeback</x:String><x:String>none</x:String><x:String>writethrough</x:String><x:String>directsync</x:String><x:String>unsafe</x:String>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.diskAio], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="DiskAioCombo" HorizontalAlignment="Stretch">
+                                    <x:String>default</x:String><x:String>threads</x:String><x:String>native</x:String><x:String>io_uring</x:String>
+                                </ComboBox>
+                            </StackPanel>
+                            <Grid Grid.Row="1" Grid.Column="1" ColumnSpacing="6">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.diskDiscard], Source={StaticResource Strings}}" />
+                                    <ComboBox x:Name="DiskDiscardCombo" HorizontalAlignment="Stretch"><x:String>default</x:String><x:String>ignore</x:String><x:String>unmap</x:String></ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.detectZeroes], Source={StaticResource Strings}}" />
+                                    <ComboBox x:Name="DiskDetectZeroesCombo" HorizontalAlignment="Stretch"><x:String>default</x:String><x:String>off</x:String><x:String>on</x:String><x:String>unmap</x:String></ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                        <Border Height="1" Margin="0,3" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <StackPanel Spacing="9">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <FontIcon FontSize="14" Foreground="#D78B35" Glyph="&#xE958;" />
+                                <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.physicalStorage], Source={StaticResource Strings}}" />
+                            </StackPanel>
+                            <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" Text="{Binding [vmEditor.physicalStorageWarning], Source={StaticResource Strings}}" TextWrapping="Wrap" />
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="120" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <ComboBox x:Name="PhysicalStorageCombo" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" MaxDropDownHeight="260" />
+                            <ComboBox x:Name="PhysicalStorageInterfaceCombo" Grid.Column="1" SelectedIndex="0"><x:String>virtio</x:String><x:String>ide</x:String></ComboBox>
+                            <ComboBox x:Name="PhysicalStorageAccessCombo" Grid.Column="2" SelectedIndex="0">
+                                <ComboBoxItem Content="{Binding [vmEditor.readOnly], Source={StaticResource Strings}}" Tag="readonly" />
+                                <ComboBoxItem Content="{Binding [vmEditor.readWrite], Source={StaticResource Strings}}" Tag="readwrite" />
+                            </ComboBox>
+                            <Button Grid.Column="3" Click="AddPhysicalStorage_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.addPhysicalStorage], Source={StaticResource Strings}}"><SymbolIcon Symbol="Add" /></Button>
+                            </Grid>
+                            <TextBlock x:Name="PhysicalStorageStatus" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <ListView MaxHeight="120" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind ConfiguredPhysicalStorage}" SelectionMode="None">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="数据:物理存储挂载">
+                                        <Grid ColumnSpacing="9">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind DevicePath}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind AccessModeText}" />
+                                            <Button Grid.Column="2" VerticalAlignment="Center" Click="RemovePhysicalStorage_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.removePhysicalStorage], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="DisplayCard" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="9">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#C07AE8" Glyph="&#xE7F4;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.display], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.displayBackend], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="DisplayCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.video], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="VideoCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" LostFocus="VideoCombo_LostFocus" MaxDropDownHeight="240" SelectionChanged="VideoCombo_SelectionChanged" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid ColumnSpacing="6" RowSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.35*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.resolutionPreset], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="ResolutionPresetCombo" HorizontalAlignment="Stretch" SelectionChanged="ResolutionPresetCombo_SelectionChanged">
+                                    <ComboBoxItem Content="{Binding [vmEditor.resolutionAutomatic], Source={StaticResource Strings}}" Tag="0x0" />
+                                    <ComboBoxItem Content="1024 × 768" Tag="1024x768" />
+                                    <ComboBoxItem Content="1280 × 720" Tag="1280x720" />
+                                    <ComboBoxItem Content="1280 × 800" Tag="1280x800" />
+                                    <ComboBoxItem Content="1366 × 768" Tag="1366x768" />
+                                    <ComboBoxItem Content="1600 × 900" Tag="1600x900" />
+                                    <ComboBoxItem Content="1920 × 1080" Tag="1920x1080" />
+                                    <ComboBoxItem Content="1920 × 1200" Tag="1920x1200" />
+                                    <ComboBoxItem Content="2560 × 1440" Tag="2560x1440" />
+                                    <ComboBoxItem Content="3840 × 2160" Tag="3840x2160" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.resolutionCustom], Source={StaticResource Strings}}" Tag="custom" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.resolutionWidth], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="DisplayWidthBox" Minimum="0" Maximum="16384" SmallChange="16" SpinButtonPlacementMode="Compact" ValueChanged="DisplayResolutionBox_ValueChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.resolutionHeight], Source={StaticResource Strings}}" />
+                                <NumberBox x:Name="DisplayHeightBox" Minimum="0" Maximum="16384" SmallChange="16" SpinButtonPlacementMode="Compact" ValueChanged="DisplayResolutionBox_ValueChanged" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock x:Name="ResolutionSupportText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="NetworkCard" MinHeight="126" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#48BFC7" Glyph="&#xE968;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.network], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.connection], Source={StaticResource Strings}}" />
+                            <ComboBox x:Name="NetworkModeCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.nic], Source={StaticResource Strings}}" />
+                            <ComboBox x:Name="NetworkModelCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.macAddress], Source={StaticResource Strings}}" />
+                            <TextBox x:Name="NetworkMacBox" PlaceholderText="52:54:00:12:34:56" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.hostForwarding], Source={StaticResource Strings}}" />
+                            <TextBox x:Name="HostForwardingBox" PlaceholderText="tcp::2222-:22;tcp::8080-:80" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="AudioCard" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#E06F7C" Glyph="&#xE767;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.audio], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.soundCard], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="AudioDeviceCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.audioBackend], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="AudioCombo" HorizontalAlignment="Stretch" IsEditable="True" KeyDown="CapabilityCombo_KeyDown" MaxDropDownHeight="240" SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="InputCard" MinHeight="112" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#E58B45" Glyph="&#xE765;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.inputDevices], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.keyboard], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="KeyboardDeviceCombo"
+                                    HorizontalAlignment="Stretch"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
+                                    MaxDropDownHeight="240"
+                                    SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.mouse], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="MouseDeviceCombo"
+                                    HorizontalAlignment="Stretch"
+                                    IsEditable="True"
+                                    KeyDown="CapabilityCombo_KeyDown"
+                                    MaxDropDownHeight="240"
+                                    SelectionChanged="CapabilityCombo_SelectionChanged" />
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.keyboardLayout], Source={StaticResource Strings}}" />
+                            <ComboBox x:Name="KeyboardLayoutBox" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" PlaceholderText="en-us" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="IntegrationCard" Style="{StaticResource HardwareCardStyle}">
+                    <StackPanel Spacing="9">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#4F9DDE" Glyph="&#xE768;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.bootAndIntegration], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                        <Grid ColumnSpacing="6" RowSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.bootOrder], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="BootOrderCombo" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootCdThenDisk], Source={StaticResource Strings}}" Tag="dc" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootDiskThenCd], Source={StaticResource Strings}}" Tag="cd" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootDisk], Source={StaticResource Strings}}" Tag="c" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootCd], Source={StaticResource Strings}}" Tag="d" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootNetworkThenDisk], Source={StaticResource Strings}}" Tag="nc" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock
+                                    Style="{StaticResource DenseLabelStyle}"
+                                    Text="{Binding [vmEditor.bootOnce], Source={StaticResource Strings}}"
+                                    ToolTipService.ToolTip="{Binding [vmEditor.bootOnceHelp], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="BootOnceCombo" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootDefault], Source={StaticResource Strings}}" Tag="" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootCd], Source={StaticResource Strings}}" Tag="d" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootDisk], Source={StaticResource Strings}}" Tag="c" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.bootNetwork], Source={StaticResource Strings}}" Tag="n" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.rtc], Source={StaticResource Strings}}" />
+                                <ComboBox x:Name="RtcCombo" HorizontalAlignment="Stretch"><x:String>localtime</x:String><x:String>utc</x:String></ComboBox>
+                            </StackPanel>
+                            <ToggleSwitch x:Name="BootMenuToggle" Grid.Row="1" Header="{Binding [vmEditor.bootMenu], Source={StaticResource Strings}}" />
+                            <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="9">
+                                <ToggleSwitch x:Name="SnapshotModeToggle" Header="{Binding [vmEditor.snapshotMode], Source={StaticResource Strings}}" />
+                                <ToggleSwitch x:Name="StartPausedToggle" Header="{Binding [vmEditor.startPaused], Source={StaticResource Strings}}" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Expander x:Name="AdvancedCard" IsExpanded="True">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon FontSize="14" Foreground="#8A7BE8" Glyph="&#xE713;" />
+                            <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.advanced], Source={StaticResource Strings}}" />
+                        </StackPanel>
+                    </Expander.Header>
+                    <Border Margin="0,6,0,0" Style="{StaticResource HardwareCardStyle}">
+                        <Grid ColumnSpacing="8" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.7*" />
+                                <ColumnDefinition Width="0.7*" />
+                                <ColumnDefinition Width="1.6*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.ColumnSpan="3">
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.extraArgs], Source={StaticResource Strings}}" />
+                                <TextBox x:Name="ExtraArgumentsBox" PlaceholderText="{Binding [vmEditor.extraArgsExample], Source={StaticResource Strings}}" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Spacing="5">
+                                <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding [vmEditor.qemuOptions], Source={StaticResource Strings}}" />
+                                <Grid ColumnSpacing="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1.1*" />
+                                        <ColumnDefinition Width="1.5*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox
+                                        x:Name="QemuOptCombo"
+                                        HorizontalAlignment="Stretch"
+                                        DisplayMemberPath="Name"
+                                        IsEditable="True"
+                                        MaxDropDownHeight="240"
+                                        PlaceholderText="{Binding [vmEditor.optionName], Source={StaticResource Strings}}"
+                                        SelectionChanged="QemuOptionCombo_SelectionChanged" />
+                                    <TextBox x:Name="QemuOptValueBox" Grid.Column="1" PlaceholderText="{Binding [vmEditor.optionValue], Source={StaticResource Strings}}" />
+                                    <Button Grid.Column="2" Click="AddQemuOption_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.addOption], Source={StaticResource Strings}}">
+                                        <SymbolIcon Symbol="Add" />
+                                    </Button>
+                                </Grid>
+                                <TextBlock x:Name="QemuOptHintText" FontFamily="Cascadia Mono, Consolas" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                <ListView
+                                    x:Name="QemuOptList"
+                                    MaxHeight="100"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ItemsSource="{x:Bind ConfiguredQemuOpts}"
+                                    SelectionMode="None">
+                                    <ListView.ItemContainerTransitions>
+                                        <TransitionCollection><AddDeleteThemeTransition /></TransitionCollection>
+                                    </ListView.ItemContainerTransitions>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource 圆角列表项基础样式}"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="32" /><Setter Property="Padding" Value="3" /><Setter Property="CornerRadius" Value="3" /></Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="数据:QEMU选项">
+                                            <Grid>
+                                                <TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" />
+                                                <Button HorizontalAlignment="Right" Click="RemoveQemuOption_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.removeOption], Source={StaticResource Strings}}">
+                                                    <SymbolIcon Symbol="Delete" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </StackPanel>
+                            <Grid Grid.Row="2" Grid.ColumnSpan="3" Margin="0,8,0,0" ColumnSpacing="10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="1.2*" /></Grid.ColumnDefinitions>
+                                <StackPanel Spacing="5">
+                                    <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding [vmEditor.devices], Source={StaticResource Strings}}" />
+                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DeviceModelCombo" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="260" PlaceholderText="{Binding [vmEditor.deviceModel], Source={StaticResource Strings}}" /><Button Grid.Column="1" Click="AddDevice_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.addDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDeviceButton" Grid.Column="2" Click="RemoveDevice_Click" CornerRadius="3" IsEnabled="False" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.removeDevice], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
+                                    <ListView x:Name="DeviceList" MaxHeight="120" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind ConfiguredDevices}" SelectionChanged="DeviceList_SelectionChanged" SelectionMode="Single">
+                                        <ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMU设备"><TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" TextTrimming="CharacterEllipsis" /></DataTemplate></ListView.ItemTemplate>
+                                    </ListView>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="5">
+                                    <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding [vmEditor.deviceProperties], Source={StaticResource Strings}}" />
+                                    <Grid ColumnSpacing="6"><Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><ComboBox x:Name="DevicePropertyCombo" DisplayMemberPath="Name" HorizontalAlignment="Stretch" IsEditable="True" MaxDropDownHeight="240" PlaceholderText="{Binding [vmEditor.propertyName], Source={StaticResource Strings}}" SelectionChanged="DevicePropertyCombo_SelectionChanged" /><ComboBox x:Name="DevicePropertyValueCombo" Grid.Column="1" HorizontalAlignment="Stretch" IsEditable="True" PlaceholderText="{Binding [vmEditor.propertyValue], Source={StaticResource Strings}}" /><Button Grid.Column="2" Click="AddDeviceProperty_Click" CornerRadius="3" Style="{StaticResource 正方形按钮样式}"><SymbolIcon Symbol="Add" /></Button><Button x:Name="RemoveDevicePropertyButton" Grid.Column="3" Click="RemoveDeviceProperty_Click" CornerRadius="3" IsEnabled="False" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [vmEditor.removeProperty], Source={StaticResource Strings}}"><SymbolIcon Symbol="Delete" /></Button></Grid>
+                                    <TextBlock x:Name="DevicePropertyHintText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <ListView x:Name="DevicePropertyList" MaxHeight="92" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind SelectedDeviceProperties}" SelectionChanged="DevicePropertyList_SelectionChanged" SelectionMode="Single"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMU选项"><TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" /></DataTemplate></ListView.ItemTemplate></ListView>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Expander>
+            </Grid>
+
+            <InfoBar
+                x:Name="ValidationInfo"
+                IsClosable="False"
+                IsOpen="False"
+                Severity="Error" />
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</ContentDialog>

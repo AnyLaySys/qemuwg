@@ -19,9 +19,10 @@ public sealed partial class QEMU服务
         var displayTask = 进程.运行(arch.ExecutablePath, ["-display", "help"]);
         var networkBackendTask = 进程.运行(arch.ExecutablePath, ["-netdev", "help"]);
         var audioBackendTask = 进程.运行(arch.ExecutablePath, ["-audiodev", "help"]);
+        var audioModelTask = 进程.运行(arch.ExecutablePath, ["-audio", "model=help"]);
         var deviceTask = 进程.运行(arch.ExecutablePath, ["-device", "help"]);
         var helpTask = 进程.运行(arch.ExecutablePath, ["-help"]);
-        await Task.WhenAll(machineTask, cpuTask, accelTask, displayTask, networkBackendTask, audioBackendTask, deviceTask, helpTask);
+        await Task.WhenAll(machineTask, cpuTask, accelTask, displayTask, networkBackendTask, audioBackendTask, audioModelTask, deviceTask, helpTask);
 
         var devices = deviceTask.Result.输出;
         var inputDevices = 解析设备(devices, "input");
@@ -36,9 +37,11 @@ public sealed partial class QEMU服务
             NetworkDevices = 解析设备(devices, "network"),
             AudioBackends = 解析首列块(audioBackendTask.Result.输出, "Available audio drivers"),
             AudioDevices = 解析设备(devices, "sound"),
+            AudioModels = 解析首列块(audioModelTask.Result.输出, "Valid audio device model names"),
             InputDevices = inputDevices,
             KeyboardDevices = inputDevices.Where(是键盘设备).ToList(),
             PointerDevices = inputDevices.Where(是指针设备).ToList(),
+            KeyboardLayouts = 读取键盘布局(arch.ExecutablePath),
             AllDevices = 解析全部设备(devices),
             CmdOptions = 解析命令选项(helpTask.Result.输出)
         };
@@ -115,17 +118,27 @@ public sealed partial class QEMU服务
     }
 
     internal static bool 是键盘设备(string model) =>
-        string.Equals(model, "usb-kbd", StringComparison.OrdinalIgnoreCase)
-        || model.StartsWith("virtio-keyboard-", StringComparison.OrdinalIgnoreCase);
+        model.Contains("kbd", StringComparison.OrdinalIgnoreCase)
+        || model.Contains("keyboard", StringComparison.OrdinalIgnoreCase);
 
     internal static bool 是指针设备(string model) =>
-        string.Equals(model, "usb-mouse", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(model, "usb-tablet", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(model, "usb-wacom-tablet", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(model, "vmmouse", StringComparison.OrdinalIgnoreCase)
-        || model.StartsWith("virtio-mouse-", StringComparison.OrdinalIgnoreCase)
-        || model.StartsWith("virtio-tablet-", StringComparison.OrdinalIgnoreCase)
-        || model.StartsWith("virtio-multitouch-", StringComparison.OrdinalIgnoreCase);
+        model.Contains("mouse", StringComparison.OrdinalIgnoreCase)
+        || model.Contains("tablet", StringComparison.OrdinalIgnoreCase)
+        || model.Contains("multitouch", StringComparison.OrdinalIgnoreCase)
+        || model.Contains("wacom", StringComparison.OrdinalIgnoreCase);
+
+    private static IReadOnlyList<string> 读取键盘布局(string executablePath)
+    {
+        var root = Path.GetDirectoryName(executablePath);
+        if (string.IsNullOrWhiteSpace(root)) return [];
+        var keymapDirectory = Path.Combine(root, "share", "keymaps");
+        if (!Directory.Exists(keymapDirectory)) return [];
+        return Directory.EnumerateFiles(keymapDirectory)
+            .Select(Path.GetFileName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Cast<string>()
+            .ToList();
+    }
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex 空白正则();

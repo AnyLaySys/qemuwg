@@ -26,6 +26,8 @@ public sealed partial class QEMU服务
                 Path = path,
                 Id = Path.GetFileNameWithoutExtension(path)["qemu-system-".Length..]
             })
+            .Where(item => !item.Id.EndsWith('w')
+                           || !File.Exists(Path.Combine(root, $"qemu-system-{item.Id[..^1]}.exe")))
             .ToList();
 
         var architectures = executables

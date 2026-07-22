@@ -20,6 +20,7 @@ public sealed partial class QEMU附加功能
     private void StartNbd_Click(object sender, RoutedEventArgs e)
     {
         if (!File.Exists(NbdImageBox.Text)) { NbdOutputBox.Text = T("tools.selectImage", "请选择镜像文件。"); return; }
+        if (仿真正在占用主磁盘(NbdImageBox.Text)) { NbdOutputBox.Text = 主磁盘占用提示(); return; }
         var arguments = new List<string>
         {
             "--bind", NbdBindBox.Text.Trim(), "--port", ((int)NbdPortBox.Value).ToString(), "--shared", ((int)NbdSharedBox.Value).ToString()
@@ -37,12 +38,12 @@ public sealed partial class QEMU附加功能
         if (NbdVerboseToggle.IsOn) arguments.Add("--verbose");
         arguments.AddRange(命令行.分割(NbdExtraBox.Text));
         arguments.Add(NbdImageBox.Text.Trim());
-        AppendNbdResult(sessions.启动(install, "qemu-nbd.exe", JoinArguments(arguments)));
+        AppendNbdResult(sessions.启动(install, machine.Id, "qemu-nbd.exe", JoinArguments(arguments)));
     }
 
     private void StopNbd_Click(object sender, RoutedEventArgs e)
     {
-        if (sessions.正在运行("qemu-nbd.exe")) AppendNbdResult(sessions.停止("qemu-nbd.exe"));
+        if (sessions.正在运行(machine.Id, "qemu-nbd.exe")) AppendNbdResult(sessions.停止(machine.Id, "qemu-nbd.exe"));
         else NbdOutputBox.Text = T("tools.notRunning", "工具没有运行");
     }
 
