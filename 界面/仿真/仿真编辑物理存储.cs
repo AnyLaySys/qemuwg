@@ -7,14 +7,33 @@ namespace QemuWG.界面;
 
 public sealed partial class 仿真编辑
 {
+    private bool physicalStorageLoaded;
+
+    private async void PhysicalStorageToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var expanded = PhysicalStorageToggle.IsChecked == true;
+        PhysicalStoragePanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        PhysicalStorageChevron.Glyph = expanded ? "\uE70E" : "\uE70D";
+        if (!expanded || physicalStorageLoaded) return;
+        await LoadPhysicalStorageAsync();
+    }
+
     private async Task LoadPhysicalStorageAsync()
     {
         PhysicalStorageStatus.Text = T("vmEditor.physicalStorageScanning", "正在扫描物理磁盘和分区…");
-        var devices = await qemuSvc.获取物理存储();
-        PhysicalStorageCombo.ItemsSource = devices;
-        PhysicalStorageStatus.Text = devices.Count == 0
-            ? T("vmEditor.physicalStorageUnavailable", "未发现物理磁盘或分区。")
-            : string.Format(T("vmEditor.physicalStorageCount", "发现 {0} 个物理磁盘或分区。"), devices.Count);
+        try
+        {
+            var devices = await qemuSvc.获取物理存储();
+            PhysicalStorageCombo.ItemsSource = devices;
+            PhysicalStorageStatus.Text = devices.Count == 0
+                ? T("vmEditor.physicalStorageUnavailable", "未发现物理磁盘或分区。")
+                : string.Format(T("vmEditor.physicalStorageCount", "发现 {0} 个物理磁盘或分区。"), devices.Count);
+            physicalStorageLoaded = true;
+        }
+        catch (Exception exception)
+        {
+            PhysicalStorageStatus.Text = exception.Message;
+        }
     }
 
     private void AddPhysicalStorage_Click(object sender, RoutedEventArgs e)

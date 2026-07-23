@@ -40,11 +40,6 @@ public sealed partial class 仿真编辑
         ResolutionPresetCombo.IsEnabled = supported;
         DisplayWidthBox.IsEnabled = supported;
         DisplayHeightBox.IsEnabled = supported;
-        ResolutionSupportText.Text = supported
-            ? string.Empty
-            : explicitDevice
-                ? T("vmEditor.resolutionUnsupported", "当前显卡不公开 xres/yres 属性，保持由来宾系统自动决定。")
-                : T("vmEditor.resolutionSelectVideo", "明确选择支持分辨率设置的显卡后可用。");
     }
 
     private void ResolutionPresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

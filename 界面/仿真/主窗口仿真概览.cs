@@ -48,7 +48,7 @@ public sealed partial class 主窗
         ToolTipService.SetToolTip(
             PowerButton,
             selectedVm.IsRunning
-                ? T("main.shutdown", "关机") + " · " + T("main.holdToForceStop", "长按 3 秒强制停止")
+                ? T("main.shutdown", "关机") + " · " + T("main.holdToForceStop", "长按 2.7 秒强制停止")
                 : T("main.start", "启动"));
         EditButton.IsEnabled = !selectedVm.IsRunning;
         DeleteVmMenuItem.IsEnabled = !selectedVm.IsRunning;
@@ -70,8 +70,8 @@ public sealed partial class 主窗
         {
             _ = 同步暂停状态(selectedVm);
         }
-        VmFolderButton.IsEnabled = Directory.Exists(selectedVm.DirPath);
-        VmLogButton.IsEnabled = File.Exists(Path.Combine(selectedVm.DirPath, "qemu.log"));
+        OpenVmFolderMenuItem.IsEnabled = Directory.Exists(selectedVm.DirPath);
+        OpenQemuLogMenuItem.IsEnabled = File.Exists(Path.Combine(selectedVm.DirPath, "qemu.log"));
         if (VmFeaturesPane.Visibility == Visibility.Visible)
         {
             if (vmChanged) 显示仿真功能(selectedVm);
@@ -84,7 +84,7 @@ public sealed partial class 主窗
             new("\uE950", T("device.processor", "处理器"),
                 string.Format(T("device.cpuValue", "{0} 核 · {1}"), selectedVm.CpuCount, RawOrDefault(selectedVm.CpuModel)), ColorHelper.FromArgb(255, 82, 132, 230)),
             new("\uE7F8", T("device.memory", "内存"), FormatMemory(selectedVm.MemoryMb), ColorHelper.FromArgb(255, 70, 173, 101)),
-            new("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · QCOW2", ColorHelper.FromArgb(255, 224, 154, 54)),
+            new("\uE958", T("device.disk", "磁盘"), $"{selectedVm.DiskGb} GB · {RawOrDefault(selectedVm.DiskFormat, "qcow2").ToUpperInvariant()}", ColorHelper.FromArgb(255, 224, 154, 54)),
             new("\uE968", T("device.network", "网络"), selectedVm.NetworkMode == "none" ? "none" : $"user · {RawOrDefault(selectedVm.NetworkModel, "auto")}", ColorHelper.FromArgb(255, 44, 169, 172)),
             new("\uE7F4", T("device.display", "显示"), $"{selectedVm.DisplayBackend} · {RawOrDefault(selectedVm.VideoDevice, "auto")}", ColorHelper.FromArgb(255, 161, 98, 215)),
             new("\uE767", T("device.sound", "声卡"), $"{RawOrDefault(selectedVm.AudioDevice, "auto")} · {selectedVm.AudioBackend}", ColorHelper.FromArgb(255, 217, 94, 119)),

@@ -291,6 +291,7 @@ public sealed partial class 快照管理器 : ContentDialog
 
     private void Workspace_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0) return;
         var compact = e.NewSize.Width < 720;
         if (compact == compactLayout) return;
         compactLayout = compact;

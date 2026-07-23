@@ -189,16 +189,50 @@
                             <FontIcon FontSize="14" Foreground="#E0AC4D" Glyph="&#xE7C3;" />
                             <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.storage], Source={StaticResource Strings}}" />
                         </StackPanel>
-                        <Grid ColumnSpacing="8">
+                        <Grid ColumnSpacing="8" RowSpacing="8">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0.65*" />
-                                <ColumnDefinition Width="1.35*" />
+                                <ColumnDefinition Width="0.75*" />
+                                <ColumnDefinition Width="1.25*" />
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <StackPanel>
+                                <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.systemDisk], Source={StaticResource Strings}}" />
+                                <ComboBox
+                                    x:Name="SystemDiskModeCombo"
+                                    HorizontalAlignment="Stretch"
+                                    PlaceholderText="{Binding [vmEditor.selectDiskMode], Source={StaticResource Strings}}"
+                                    SelectionChanged="SystemDiskModeCombo_SelectionChanged">
+                                    <ComboBoxItem Content="{Binding [vmEditor.createDisk], Source={StaticResource Strings}}" Tag="create" />
+                                    <ComboBoxItem Content="{Binding [vmEditor.useExistingDisk], Source={StaticResource Strings}}" Tag="existing" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel x:Name="NewSystemDiskField" Grid.Column="1" Visibility="Collapsed">
                                 <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.systemDiskGb], Source={StaticResource Strings}}" />
                                 <NumberBox x:Name="DiskBox" Minimum="1" Maximum="8192" SmallChange="8" SpinButtonPlacementMode="Compact" />
                             </StackPanel>
-                            <Grid Grid.Column="1" ColumnSpacing="6">
+                            <Grid x:Name="ExistingSystemDiskField" Grid.Column="1" ColumnSpacing="6" Visibility="Collapsed">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource DenseLabelStyle}" Text="{Binding [vmEditor.existingDisk], Source={StaticResource Strings}}" />
+                                    <TextBox x:Name="SystemDiskPathBox" PlaceholderText="{Binding [vmEditor.diskPlaceholder], Source={StaticResource Strings}}" />
+                                </StackPanel>
+                                <Button
+                                    Grid.Column="1"
+                                    VerticalAlignment="Bottom"
+                                    Click="BrowseSystemDisk_Click"
+                                    CornerRadius="3"
+                                    Style="{StaticResource 正方形按钮样式}"
+                                    ToolTipService.ToolTip="{Binding [vmEditor.browseDisk], Source={StaticResource Strings}}">
+                                    <SymbolIcon Symbol="Folder" />
+                                </Button>
+                            </Grid>
+                            <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnSpacing="6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
@@ -257,12 +291,18 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                        <Border Height="1" Margin="0,3" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <StackPanel Spacing="9">
+                        <ToggleButton
+                            x:Name="PhysicalStorageToggle"
+                            HorizontalAlignment="Left"
+                            Click="PhysicalStorageToggle_Click"
+                            CornerRadius="6">
                             <StackPanel Orientation="Horizontal" Spacing="7">
                                 <FontIcon FontSize="14" Foreground="#D78B35" Glyph="&#xE958;" />
                                 <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.physicalStorage], Source={StaticResource Strings}}" />
+                                <FontIcon x:Name="PhysicalStorageChevron" FontSize="11" Glyph="&#xE70D;" />
                             </StackPanel>
+                        </ToggleButton>
+                        <StackPanel x:Name="PhysicalStoragePanel" Spacing="9" Visibility="Collapsed">
                             <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" Text="{Binding [vmEditor.physicalStorageWarning], Source={StaticResource Strings}}" TextWrapping="Wrap" />
                         <Grid ColumnSpacing="6">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="120" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -345,7 +385,6 @@
                                 <NumberBox x:Name="DisplayHeightBox" Minimum="0" Maximum="16384" SmallChange="16" SpinButtonPlacementMode="Compact" ValueChanged="DisplayResolutionBox_ValueChanged" />
                             </StackPanel>
                         </Grid>
-                        <TextBlock x:Name="ResolutionSupportText" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
@@ -482,15 +521,18 @@
                     </StackPanel>
                 </Border>
 
-                <Expander x:Name="AdvancedCard" IsExpanded="True">
+                <Expander
+                    x:Name="AdvancedCard"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="True">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <FontIcon FontSize="14" Foreground="#8A7BE8" Glyph="&#xE713;" />
                             <TextBlock FontWeight="SemiBold" Text="{Binding [vmEditor.advanced], Source={StaticResource Strings}}" />
                         </StackPanel>
                     </Expander.Header>
-                    <Border Margin="0,6,0,0" Style="{StaticResource HardwareCardStyle}">
-                        <Grid ColumnSpacing="8" RowSpacing="8">
+                    <Grid Margin="9,6,9,9" ColumnSpacing="8" RowSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="0.7*" />
                                 <ColumnDefinition Width="0.7*" />
@@ -568,8 +610,7 @@
                                     <ListView x:Name="DevicePropertyList" MaxHeight="92" Background="Transparent" BorderThickness="0" ItemsSource="{x:Bind SelectedDeviceProperties}" SelectionChanged="DevicePropertyList_SelectionChanged" SelectionMode="Single"><ListView.ItemTemplate><DataTemplate x:DataType="数据:QEMU选项"><TextBlock VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{x:Bind DisplayText}" /></DataTemplate></ListView.ItemTemplate></ListView>
                                 </StackPanel>
                             </Grid>
-                        </Grid>
-                    </Border>
+                    </Grid>
                 </Expander>
             </Grid>
 

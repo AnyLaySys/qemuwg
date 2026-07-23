@@ -36,6 +36,8 @@ public sealed class 仿真仓库
                     if (vm is null) continue;
                     vm.CfgPath = path;
                     vm.DirPath = Path.GetDirectoryName(path) ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(vm.DiskMode) && !string.IsNullOrWhiteSpace(vm.DiskPath))
+                        vm.DiskMode = 系统磁盘模式.已有;
                     迁移输入设备(vm);
                     result.Add(vm);
                 }
@@ -52,8 +54,28 @@ public sealed class 仿真仓库
         仿真配置 request,
         string parentDirectory)
     {
-        if (!qemu.IsAvailable || !File.Exists(qemu.ImgToolPath))
-            return (操作结果.Fail(T("repo.imgMissing", "未找到 qemu-img")), null);
+        if (!qemu.IsAvailable)
+            return (操作结果.Fail(T("repo.qemuMissing", "未找到可用的 QEMU")), null);
+
+        var createDisk = string.Equals(request.DiskMode, 系统磁盘模式.新建, StringComparison.OrdinalIgnoreCase);
+        var useExistingDisk = string.Equals(request.DiskMode, 系统磁盘模式.已有, StringComparison.OrdinalIgnoreCase);
+        if (!createDisk && !useExistingDisk)
+            return (操作结果.Fail(T("repo.diskModeRequired", "必须明确选择新建磁盘或使用已有磁盘")), null);
+
+        磁盘镜像信息? existingDiskInfo = null;
+        var existingDiskPath = string.Empty;
+        if (createDisk)
+        {
+            if (!File.Exists(qemu.ImgToolPath))
+                return (操作结果.Fail(T("repo.imgMissing", "未找到 qemu-img")), null);
+        }
+        else
+        {
+            var checkedDisk = await new 系统磁盘检查().检查(qemu, request.DiskPath);
+            if (!checkedDisk.结果.Succeeded) return (checkedDisk.结果, null);
+            existingDiskPath = checkedDisk.路径;
+            existingDiskInfo = checkedDisk.信息;
+        }
 
         var safeName = 清理名称(request.Name);
         var directory = 获取唯一目录(parentDirectory, safeName);
@@ -64,15 +86,25 @@ public sealed class 仿真仓库
         vm.Name = safeName;
         vm.DirPath = directory;
         vm.CfgPath = Path.Combine(directory, safeName + ".qemu");
-        vm.DiskPath = Path.Combine(directory, "system.qcow2");
-
-        var disk = await 进程.运行(qemu.ImgToolPath,
-            ["create", "-f", "qcow2", vm.DiskPath, $"{vm.DiskGb}G"]);
-        if (disk.退出码 != 0)
+        if (createDisk)
         {
-            尝试删除空目录(directory);
-            return (操作结果.Fail(T("repo.diskCreateFailed", "创建虚拟磁盘失败"), disk.输出), null);
+            vm.DiskPath = Path.Combine(directory, "system.qcow2");
+            vm.DiskFormat = "qcow2";
+            var disk = await 进程.运行(qemu.ImgToolPath,
+                ["create", "-f", "qcow2", vm.DiskPath, $"{vm.DiskGb}G"]);
+            if (disk.退出码 != 0)
+            {
+                尝试删除空目录(directory);
+                return (操作结果.Fail(T("repo.diskCreateFailed", "创建虚拟磁盘失败"), disk.输出), null);
+            }
         }
+        else
+        {
+            vm.DiskPath = existingDiskPath;
+            vm.DiskFormat = existingDiskInfo!.Format;
+            vm.DiskGb = 系统磁盘检查.转换容量(existingDiskInfo.VirtualSize);
+        }
+        vm.DiskMode = 系统磁盘模式.已有;
 
         var saved = await 保存(vm);
         if (!saved.Succeeded)

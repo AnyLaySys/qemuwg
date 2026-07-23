@@ -153,10 +153,6 @@
                                 x:Name="PowerButton"
                                 Click="PowerButton_Click"
                                 CornerRadius="6"
-                                PointerCanceled="PowerButton_PointerCanceled"
-                                PointerCaptureLost="PowerButton_PointerCanceled"
-                                PointerPressed="PowerButton_PointerPressed"
-                                PointerReleased="PowerButton_PointerReleased"
                                 Style="{StaticResource 强调正方形按钮样式}">
                                 <FontIcon x:Name="PowerButtonIcon" Glyph="&#xE7E8;" />
                             </Button>
@@ -196,11 +192,11 @@
                             ToolTipService.ToolTip="{Binding [qmp.screenshot], Source={StaticResource Strings}}">
                             <FontIcon Glyph="&#xE722;" />
                         </Button>
-                        <Button x:Name="EditButton" Click="EditButton_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.editConfig], Source={StaticResource Strings}}">
-                            <SymbolIcon Symbol="Edit" />
-                        </Button>
                         <Button x:Name="VmSnapshotButton" Click="SnapshotManager_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.snapshotManager], Source={StaticResource Strings}}">
                             <FontIcon Foreground="#6F7FE8" Glyph="&#xE777;" />
+                        </Button>
+                        <Button x:Name="EditButton" Click="EditButton_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.editConfig], Source={StaticResource Strings}}">
+                            <SymbolIcon Symbol="Edit" />
                         </Button>
                         <Button x:Name="VmDiskManagerButton" Click="DiskManager_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.diskManager], Source={StaticResource Strings}}">
                             <FontIcon
@@ -212,16 +208,17 @@
                         <Button x:Name="VmFeaturesButton" Click="VmFeaturesButton_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.vmDeviceServices], Source={StaticResource Strings}}">
                             <FontIcon Foreground="#2AA7A1" Glyph="&#xE90F;" />
                         </Button>
-                        <Button x:Name="VmFolderButton" Click="OpenFolder_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.openVmFolder], Source={StaticResource Strings}}">
-                            <SymbolIcon Symbol="Folder" />
-                        </Button>
-                        <Button x:Name="VmLogButton" Click="OpenLog_Click" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.openQemuLog], Source={StaticResource Strings}}">
-                            <SymbolIcon Symbol="Document" />
-                        </Button>
                         <Button x:Name="MoreButton" CornerRadius="6" Style="{StaticResource 正方形按钮样式}" ToolTipService.ToolTip="{Binding [main.more], Source={StaticResource Strings}}">
                             <SymbolIcon Symbol="More" />
                             <Button.Flyout>
                                 <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="OpenVmFolderMenuItem" Click="OpenFolder_Click" Text="{Binding [main.openVmFolder], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Folder" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="OpenQemuLogMenuItem" Click="OpenLog_Click" Text="{Binding [main.openQemuLog], Source={StaticResource Strings}}">
+                                        <MenuFlyoutItem.Icon><SymbolIcon Symbol="Document" /></MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
                                     <MenuFlyoutItem x:Name="DeleteVmMenuItem" Click="DeleteButton_Click" Text="{Binding [main.deleteVm], Source={StaticResource Strings}}">
                                         <MenuFlyoutItem.Icon><SymbolIcon Symbol="Delete" /></MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>

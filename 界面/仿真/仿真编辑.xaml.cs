@@ -54,7 +54,7 @@ public sealed partial class 仿真编辑 : ContentDialog
         CpuSocketsBox.Value = vm.CpuSockets > 0 ? vm.CpuSockets : 1;
         CpuCoresBox.Value = vm.CpuCores > 0 ? vm.CpuCores : Math.Max(1, vm.CpuCount);
         CpuThreadsBox.Value = vm.CpuThreads > 0 ? vm.CpuThreads : 1;
-        DiskBox.Value = vm.DiskGb;
+        初始化系统磁盘(vm);
         NetworkMacBox.Text = vm.NetworkMac;
         HostForwardingBox.Text = vm.HostForwarding;
         KeyboardLayoutBox.Text = vm.KeyboardLayout;
@@ -100,13 +100,11 @@ public sealed partial class 仿真编辑 : ContentDialog
         if (source is not null)
         {
             BrowseLocationButton.IsEnabled = false;
-            DiskBox.IsEnabled = false;
         }
 
         Loaded += async (_, _) =>
         {
-            await Task.WhenAll(LoadCapsAsync(vm), LoadPhysicalStorageAsync());
-            EditorScrollViewer.ChangeView(null, 0, null, true);
+            await LoadCapsAsync(vm);
         };
     }
 
@@ -128,7 +126,7 @@ public sealed partial class 仿真编辑 : ContentDialog
         vm.CpuCores = (int)CpuCoresBox.Value;
         vm.CpuThreads = (int)CpuThreadsBox.Value;
         vm.CpuCount = checked(vm.CpuSockets * vm.CpuCores * vm.CpuThreads);
-        vm.DiskGb = (int)DiskBox.Value;
+        读取系统磁盘(vm);
         vm.DiskInterface = NormalizeDefault(DiskInterfaceCombo.SelectedItem?.ToString(), "virtio");
         vm.DiskCache = NormalizeDefault(DiskCacheCombo.SelectedItem?.ToString(), "default");
         vm.DiskAio = NormalizeDefault(DiskAioCombo.SelectedItem?.ToString(), "default");
@@ -184,7 +182,6 @@ public sealed partial class 仿真编辑 : ContentDialog
         InitializeWithWindow.Initialize(picker, ownerHandle);
         picker.FileTypeFilter.Add(".iso");
         picker.FileTypeFilter.Add(".img");
-        picker.FileTypeFilter.Add(".qcow2");
         var file = await picker.PickSingleFileAsync();
         if (file is not null) IsoBox.Text = file.Path;
     }
@@ -303,15 +300,6 @@ public sealed partial class 仿真编辑 : ContentDialog
         if (sender is Button { DataContext: QEMU选项 option }) ConfiguredQemuOpts.Remove(option);
     }
 
-    private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        var error = ValidateInput();
-        if (error is null) return;
-        args.Cancel = true;
-        ValidationInfo.Message = error;
-        ValidationInfo.IsOpen = true;
-    }
-
     private string? ValidateInput()
     {
         if (string.IsNullOrWhiteSpace(NameBox.Text)) return T("vmEditor.validation.name", "请输入仿真名称。");
@@ -324,7 +312,6 @@ public sealed partial class 仿真编辑 : ContentDialog
             return T("vmEditor.validation.cpuTopology", "处理器插槽、核心和线程数必须至少为 1。");
         if (CpuSocketsBox.Value * CpuCoresBox.Value * CpuThreadsBox.Value > 1024)
             return T("vmEditor.validation.cpuMaximum", "vCPU 总数不能超过 1024。");
-        if (!double.IsFinite(DiskBox.Value) || DiskBox.Value < 1) return T("vmEditor.validation.disk", "磁盘至少为 1 GB。");
         if (!string.IsNullOrWhiteSpace(IsoBox.Text) && !File.Exists(IsoBox.Text)) return T("vmEditor.validation.media", "安装镜像不存在。");
         return null;
     }

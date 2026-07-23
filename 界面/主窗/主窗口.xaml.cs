@@ -35,6 +35,7 @@ public sealed partial class 主窗 : Window
     {
         应用日志.写("主窗 constructor begin");
         InitializeComponent();
+        初始化电源按钮指针监听();
         DisplaySurface.SizeChanged += (_, _) => 更新内嵌画面布局();
         VmItems.ItemsSource = 仿真侧栏项列表;
         resizeAnimationTimer = DispatcherQueue.CreateTimer();
@@ -47,7 +48,11 @@ public sealed partial class 主窗 : Window
             else if (EmptyView.Visibility == Visibility.Visible)
                 页面过渡动画.布局稳定(EmptyView);
         };
-        RootGrid.Loaded += (_, _) => 按钮交互动画.启用(RootGrid);
+        RootGrid.Loaded += (_, _) =>
+        {
+            按钮交互动画.启用(RootGrid);
+            滚动焦点控制.禁用自动滚动(RootGrid);
+        };
         应用日志.写("主窗 XAML initialized");
         Title = "QemuWG";
         sessions = new QEMU会话(qemuSvc);
@@ -90,6 +95,7 @@ public sealed partial class 主窗 : Window
 
     private void RootGrid_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0) return;
         DetailBodyGrid.MinHeight = Math.Max(360, e.NewSize.Height - 105);
         var detailWidth = Math.Max(0, e.NewSize.Width - SidebarColumn.ActualWidth);
         var compact = detailWidth < 540;
@@ -246,6 +252,10 @@ public sealed partial class 主窗 : Window
     private static void CopyEditableValues(仿真配置 source, 仿真配置 target)
     {
         target.Name = source.Name;
+        target.DiskPath = source.DiskPath;
+        target.DiskFormat = source.DiskFormat;
+        target.DiskMode = source.DiskMode;
+        target.DiskGb = source.DiskGb;
         target.IsoPath = source.IsoPath;
         target.来宾系统 = source.来宾系统;
         target.Arch = source.Arch;

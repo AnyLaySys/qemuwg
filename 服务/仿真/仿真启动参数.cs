@@ -34,13 +34,13 @@ public sealed partial class QEMU会话
             }
         }
 
-        var systemDisk = $"file={vm.DiskPath},format=qcow2,if={RawOrDefault(vm.DiskInterface, "virtio")},id=system-disk";
+        var systemDisk = $"file={转义驱动器值(vm.DiskPath)},format={RawOrDefault(vm.DiskFormat, "qcow2")},if={RawOrDefault(vm.DiskInterface, "virtio")},id=system-disk";
         if (!是默认值(vm.DiskCache)) systemDisk += $",cache={vm.DiskCache.Trim()}";
         if (!是默认值(vm.DiskAio)) systemDisk += $",aio={vm.DiskAio.Trim()}";
         if (!是默认值(vm.DiskDiscard)) systemDisk += $",discard={vm.DiskDiscard.Trim()}";
         if (!是默认值(vm.DiskDetectZeroes)) systemDisk += $",detect-zeroes={vm.DiskDetectZeroes.Trim()}";
         arguments.AddRange(["-drive", systemDisk]);
-        if (File.Exists(vm.IsoPath)) arguments.AddRange(["-drive", $"file={vm.IsoPath},media=cdrom,readonly=on,id=install-media"]);
+        if (File.Exists(vm.IsoPath)) arguments.AddRange(["-drive", $"file={转义驱动器值(vm.IsoPath)},media=cdrom,readonly=on,id=install-media"]);
         var physicalStorage = vm.PhysicalStorage
             .Where(storage => !string.IsNullOrWhiteSpace(storage.DevicePath))
             .ToList();
@@ -172,6 +172,8 @@ public sealed partial class QEMU会话
         arguments.AddRange(extraArguments);
         return arguments;
     }
+
+    private static string 转义驱动器值(string value) => value.Replace(",", ",,", StringComparison.Ordinal);
 
     private static bool 是默认值(string value) =>
         string.IsNullOrWhiteSpace(value) || string.Equals(value, "default", StringComparison.OrdinalIgnoreCase);

@@ -21,6 +21,7 @@ internal static class 对话框布局
             if (updating) return;
             var root = dialog.XamlRoot;
             if (root is null || dialog.Content is not FrameworkElement content) return;
+            if (root.Size.Width <= 0 || root.Size.Height <= 0) return;
 
             var dialogWidth = root.Size.Width * 对话框宽度比例;
             var contentHeight = root.Size.Height * 内容高度比例;
@@ -57,6 +58,7 @@ internal static class 对话框布局
         dialog.Opened += (_, _) =>
         {
             Update();
+            滚动焦点控制.禁用自动滚动(dialog);
             if (dialog.XamlRoot is { } root)
             {
                 root.Changed -= RootChanged;

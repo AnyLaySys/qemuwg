@@ -14,6 +14,8 @@ public sealed class 仿真配置 : INotifyPropertyChanged
     public string DirPath { get; set; } = string.Empty;
     public string CfgPath { get; set; } = string.Empty;
     public string DiskPath { get; set; } = string.Empty;
+    public string DiskFormat { get; set; } = "qcow2";
+    public string DiskMode { get; set; } = 系统磁盘模式.未选择;
     public string IsoPath { get; set; } = string.Empty;
     public string 来宾系统 { get; set; } = 仿真系统标识.自动;
     public string Arch { get; set; } = "x86_64";
@@ -81,6 +83,8 @@ public sealed class 仿真配置 : INotifyPropertyChanged
         DirPath = DirPath,
         CfgPath = CfgPath,
         DiskPath = DiskPath,
+        DiskFormat = DiskFormat,
+        DiskMode = DiskMode,
         IsoPath = IsoPath,
         来宾系统 = 来宾系统,
         Arch = Arch,

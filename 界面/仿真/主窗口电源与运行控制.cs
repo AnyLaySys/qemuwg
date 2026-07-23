@@ -19,6 +19,23 @@ public sealed partial class 主窗
     private 仿真配置? powerLongPressTarget;
     private DateTimeOffset powerPressStartedAt;
 
+    private void 初始化电源按钮指针监听()
+    {
+        PowerButton.AddHandler(
+            UIElement.PointerPressedEvent,
+            new PointerEventHandler(PowerButton_PointerPressed),
+            true);
+        PowerButton.AddHandler(
+            UIElement.PointerReleasedEvent,
+            new PointerEventHandler(PowerButton_PointerReleased),
+            true);
+        PowerButton.AddHandler(
+            UIElement.PointerCanceledEvent,
+            new PointerEventHandler(PowerButton_PointerCanceled),
+            true);
+        PowerButton.PointerCaptureLost += PowerButton_PointerCanceled;
+    }
+
     private void PowerActionsHost_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         powerSecondaryCollapseTimer?.Stop();
@@ -55,6 +72,7 @@ public sealed partial class 主窗
         powerLongPressTarget = selectedVm;
         powerPressStartedAt = DateTimeOffset.UtcNow;
         powerLongPressTriggered = false;
+        PowerButton.CapturePointer(e.Pointer);
         powerLongPressTimer ??= 创建电源长按计时器();
         powerLongPressTimer.Stop();
         powerLongPressTimer.Start();
@@ -67,7 +85,7 @@ public sealed partial class 主窗
     private Microsoft.UI.Dispatching.DispatcherQueueTimer 创建电源长按计时器()
     {
         var timer = DispatcherQueue.CreateTimer();
-        timer.Interval = TimeSpan.FromSeconds(3);
+        timer.Interval = TimeSpan.FromMilliseconds(2700);
         timer.IsRepeating = false;
         timer.Tick += async (_, _) => await 强制停止长按目标();
         return timer;
@@ -79,7 +97,7 @@ public sealed partial class 主窗
         var target = powerLongPressTarget;
         var elapsed = DateTimeOffset.UtcNow - powerPressStartedAt;
         if (!powerLongPressTriggered
-            && elapsed >= TimeSpan.FromMilliseconds(2800)
+            && elapsed >= TimeSpan.FromMilliseconds(2500)
             && target?.IsRunning == true
             && ReferenceEquals(selectedVm, target)
             && !powerOperationInProgress)
@@ -179,7 +197,7 @@ public sealed partial class 主窗
         if (await sessions.等待退出(vm, TimeSpan.FromSeconds(12))) return;
         await ShowMessageAsync(
             T("dialog.shutdownTimeoutTitle", "仿真没有响应关机请求"),
-            T("main.holdToForceStopHint", "来宾系统仍未关机。请继续等待，或长按电源按钮 3 秒强制停止。"));
+            T("main.holdToForceStopHint", "来宾系统仍未关机。请继续等待，或长按电源按钮 2.7 秒强制停止。"));
     }
 
     private async void PauseResumeButton_Click(object sender, RoutedEventArgs e)
