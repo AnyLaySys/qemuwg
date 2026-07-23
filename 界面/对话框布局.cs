@@ -58,7 +58,6 @@ internal static class 对话框布局
         dialog.Opened += (_, _) =>
         {
             Update();
-            滚动焦点控制.禁用自动滚动(dialog);
             if (dialog.XamlRoot is { } root)
             {
                 root.Changed -= RootChanged;

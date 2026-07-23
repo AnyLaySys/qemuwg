@@ -267,6 +267,7 @@ public sealed partial class 主窗
         {
             dialog.XamlRoot ??= RootXamlRoot;
             对话框布局.应用按钮圆角(dialog);
+            activeDialog = dialog;
             dialog.Opened += (_, _) =>
             {
                 if (dialog.Content is DependencyObject content) 按钮交互动画.启用(content);
@@ -275,6 +276,7 @@ public sealed partial class 主窗
         }
         finally
         {
+            if (ReferenceEquals(activeDialog, dialog)) activeDialog = null;
             dialogGate.Release();
         }
     }

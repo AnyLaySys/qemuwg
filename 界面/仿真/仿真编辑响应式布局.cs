@@ -36,9 +36,11 @@ public sealed partial class 仿真编辑
         var horizontalOffset = EditorScrollViewer.HorizontalOffset;
         var verticalOffset = EditorScrollViewer.VerticalOffset;
         var zoomFactor = EditorScrollViewer.ZoomFactor;
+        var previousLayout = currentCardLayout;
         currentCardLayout = layout;
-        ConfigureIdentity(layout == 1);
-        DetachCardsFromCurrentLayout();
+        if (previousLayout == 0 || (previousLayout == 1) != (layout == 1))
+            ConfigureIdentity(layout == 1);
+        PrepareCardContainers(layout);
 
         switch (layout)
         {
@@ -97,20 +99,26 @@ public sealed partial class 仿真编辑
 
     private void ConfigureGrid(int columnCount, int rowCount)
     {
-        HardwareCardsGrid.ColumnDefinitions.Clear();
-        for (var index = 0; index < columnCount; index++)
+        while (HardwareCardsGrid.ColumnDefinitions.Count > columnCount)
+            HardwareCardsGrid.ColumnDefinitions.RemoveAt(HardwareCardsGrid.ColumnDefinitions.Count - 1);
+        while (HardwareCardsGrid.ColumnDefinitions.Count < columnCount)
             HardwareCardsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        foreach (var definition in HardwareCardsGrid.ColumnDefinitions)
+            definition.Width = new GridLength(1, GridUnitType.Star);
 
-        HardwareCardsGrid.RowDefinitions.Clear();
-        for (var index = 0; index < rowCount; index++)
+        while (HardwareCardsGrid.RowDefinitions.Count > rowCount)
+            HardwareCardsGrid.RowDefinitions.RemoveAt(HardwareCardsGrid.RowDefinitions.Count - 1);
+        while (HardwareCardsGrid.RowDefinitions.Count < rowCount)
             HardwareCardsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        foreach (var definition in HardwareCardsGrid.RowDefinitions)
+            definition.Height = GridLength.Auto;
     }
 
-    private void DetachCardsFromCurrentLayout()
+    private void PrepareCardContainers(int layout)
     {
-        peripheralLeftColumn.Children.Clear();
-        peripheralRightColumn.Children.Clear();
-        HardwareCardsGrid.Children.Clear();
+        if (layout != 1) return;
+        HardwareCardsGrid.Children.Remove(peripheralLeftColumn);
+        HardwareCardsGrid.Children.Remove(peripheralRightColumn);
     }
 
     private void AddCardColumn(
@@ -120,28 +128,33 @@ public sealed partial class 仿真编辑
         int columnSpan,
         params FrameworkElement[] cards)
     {
-        foreach (var card in cards) column.Children.Add(card);
+        foreach (var card in cards) MoveToPanel(card, column);
         AddCard(column, row, gridColumn, columnSpan);
     }
 
     private void AddCard(FrameworkElement card, int row, int column, int columnSpan)
     {
         card.HorizontalAlignment = HorizontalAlignment.Stretch;
-        HardwareCardsGrid.Children.Add(card);
+        MoveToPanel(card, HardwareCardsGrid);
         PlaceCard(card, row, column, columnSpan);
+    }
+
+    private void MoveToPanel(FrameworkElement element, Panel destination)
+    {
+        if (destination.Children.Contains(element)) return;
+        HardwareCardsGrid.Children.Remove(element);
+        peripheralLeftColumn.Children.Remove(element);
+        peripheralRightColumn.Children.Remove(element);
+        destination.Children.Add(element);
     }
 
     private void ConfigureIdentity(bool compact)
     {
-        IdentityGrid.ColumnDefinitions.Clear();
-        IdentityGrid.RowDefinitions.Clear();
-
-        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
         if (compact)
         {
-            IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            ResizeIdentityGrid(2, 2);
+            IdentityGrid.ColumnDefinitions[0].Width = new GridLength(26);
+            IdentityGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
             Grid.SetRow(IdentityIcon, 0);
             Grid.SetRowSpan(IdentityIcon, 2);
             Grid.SetColumn(NameField, 1);
@@ -151,15 +164,30 @@ public sealed partial class 仿真编辑
             return;
         }
 
-        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.85, GridUnitType.Star) });
-        IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) });
-        IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        ResizeIdentityGrid(3, 1);
+        IdentityGrid.ColumnDefinitions[0].Width = new GridLength(26);
+        IdentityGrid.ColumnDefinitions[1].Width = new GridLength(0.85, GridUnitType.Star);
+        IdentityGrid.ColumnDefinitions[2].Width = new GridLength(1.4, GridUnitType.Star);
         Grid.SetRow(IdentityIcon, 0);
         Grid.SetRowSpan(IdentityIcon, 1);
         Grid.SetColumn(NameField, 1);
         Grid.SetRow(NameField, 0);
         Grid.SetColumn(LocationField, 2);
         Grid.SetRow(LocationField, 0);
+    }
+
+    private void ResizeIdentityGrid(int columnCount, int rowCount)
+    {
+        while (IdentityGrid.ColumnDefinitions.Count > columnCount)
+            IdentityGrid.ColumnDefinitions.RemoveAt(IdentityGrid.ColumnDefinitions.Count - 1);
+        while (IdentityGrid.ColumnDefinitions.Count < columnCount)
+            IdentityGrid.ColumnDefinitions.Add(new ColumnDefinition());
+        while (IdentityGrid.RowDefinitions.Count > rowCount)
+            IdentityGrid.RowDefinitions.RemoveAt(IdentityGrid.RowDefinitions.Count - 1);
+        while (IdentityGrid.RowDefinitions.Count < rowCount)
+            IdentityGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        foreach (var definition in IdentityGrid.RowDefinitions)
+            definition.Height = GridLength.Auto;
     }
 
     private static void PlaceCard(FrameworkElement card, int row, int column, int columnSpan)

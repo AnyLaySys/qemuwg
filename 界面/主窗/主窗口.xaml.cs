@@ -35,6 +35,7 @@ public sealed partial class 主窗 : Window
     {
         应用日志.写("主窗 constructor begin");
         InitializeComponent();
+        scrollActivationGuard = new 滚动激活保护(DispatcherQueue);
         初始化电源按钮指针监听();
         DisplaySurface.SizeChanged += (_, _) => 更新内嵌画面布局();
         VmItems.ItemsSource = 仿真侧栏项列表;
@@ -51,7 +52,6 @@ public sealed partial class 主窗 : Window
         RootGrid.Loaded += (_, _) =>
         {
             按钮交互动画.启用(RootGrid);
-            滚动焦点控制.禁用自动滚动(RootGrid);
         };
         应用日志.写("主窗 XAML initialized");
         Title = "QemuWG";
@@ -61,6 +61,7 @@ public sealed partial class 主窗 : Window
         var windowHandle = WindowNative.GetWindowHandle(this);
         Closed += (_, _) =>
         {
+            scrollActivationGuard.停止();
             StopDisplay();
             toolSessions.停止全部();
         };
@@ -76,6 +77,7 @@ public sealed partial class 主窗 : Window
         应用日志.写("AppWindow configured");
 
         Activated += 主窗_Activated;
+        Activated += 主窗_滚动激活状态变化;
         应用日志.写("主窗 constructor end");
     }
 
